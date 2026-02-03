@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
+import CartButton from "@/components/cart/CartButton"
 
 export default function HomeHeader() {
   const { data: session } = useSession()
@@ -28,8 +29,8 @@ export default function HomeHeader() {
             </Link>
           </div>
           
-          {/* Droite : Contact + Connexion */}
-          <div className="flex items-center gap-8">
+          {/* Droite : Contact + Connexion + Panier */}
+          <div className="flex items-center gap-6">
             <Link href="/contact" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
               Contact
             </Link>
@@ -57,6 +58,9 @@ export default function HomeHeader() {
                 Connexion
               </Link>
             )}
+            
+            {/* Cart Button */}
+            <CartButton />
           </div>
         </div>
       </div>

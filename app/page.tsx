@@ -1,7 +1,57 @@
 import Link from "next/link"
 import HomeHeader from "@/components/layout/HomeHeader"
+import prisma from "@/lib/prisma"
 
-export default function HomePage() {
+// Helper pour extraire l'URL de l'image depuis le JSON
+function getImageUrl(images: any, index: number = 0): string {
+  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200"
+  if (!images) return fallback
+  try {
+    const parsed = typeof images === 'string' ? JSON.parse(images) : images
+    return parsed[index]?.url || fallback
+  } catch {
+    return fallback
+  }
+}
+
+// Récupérer les œuvres à la une depuis la DB
+async function getFeaturedArtworks() {
+  try {
+    const artworks = await prisma.artwork.findMany({
+      where: {
+        status: "AVAILABLE"
+      },
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 3,
+      include: {
+        artist: {
+          include: {
+            user: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      }
+    })
+    return artworks
+  } catch (error) {
+    console.error("Erreur récupération œuvres:", error)
+    return []
+  }
+}
+
+export default async function HomePage() {
+  const featuredArtworks = await getFeaturedArtworks()
+  
+  // Image de fond : première œuvre ou fallback
+  const heroImage = featuredArtworks[0] 
+    ? getImageUrl(featuredArtworks[0].images) 
+    : "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1920&h=1080&fit=crop"
+
   return (
     <main className="bg-black text-white min-h-screen">
       
@@ -13,7 +63,7 @@ export default function HomePage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1920&h=1080&fit=crop" 
+            src={heroImage}
             alt="Featured artwork"
             className="w-full h-full object-cover opacity-40"
           />
@@ -78,65 +128,67 @@ export default function HomePage() {
           </div>
           
           {/* Artworks Grid - Asymmetric */}
-          <div className="grid md:grid-cols-12 gap-6 md:gap-8">
-            {/* Large Featured */}
-            <Link href="/oeuvre/1" className="md:col-span-7 group">
-              <div className="relative img-zoom aspect-[4/5] md:aspect-[3/4] bg-neutral-900">
-                <img
-                  src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200&h=1500&fit=crop"
-                  alt="Harmonie Abstraite"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-              </div>
-              <div className="mt-6 flex justify-between items-start">
-                <div>
-                  <h3 className="heading-sm mb-2 group-hover:text-gold transition-colors">Harmonie Abstraite</h3>
-                  <p className="text-neutral-500">Marie Dupont</p>
-                </div>
-                <p className="text-lg">€2,500</p>
-              </div>
-            </Link>
-            
-            {/* Stacked Right */}
-            <div className="md:col-span-5 flex flex-col gap-6 md:gap-8">
-              <Link href="/oeuvre/2" className="group">
-                <div className="relative img-zoom aspect-[4/3] bg-neutral-900">
-                  <img
-                    src="https://images.unsplash.com/photo-1578926288207-a90a5366759d?w=800&h=600&fit=crop"
-                    alt="Nature Silencieuse"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-                </div>
-                <div className="mt-6 flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-light group-hover:text-gold transition-colors">Nature Silencieuse</h3>
-                    <p className="text-neutral-500 text-sm mt-1">Jean Martin</p>
+          {featuredArtworks.length > 0 ? (
+            <div className="grid md:grid-cols-12 gap-6 md:gap-8">
+              {/* Large Featured - First artwork */}
+              {featuredArtworks[0] && (
+                <Link href={`/oeuvre/${featuredArtworks[0].slug}`} className="md:col-span-7 group">
+                  <div className="relative img-zoom aspect-[4/5] md:aspect-[3/4] bg-neutral-900">
+                    <img
+                      src={getImageUrl(featuredArtworks[0].images)}
+                      alt={featuredArtworks[0].title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
                   </div>
-                  <p>€1,800</p>
-                </div>
-              </Link>
+                  <div className="mt-6 flex justify-between items-start">
+                    <div>
+                      <h3 className="heading-sm mb-2 group-hover:text-gold transition-colors">
+                        {featuredArtworks[0].title}
+                      </h3>
+                      <p className="text-neutral-500">{featuredArtworks[0].artist.user.name}</p>
+                    </div>
+                    <p className="text-lg">€{Number(featuredArtworks[0].price).toLocaleString()}</p>
+                  </div>
+                </Link>
+              )}
               
-              <Link href="/oeuvre/3" className="group">
-                <div className="relative img-zoom aspect-[4/3] bg-neutral-900">
-                  <img
-                    src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&h=600&fit=crop"
-                    alt="Lumière d'Été"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-                </div>
-                <div className="mt-6 flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-light group-hover:text-gold transition-colors">Lumière d'Été</h3>
-                    <p className="text-neutral-500 text-sm mt-1">Sophie Bernard</p>
-                  </div>
-                  <p>€3,200</p>
-                </div>
-              </Link>
+              {/* Stacked Right - Other artworks */}
+              <div className="md:col-span-5 flex flex-col gap-6 md:gap-8">
+                {featuredArtworks.slice(1, 3).map((artwork) => (
+                  <Link key={artwork.id} href={`/oeuvre/${artwork.slug}`} className="group">
+                    <div className="relative img-zoom aspect-[4/3] bg-neutral-900">
+                      <img
+                        src={getImageUrl(artwork.images)}
+                        alt={artwork.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+                    </div>
+                    <div className="mt-6 flex justify-between items-start">
+                      <div>
+                        <h3 className="text-xl font-light group-hover:text-gold transition-colors">
+                          {artwork.title}
+                        </h3>
+                        <p className="text-neutral-500 text-sm mt-1">{artwork.artist.user.name}</p>
+                      </div>
+                      <p>€{Number(artwork.price).toLocaleString()}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            // Message si pas d'œuvres
+            <div className="text-center py-24 border border-neutral-800">
+              <p className="text-neutral-500 text-lg mb-4">
+                Aucune œuvre disponible pour le moment.
+              </p>
+              <p className="text-neutral-600">
+                Revenez bientôt pour découvrir notre collection.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

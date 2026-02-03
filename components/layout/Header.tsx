@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
+import CartButton from "@/components/cart/CartButton"
 
 export default function Header() {
   const { data: session } = useSession()
@@ -31,7 +32,7 @@ export default function Header() {
           </div>
           
           {/* Right side */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6">
             {session ? (
               <div className="hidden md:flex items-center gap-6">
                 <Link 
@@ -56,9 +57,12 @@ export default function Header() {
               </Link>
             )}
             
-            <Link href="/contact" className="text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity">
+            <Link href="/contact" className="hidden md:block text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity">
               Contact
             </Link>
+
+            {/* Cart Button */}
+            <CartButton />
 
             {/* Menu Mobile Button */}
             <button 
