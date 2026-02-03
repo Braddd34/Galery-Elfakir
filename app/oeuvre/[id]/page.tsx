@@ -3,173 +3,240 @@ import Link from "next/link"
 const artwork = {
   id: "1",
   title: "Harmonie Abstraite",
-  artist: { name: "Marie Dupont", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200", bio: "Artiste contemporaine basée à Paris", artworksCount: 12 },
+  artist: {
+    name: "Marie Dupont",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
+    location: "Paris, France",
+    bio: "Artiste contemporaine reconnue pour son exploration des formes abstraites et de la couleur.",
+  },
   price: 2500,
+  year: 2024,
+  medium: "Huile sur toile",
+  dimensions: { width: 100, height: 80, depth: 3 },
   images: [
-    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200",
+    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&h=1800&fit=crop",
     "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800",
     "https://images.unsplash.com/photo-1578926288207-a90a5366759d?w=800",
   ],
+  description: "Cette œuvre explore la tension entre forme et couleur, créant un dialogue visuel qui invite à la contemplation. Les couches successives de pigments révèlent une profondeur unique, évoquant à la fois le mouvement et la sérénité.",
   category: "Peinture",
-  year: 2024,
-  medium: "Huile sur toile",
-  dimensions: { width: 100, height: 80 },
-  description: "Cette œuvre explore les tensions entre forme et couleur, créant un dialogue visuel qui invite à la contemplation. Les couches successives de pigments créent une profondeur unique.",
+  edition: "Œuvre unique",
 }
 
 export default function ArtworkPage({ params }: { params: { id: string } }) {
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
+    <main className="bg-black text-white min-h-screen">
+      
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-neutral-800/50">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-6">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-xl font-bold tracking-tight">ELFAKIR</Link>
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/catalogue" className="text-sm text-gray-600 hover:text-black">Catalogue</Link>
-              <Link href="/artistes" className="text-sm text-gray-600 hover:text-black">Artistes</Link>
-              <Link href="/a-propos" className="text-sm text-gray-600 hover:text-black">À propos</Link>
-              <Link href="/contact" className="text-sm text-gray-600 hover:text-black">Contact</Link>
+            <Link href="/" className="text-2xl tracking-[0.3em] font-light">
+              ELFAKIR
+            </Link>
+            
+            <div className="hidden md:flex items-center gap-12">
+              <Link href="/catalogue" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
+                Collection
+              </Link>
+              <Link href="/artistes" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
+                Artistes
+              </Link>
+              <Link href="/a-propos" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
+                À propos
+              </Link>
             </div>
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm text-gray-600 hover:text-black">Connexion</Link>
-              <Link href="/register" className="bg-black text-white px-5 py-2.5 text-sm font-medium rounded-full">S'inscrire</Link>
-            </div>
+            
+            <Link href="/contact" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
+              Contact
+            </Link>
           </div>
         </div>
       </nav>
 
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <nav className="flex items-center gap-2 text-sm">
-            <Link href="/" className="text-gray-500 hover:text-black">Accueil</Link>
-            <span className="text-gray-300">/</span>
-            <Link href="/catalogue" className="text-gray-500 hover:text-black">Catalogue</Link>
-            <span className="text-gray-300">/</span>
-            <span className="text-black font-medium">{artwork.title}</span>
+      <div className="pt-28 border-b border-neutral-800/50">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-4">
+          <nav className="flex items-center gap-3 text-sm text-neutral-500">
+            <Link href="/" className="hover:text-white transition-colors">Accueil</Link>
+            <span>/</span>
+            <Link href="/catalogue" className="hover:text-white transition-colors">Collection</Link>
+            <span>/</span>
+            <span className="text-white">{artwork.title}</span>
           </nav>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-2 gap-12">
-          
-          {/* Left: Images */}
-          <div className="space-y-4">
-            {/* Main Image */}
-            <div className="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
-              <div className="aspect-[4/5]">
-                <img src={artwork.images[0]} alt={artwork.title} className="w-full h-full object-cover" />
-              </div>
-            </div>
+      <section className="py-16 md:py-24">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+          <div className="grid lg:grid-cols-12 gap-16">
             
-            {/* Thumbnails */}
-            <div className="grid grid-cols-3 gap-4">
-              {artwork.images.map((img, i) => (
-                <button
-                  key={i}
-                  className={`bg-white rounded-xl overflow-hidden border-2 aspect-square transition-all ${
-                    i === 0 ? "border-black" : "border-gray-200 hover:border-gray-400"
-                  }`}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Info */}
-          <div className="space-y-8">
-            {/* Header */}
-            <div>
-              <div className="flex gap-2 mb-4">
-                <span className="bg-gray-100 text-sm font-medium px-4 py-2 rounded-full">{artwork.category}</span>
-                <span className="bg-gray-100 text-sm font-medium px-4 py-2 rounded-full">{artwork.year}</span>
+            {/* Left: Images */}
+            <div className="lg:col-span-7 space-y-4">
+              {/* Main Image */}
+              <div className="aspect-[4/5] bg-neutral-900">
+                <img 
+                  src={artwork.images[0]} 
+                  alt={artwork.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">{artwork.title}</h1>
-              <p className="text-gray-500 text-lg">{artwork.medium}</p>
-            </div>
-
-            {/* Artist Card */}
-            <Link href={`/artiste/${artwork.artist.name}`} className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all">
-              <img src={artwork.artist.image} alt={artwork.artist.name} className="w-16 h-16 rounded-full object-cover" />
-              <div className="flex-1">
-                <div className="font-semibold text-lg">{artwork.artist.name}</div>
-                <div className="text-gray-500 text-sm">{artwork.artist.artworksCount} œuvres</div>
-              </div>
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-
-            {/* Description */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200">
-              <h2 className="font-semibold text-lg mb-3">À propos de l'œuvre</h2>
-              <p className="text-gray-600 leading-relaxed">{artwork.description}</p>
-            </div>
-
-            {/* Details */}
-            <div className="bg-white rounded-2xl border border-gray-200 divide-y divide-gray-100">
-              <div className="flex justify-between items-center p-5">
-                <span className="text-gray-500">Dimensions</span>
-                <span className="font-medium">{artwork.dimensions.width} × {artwork.dimensions.height} cm</span>
-              </div>
-              <div className="flex justify-between items-center p-5">
-                <span className="text-gray-500">Technique</span>
-                <span className="font-medium">{artwork.medium}</span>
-              </div>
-              <div className="flex justify-between items-center p-5">
-                <span className="text-gray-500">Année</span>
-                <span className="font-medium">{artwork.year}</span>
-              </div>
-              <div className="flex justify-between items-center p-5">
-                <span className="text-gray-500">Certificat</span>
-                <span className="flex items-center gap-2 font-medium text-green-600">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Inclus
-                </span>
+              
+              {/* Thumbnails */}
+              <div className="grid grid-cols-3 gap-4">
+                {artwork.images.map((img, i) => (
+                  <div 
+                    key={i}
+                    className={`aspect-square bg-neutral-900 cursor-pointer transition-opacity ${
+                      i === 0 ? "ring-1 ring-white" : "opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Price & CTA */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 sticky top-24">
-              <div className="flex items-end justify-between mb-6">
-                <div>
-                  <span className="text-gray-500 text-sm">Prix</span>
-                  <div className="text-4xl font-bold">{artwork.price.toLocaleString('fr-FR')} €</div>
+            {/* Right: Info */}
+            <div className="lg:col-span-5 lg:sticky lg:top-32 lg:self-start space-y-10">
+              
+              {/* Header */}
+              <div>
+                <p className="label text-gold mb-4">{artwork.category} — {artwork.year}</p>
+                <h1 className="heading-md mb-2">{artwork.title}</h1>
+                <p className="text-neutral-500 text-lg">{artwork.medium}</p>
+              </div>
+
+              {/* Artist */}
+              <Link 
+                href={`/artiste/${artwork.artist.name}`}
+                className="flex items-center gap-5 py-6 border-y border-neutral-800 group"
+              >
+                <img 
+                  src={artwork.artist.image} 
+                  alt={artwork.artist.name}
+                  className="w-16 h-16 object-cover"
+                />
+                <div className="flex-1">
+                  <p className="text-lg group-hover:text-gold transition-colors">{artwork.artist.name}</p>
+                  <p className="text-neutral-500 text-sm">{artwork.artist.location}</p>
                 </div>
-                <span className="text-gray-400 text-sm">TVA incluse</span>
-              </div>
-              
-              <button className="w-full bg-black text-white py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 transition-colors mb-3">
-                Acheter maintenant
-              </button>
-              
-              <button className="w-full bg-gray-100 py-4 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                <svg className="w-5 h-5 text-neutral-600 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
                 </svg>
-                Ajouter aux favoris
-              </button>
-              
-              <p className="text-center text-gray-500 text-sm mt-4">
-                🚚 Livraison mondiale assurée
-              </p>
+              </Link>
+
+              {/* Description */}
+              <div>
+                <p className="label mb-4">À propos</p>
+                <p className="text-neutral-400 leading-relaxed">{artwork.description}</p>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-4">
+                <p className="label mb-4">Détails</p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="py-4 border-b border-neutral-800">
+                    <p className="text-neutral-500 mb-1">Dimensions</p>
+                    <p>{artwork.dimensions.width} × {artwork.dimensions.height} × {artwork.dimensions.depth} cm</p>
+                  </div>
+                  <div className="py-4 border-b border-neutral-800">
+                    <p className="text-neutral-500 mb-1">Année</p>
+                    <p>{artwork.year}</p>
+                  </div>
+                  <div className="py-4 border-b border-neutral-800">
+                    <p className="text-neutral-500 mb-1">Technique</p>
+                    <p>{artwork.medium}</p>
+                  </div>
+                  <div className="py-4 border-b border-neutral-800">
+                    <p className="text-neutral-500 mb-1">Édition</p>
+                    <p>{artwork.edition}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Price & CTA */}
+              <div className="bg-neutral-900/50 p-8 space-y-6">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-neutral-500 text-sm mb-1">Prix</p>
+                    <p className="text-4xl font-light">€{artwork.price.toLocaleString()}</p>
+                  </div>
+                  <p className="text-neutral-500 text-sm">TVA incluse</p>
+                </div>
+                
+                <button className="w-full bg-white text-black py-5 text-sm tracking-[0.15em] uppercase font-medium hover:bg-gold hover:text-black transition-colors">
+                  Acquérir cette œuvre
+                </button>
+                
+                <button className="w-full border border-neutral-700 py-5 text-sm tracking-[0.15em] uppercase hover:border-white transition-colors flex items-center justify-center gap-3">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  Sauvegarder
+                </button>
+                
+                <div className="flex items-center gap-3 pt-4 text-neutral-500 text-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>Certificat d'authenticité inclus</span>
+                </div>
+                
+                <div className="flex items-center gap-3 text-neutral-500 text-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                  </svg>
+                  <span>Livraison mondiale assurée</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* Related Works */}
+      <section className="py-24 border-t border-neutral-800">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+          <div className="flex justify-between items-end mb-16">
+            <div>
+              <p className="label text-gold mb-4">Explorer</p>
+              <h2 className="heading-sm">Œuvres similaires</h2>
+            </div>
+            <Link href="/catalogue" className="text-sm tracking-[0.15em] uppercase text-neutral-500 hover:text-white transition-colors">
+              Voir tout
+            </Link>
+          </div>
+          
+          <div className="grid md:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Link key={i} href={`/oeuvre/${i}`} className="group">
+                <div className="img-zoom aspect-[3/4] bg-neutral-900 mb-4">
+                  <img 
+                    src={`https://images.unsplash.com/photo-154${i}961017774-22349e4a1262?w=600&h=800&fit=crop`}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="font-light group-hover:text-gold transition-colors">Œuvre {i}</h3>
+                <p className="text-neutral-500 text-sm">Artiste</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-12 px-6 mt-12">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm text-gray-400">© {new Date().getFullYear()} Galerie ELFAKIR</p>
+      <footer className="border-t border-neutral-800 py-12">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-neutral-600 text-sm">© 2024 Galerie ELFAKIR</p>
+          <div className="flex gap-8 text-sm text-neutral-600">
+            <Link href="#" className="hover:text-white transition-colors">Mentions légales</Link>
+            <Link href="#" className="hover:text-white transition-colors">CGV</Link>
+          </div>
         </div>
       </footer>
-    </div>
+    </main>
   )
 }

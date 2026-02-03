@@ -1,77 +1,78 @@
 import Link from "next/link"
 
 const artworks = [
-  { id: "1", title: "Harmonie Abstraite", artist: "Marie Dupont", price: 2500, image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&h=750&fit=crop", category: "Peinture" },
-  { id: "2", title: "Nature Silencieuse", artist: "Jean Martin", price: 1800, image: "https://images.unsplash.com/photo-1578926288207-a90a5366759d?w=600&h=750&fit=crop", category: "Peinture" },
-  { id: "3", title: "Sculpture Organique", artist: "Sophie Bernard", price: 4500, image: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=600&h=750&fit=crop", category: "Sculpture" },
-  { id: "4", title: "Portrait Moderne", artist: "Lucas Moreau", price: 3200, image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&h=750&fit=crop", category: "Peinture" },
-  { id: "5", title: "Lumière Urbaine", artist: "Emma Leroy", price: 2100, image: "https://images.unsplash.com/photo-1549490349-8643362247b5?w=600&h=750&fit=crop", category: "Photographie" },
-  { id: "6", title: "Géométrie Pure", artist: "Pierre Dubois", price: 1950, image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=600&h=750&fit=crop", category: "Peinture" },
-  { id: "7", title: "Essence Marine", artist: "Claire Fontaine", price: 2800, image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=600&h=750&fit=crop", category: "Peinture" },
-  { id: "8", title: "Fragments", artist: "Antoine Roux", price: 3500, image: "https://images.unsplash.com/photo-1482160549825-59d1b23cb208?w=600&h=750&fit=crop", category: "Technique mixte" },
+  { id: "1", title: "Harmonie Abstraite", artist: "Marie Dupont", price: 2500, year: 2024, image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop", category: "Peinture" },
+  { id: "2", title: "Nature Silencieuse", artist: "Jean Martin", price: 1800, year: 2023, image: "https://images.unsplash.com/photo-1578926288207-a90a5366759d?w=800&h=1000&fit=crop", category: "Peinture" },
+  { id: "3", title: "Sculpture Organique", artist: "Sophie Bernard", price: 4500, year: 2024, image: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=800&h=1000&fit=crop", category: "Sculpture" },
+  { id: "4", title: "Portrait Moderne", artist: "Lucas Moreau", price: 3200, year: 2024, image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&h=1000&fit=crop", category: "Peinture" },
+  { id: "5", title: "Lumière Urbaine", artist: "Emma Leroy", price: 2100, year: 2023, image: "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800&h=1000&fit=crop", category: "Photographie" },
+  { id: "6", title: "Géométrie Pure", artist: "Pierre Dubois", price: 1950, year: 2024, image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=800&h=1000&fit=crop", category: "Peinture" },
+  { id: "7", title: "Essence Marine", artist: "Claire Fontaine", price: 2800, year: 2024, image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&h=1000&fit=crop", category: "Peinture" },
+  { id: "8", title: "Fragments", artist: "Antoine Roux", price: 3500, year: 2023, image: "https://images.unsplash.com/photo-1482160549825-59d1b23cb208?w=800&h=1000&fit=crop", category: "Technique mixte" },
 ]
 
-const categories = ["Tous", "Peinture", "Sculpture", "Photographie", "Dessin"]
+const categories = ["Tout", "Peinture", "Sculpture", "Photographie", "Technique mixte"]
 
 export default function CataloguePage() {
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
+    <main className="bg-black text-white min-h-screen">
+      
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-neutral-800/50">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-6">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-xl font-bold tracking-tight">
+            <Link href="/" className="text-2xl tracking-[0.3em] font-light">
               ELFAKIR
             </Link>
             
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/catalogue" className="text-sm font-medium text-black">
-                Catalogue
+            <div className="hidden md:flex items-center gap-12">
+              <Link href="/catalogue" className="text-sm tracking-[0.15em] uppercase text-gold">
+                Collection
               </Link>
-              <Link href="/artistes" className="text-sm text-gray-600 hover:text-black transition-colors">
+              <Link href="/artistes" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
                 Artistes
               </Link>
-              <Link href="/a-propos" className="text-sm text-gray-600 hover:text-black transition-colors">
+              <Link href="/a-propos" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
                 À propos
-              </Link>
-              <Link href="/contact" className="text-sm text-gray-600 hover:text-black transition-colors">
-                Contact
               </Link>
             </div>
             
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm text-gray-600 hover:text-black transition-colors">
-                Connexion
-              </Link>
-              <Link href="/register" className="bg-black text-white px-5 py-2.5 text-sm font-medium rounded-full hover:bg-gray-800 transition-colors">
-                S'inscrire
-              </Link>
-            </div>
+            <Link href="/contact" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
+              Contact
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Page Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Catalogue</h1>
-          <p className="text-gray-500 text-lg">{artworks.length} œuvres disponibles</p>
+      {/* Hero Header */}
+      <header className="pt-40 pb-20 border-b border-neutral-800">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+              <p className="label mb-4 text-gold">Notre collection</p>
+              <h1 className="heading-xl">Œuvres</h1>
+            </div>
+            <p className="text-neutral-500 max-w-md">
+              Une sélection minutieuse d'œuvres originales, 
+              choisies pour leur qualité artistique exceptionnelle.
+            </p>
+          </div>
         </div>
       </header>
 
-      {/* Filters Bar */}
-      <div className="sticky top-[73px] z-40 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Filters */}
+      <div className="border-b border-neutral-800 sticky top-[73px] bg-black z-40">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-6">
+          <div className="flex flex-wrap items-center justify-between gap-6">
             {/* Categories */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              {categories.map((category) => (
+              {categories.map((category, index) => (
                 <button
                   key={category}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
-                    category === "Tous"
-                      ? "bg-black text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className={`px-6 py-3 text-sm tracking-[0.1em] uppercase transition-all border ${
+                    index === 0
+                      ? "bg-white text-black border-white"
+                      : "border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white"
                   }`}
                 >
                   {category}
@@ -79,98 +80,77 @@ export default function CataloguePage() {
               ))}
             </div>
             
-            {/* Search & Sort */}
-            <div className="flex items-center gap-3">
-              {/* Search */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  className="w-64 pl-10 pr-4 py-2.5 bg-gray-100 border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
-                />
-                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              
-              {/* Sort Dropdown */}
-              <button className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 rounded-full text-sm hover:bg-gray-200 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                </svg>
-                Trier
-              </button>
-            </div>
+            {/* Count */}
+            <p className="text-neutral-500 text-sm">
+              {artworks.length} œuvres
+            </p>
           </div>
         </div>
       </div>
 
       {/* Artworks Grid */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {artworks.map((artwork) => (
-            <Link key={artwork.id} href={`/oeuvre/${artwork.id}`} className="group">
-              {/* Card */}
-              <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:border-gray-300 transition-all duration-300 hover:-translate-y-1">
+      <section className="py-20">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+            {artworks.map((artwork, index) => (
+              <Link 
+                key={artwork.id} 
+                href={`/oeuvre/${artwork.id}`}
+                className="group"
+              >
                 {/* Image */}
-                <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
+                <div className="relative img-zoom aspect-[3/4] bg-neutral-900 mb-6">
                   <img
                     src={artwork.image}
                     alt={artwork.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
                   
-                  {/* Category */}
-                  <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-xs font-medium px-3 py-1.5 rounded-full">
-                    {artwork.category}
-                  </span>
-                  
-                  {/* Favorite */}
-                  <div className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                  {/* Quick View Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <span className="text-sm tracking-[0.2em] uppercase border border-white px-8 py-4 bg-black/50 backdrop-blur">
+                      Voir l'œuvre
+                    </span>
                   </div>
                 </div>
                 
                 {/* Info */}
-                <div className="p-5">
-                  <h3 className="font-semibold text-base mb-1 truncate">{artwork.title}</h3>
-                  <p className="text-gray-500 text-sm mb-3">{artwork.artist}</p>
-                  <p className="text-lg font-bold">{artwork.price.toLocaleString('fr-FR')} €</p>
+                <div className="space-y-2">
+                  <p className="text-[11px] tracking-[0.2em] uppercase text-neutral-500">
+                    {artwork.category} — {artwork.year}
+                  </p>
+                  <h3 className="text-lg font-light group-hover:text-gold transition-colors duration-300">
+                    {artwork.title}
+                  </h3>
+                  <p className="text-neutral-500 text-sm">{artwork.artist}</p>
+                  <p className="text-lg pt-2">€{artwork.price.toLocaleString()}</p>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
+      </section>
 
-        {/* Load More */}
-        <div className="text-center mt-16">
-          <button className="bg-black text-white px-8 py-4 rounded-full font-medium hover:bg-gray-800 transition-colors">
-            Charger plus d'œuvres
-          </button>
-        </div>
-      </main>
+      {/* Load More */}
+      <div className="pb-32 text-center">
+        <button className="border border-neutral-700 px-16 py-5 text-sm tracking-[0.15em] uppercase hover:border-white hover:bg-white hover:text-black transition-all duration-300">
+          Charger plus
+        </button>
+      </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} Galerie ELFAKIR
+      <footer className="border-t border-neutral-800 py-12">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-neutral-600 text-sm">
+            © 2024 Galerie ELFAKIR
           </p>
-          <div className="flex items-center gap-6">
-            <Link href="/mentions-legales" className="text-sm text-gray-400 hover:text-black transition-colors">
-              Mentions légales
-            </Link>
-            <Link href="/cgv" className="text-sm text-gray-400 hover:text-black transition-colors">
-              CGV
-            </Link>
-            <Link href="/contact" className="text-sm text-gray-400 hover:text-black transition-colors">
-              Contact
-            </Link>
+          <div className="flex gap-8 text-sm text-neutral-600">
+            <Link href="#" className="hover:text-white transition-colors">Mentions légales</Link>
+            <Link href="#" className="hover:text-white transition-colors">CGV</Link>
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   )
 }
