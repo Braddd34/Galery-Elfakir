@@ -286,17 +286,6 @@ export default function CataloguePage() {
           </div>
         </div>
       </footer>
-      
-      {/* Custom scrollbar hide for filters */}
-      <style jsx global>{`
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   )
 }
