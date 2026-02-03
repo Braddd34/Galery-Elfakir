@@ -1,35 +1,12 @@
 import Link from "next/link"
+import HomeHeader from "@/components/layout/HomeHeader"
 
 export default function HomePage() {
   return (
     <main className="bg-black text-white min-h-screen">
       
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
-        <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-8">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl tracking-[0.3em] font-light">
-              ELFAKIR
-            </Link>
-            
-            <div className="hidden md:flex items-center gap-12">
-              <Link href="/catalogue" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
-                Collection
-              </Link>
-              <Link href="/artistes" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
-                Artistes
-              </Link>
-              <Link href="/a-propos" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
-                À propos
-              </Link>
-            </div>
-            
-            <Link href="/contact" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
-              Contact
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <HomeHeader />
 
       {/* Hero Section - Full Screen */}
       <section className="h-screen relative flex items-end">
