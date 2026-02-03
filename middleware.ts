@@ -37,7 +37,8 @@ export default withAuth(
           path === "/register" ||
           path === "/a-propos" ||
           path === "/contact" ||
-          path.startsWith("/api/auth")
+          path.startsWith("/api/auth") ||
+          path.startsWith("/api/setup")
         ) {
           return true
         }
@@ -57,7 +58,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public files
+     * - api routes (setup, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\..*|api/auth).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\..*|api).*)",
   ],
 }
