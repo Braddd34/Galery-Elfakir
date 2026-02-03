@@ -1,0 +1,314 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ==========================================
+// AUTHENTIFICATION & UTILISATEURS
+// ==========================================
+
+enum UserRole {
+  ADMIN
+  ARTIST
+  BUYER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  name          String?
+  image         String?
+  role          UserRole  @default(BUYER)
+  status        UserStatus @default(PENDING)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  accounts      Account[]
+  sessions      Session[]
+  artistProfile ArtistProfile?
+  buyerProfile  BuyerProfile?
+  orders        Order[]
+  favorites     Favorite[]
+  
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ==========================================
+// PROFILS
+// ==========================================
+
+model ArtistProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bio         String?  @db.Text
+  country     String?
+  city        String?
+  website     String?
+  instagram   String?
+  phone       String?
+  
+  siret       String?
+  vatNumber   String?
+  
+  stripeAccountId String? @unique
+  stripeOnboarded Boolean @default(false)
+  
+  commissionRate  Decimal @default(30.0) @db.Decimal(5,2)
+  
+  totalSales      Int     @default(0)
+  totalRevenue    Decimal @default(0) @db.Decimal(10,2)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  artworks    Artwork[]
+  
+  @@map("artist_profiles")
+}
+
+model BuyerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  firstName   String?
+  lastName    String?
+  address     String?
+  city        String?
+  postalCode  String?
+  country     String?
+  phone       String?
+  
+  stripeCustomerId String? @unique
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("buyer_profiles")
+}
+
+// ==========================================
+// ŒUVRES D'ART
+// ==========================================
+
+enum ArtworkStatus {
+  DRAFT
+  PENDING
+  AVAILABLE
+  RESERVED
+  SOLD
+  ARCHIVED
+}
+
+enum ArtworkCategory {
+  PAINTING
+  SCULPTURE
+  PHOTOGRAPHY
+  DRAWING
+  PRINT
+  DIGITAL
+  MIXED_MEDIA
+  OTHER
+}
+
+model Artwork {
+  id          String   @id @default(cuid())
+  
+  title       String
+  description String   @db.Text
+  category    ArtworkCategory
+  year        Int
+  
+  width       Decimal  @db.Decimal(8,2)
+  height      Decimal  @db.Decimal(8,2)
+  depth       Decimal? @db.Decimal(8,2)
+  weight      Decimal? @db.Decimal(8,2)
+  medium      String
+  support     String?
+  
+  price       Decimal  @db.Decimal(10,2)
+  currency    String   @default("EUR")
+  status      ArtworkStatus @default(DRAFT)
+  
+  artistId    String
+  artist      ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Restrict)
+  
+  certificateUrl String?
+  hasCertificate Boolean @default(true)
+  
+  images      Json
+  
+  slug        String   @unique
+  tags        String[]
+  
+  soldAt      DateTime?
+  orderId     String?   @unique
+  order       Order?    @relation(fields: [orderId], references: [id])
+  
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+  
+  favorites   Favorite[]
+  
+  @@index([artistId])
+  @@index([status])
+  @@index([category])
+  @@index([slug])
+  @@map("artworks")
+}
+
+// ==========================================
+// COMMANDES & PAIEMENTS
+// ==========================================
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  
+  artwork         Artwork?
+  artworkSnapshot Json
+  
+  subtotal        Decimal     @db.Decimal(10,2)
+  shippingCost    Decimal     @db.Decimal(10,2)
+  tax             Decimal     @db.Decimal(10,2)
+  total           Decimal     @db.Decimal(10,2)
+  currency        String      @default("EUR")
+  
+  commissionRate  Decimal     @db.Decimal(5,2)
+  commissionAmount Decimal    @db.Decimal(10,2)
+  artistPayout    Decimal     @db.Decimal(10,2)
+  
+  status          OrderStatus @default(PENDING)
+  
+  stripeSessionId    String?  @unique
+  stripePaymentId    String?  @unique
+  stripeTransferId   String?
+  paidAt             DateTime?
+  
+  shippingAddress    Json
+  
+  trackingNumber     String?
+  shippingCarrier    String?
+  shippedAt          DateTime?
+  deliveredAt        DateTime?
+  
+  certificateGenerated Boolean  @default(false)
+  certificateSentAt    DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+// ==========================================
+// FAVORIS
+// ==========================================
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  artworkId String
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@map("favorites")
+}
+
+// ==========================================
+// PARAMÈTRES GLOBAUX
+// ==========================================
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+  
+  updatedAt DateTime @updatedAt
+  
+  @@map("settings")
+}

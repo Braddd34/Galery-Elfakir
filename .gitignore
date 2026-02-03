@@ -45,3 +45,8 @@ next-env.d.ts
 
 # Prisma
 prisma/migrations/**/migration_lock.toml
+
+# Package lock (will be generated on install)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
