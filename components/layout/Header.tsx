@@ -9,43 +9,40 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-neutral-800">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-20">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+      <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-6">
+        <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="text-xl tracking-[0.3em] font-light hover:text-neutral-300 transition-colors">
+          <Link href="/" className="text-2xl tracking-[0.3em] font-light text-white">
             ELFAKIR
           </Link>
-
+          
           {/* Navigation Desktop */}
-          <nav className="hidden md:flex items-center gap-10">
-            <Link href="/catalogue" className="text-sm text-neutral-400 hover:text-white transition-colors">
-              Catalogue
+          <div className="hidden md:flex items-center gap-12">
+            <Link href="/catalogue" className="text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity">
+              Collection
             </Link>
-            <Link href="/artistes" className="text-sm text-neutral-400 hover:text-white transition-colors">
+            <Link href="/artistes" className="text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity">
               Artistes
             </Link>
-            <Link href="/a-propos" className="text-sm text-neutral-400 hover:text-white transition-colors">
+            <Link href="/a-propos" className="text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity">
               À propos
             </Link>
-            <Link href="/contact" className="text-sm text-neutral-400 hover:text-white transition-colors">
-              Contact
-            </Link>
-          </nav>
-
-          {/* Actions */}
-          <div className="flex items-center gap-6">
+          </div>
+          
+          {/* Right side */}
+          <div className="flex items-center gap-8">
             {session ? (
-              <div className="hidden md:flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-6">
                 <Link 
                   href="/dashboard" 
-                  className="text-sm text-neutral-400 hover:text-white transition-colors"
+                  className="text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity"
                 >
-                  {session.user?.name}
+                  Mon compte
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  className="text-sm tracking-[0.15em] uppercase text-neutral-400 hover:text-white transition-colors"
                 >
                   Déconnexion
                 </button>
@@ -53,65 +50,97 @@ export default function Header() {
             ) : (
               <Link 
                 href="/login" 
-                className="hidden md:block text-sm border border-white px-6 py-2 hover:bg-white hover:text-black transition-all"
+                className="hidden md:block text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity"
               >
                 Connexion
               </Link>
             )}
+            
+            <Link href="/contact" className="text-sm tracking-[0.15em] uppercase text-white hover:opacity-60 transition-opacity">
+              Contact
+            </Link>
 
-            {/* Menu Mobile */}
+            {/* Menu Mobile Button */}
             <button 
               className="md:hidden p-2"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               <div className="w-6 flex flex-col gap-1.5">
-                <span className={`block h-px bg-white transition-transform ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-                <span className={`block h-px bg-white transition-opacity ${menuOpen ? 'opacity-0' : ''}`}></span>
-                <span className={`block h-px bg-white transition-transform ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+                <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
+                <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></span>
+                <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
               </div>
             </button>
           </div>
         </div>
 
-        {/* Menu Mobile Ouvert */}
+        {/* Menu Mobile */}
         {menuOpen && (
-          <div className="md:hidden border-t border-neutral-800 py-6">
-            <nav className="flex flex-col gap-4">
-              <Link href="/catalogue" className="text-neutral-400 hover:text-white transition-colors py-2">
-                Catalogue
+          <div className="md:hidden mt-8 pb-4 border-t border-neutral-800 pt-8">
+            <div className="flex flex-col gap-6">
+              <Link 
+                href="/catalogue" 
+                className="text-sm tracking-[0.15em] uppercase text-white"
+                onClick={() => setMenuOpen(false)}
+              >
+                Collection
               </Link>
-              <Link href="/artistes" className="text-neutral-400 hover:text-white transition-colors py-2">
+              <Link 
+                href="/artistes" 
+                className="text-sm tracking-[0.15em] uppercase text-white"
+                onClick={() => setMenuOpen(false)}
+              >
                 Artistes
               </Link>
-              <Link href="/a-propos" className="text-neutral-400 hover:text-white transition-colors py-2">
+              <Link 
+                href="/a-propos" 
+                className="text-sm tracking-[0.15em] uppercase text-white"
+                onClick={() => setMenuOpen(false)}
+              >
                 À propos
               </Link>
-              <Link href="/contact" className="text-neutral-400 hover:text-white transition-colors py-2">
+              <Link 
+                href="/contact" 
+                className="text-sm tracking-[0.15em] uppercase text-white"
+                onClick={() => setMenuOpen(false)}
+              >
                 Contact
               </Link>
-              <div className="pt-4 border-t border-neutral-800">
+              
+              <div className="pt-6 border-t border-neutral-800">
                 {session ? (
                   <>
-                    <Link href="/dashboard" className="block text-white py-2">
+                    <Link 
+                      href="/dashboard" 
+                      className="block text-sm tracking-[0.15em] uppercase text-white mb-4"
+                      onClick={() => setMenuOpen(false)}
+                    >
                       Mon compte
                     </Link>
                     <button
-                      onClick={() => signOut({ callbackUrl: "/" })}
-                      className="text-neutral-500 py-2"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        signOut({ callbackUrl: "/" })
+                      }}
+                      className="text-sm tracking-[0.15em] uppercase text-neutral-400"
                     >
                       Déconnexion
                     </button>
                   </>
                 ) : (
-                  <Link href="/login" className="block text-white py-2">
+                  <Link 
+                    href="/login" 
+                    className="text-sm tracking-[0.15em] uppercase text-white"
+                    onClick={() => setMenuOpen(false)}
+                  >
                     Connexion
                   </Link>
                 )}
               </div>
-            </nav>
+            </div>
           </div>
         )}
       </div>
-    </header>
+    </nav>
   )
 }

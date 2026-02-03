@@ -51,7 +51,7 @@ export default async function ArtistesPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-black text-white pt-20">
+      <main className="min-h-screen bg-black text-white pt-28">
         {/* Hero */}
         <section className="py-24 px-6">
           <div className="max-w-7xl mx-auto">

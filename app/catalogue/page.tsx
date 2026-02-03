@@ -1,4 +1,6 @@
 import Link from "next/link"
+import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
 
 const artworks = [
   { id: "1", title: "Harmonie Abstraite", artist: "Marie Dupont", price: 2500, year: 2024, image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop", category: "Peinture" },
@@ -15,37 +17,11 @@ const categories = ["Tout", "Peinture", "Sculpture", "Photographie", "Technique 
 
 export default function CataloguePage() {
   return (
-    <main className="bg-black text-white min-h-screen">
-      
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-neutral-800/50">
-        <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-6">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl tracking-[0.3em] font-light">
-              ELFAKIR
-            </Link>
-            
-            <div className="hidden md:flex items-center gap-12">
-              <Link href="/catalogue" className="text-sm tracking-[0.15em] uppercase text-gold">
-                Collection
-              </Link>
-              <Link href="/artistes" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
-                Artistes
-              </Link>
-              <Link href="/a-propos" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
-                À propos
-              </Link>
-            </div>
-            
-            <Link href="/contact" className="text-sm tracking-[0.15em] uppercase hover:opacity-60 transition-opacity">
-              Contact
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Header */}
-      <header className="pt-40 pb-20 border-b border-neutral-800">
+    <>
+      <Header />
+      <main className="bg-black text-white min-h-screen pt-28">
+        {/* Hero Header */}
+      <header className="pt-12 pb-20 border-b border-neutral-800">
         <div className="max-w-[1800px] mx-auto px-8 md:px-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
@@ -139,18 +115,8 @@ export default function CataloguePage() {
         </button>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-800 py-12">
-        <div className="max-w-[1800px] mx-auto px-8 md:px-16 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-neutral-600 text-sm">
-            © 2024 Galerie ELFAKIR
-          </p>
-          <div className="flex gap-8 text-sm text-neutral-600">
-            <Link href="#" className="hover:text-white transition-colors">Mentions légales</Link>
-            <Link href="#" className="hover:text-white transition-colors">CGV</Link>
-          </div>
-        </div>
-      </footer>
-    </main>
+      </main>
+      <Footer />
+    </>
   )
 }
