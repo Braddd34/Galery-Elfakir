@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const defaultRole = searchParams.get("role") === "artist" ? "ARTIST" : "BUYER"
@@ -183,5 +183,26 @@ export default function RegisterPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+// Loading fallback pendant que useSearchParams charge
+function RegisterLoading() {
+  return (
+    <main className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md text-center">
+        <span className="text-2xl tracking-[0.3em] font-light">ELFAKIR</span>
+        <p className="text-neutral-500 mt-8">Chargement...</p>
+      </div>
+    </main>
+  )
+}
+
+// Page principale avec Suspense
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterLoading />}>
+      <RegisterForm />
+    </Suspense>
   )
 }
