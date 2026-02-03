@@ -2,24 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ==========================================
-   GALERIE ELFAKIR - DESIGN SYSTEM
-   ========================================== */
-
-/* Force base styles */
+/* Base styles */
 html {
-  background-color: #000000;
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: #000000;
-  color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  margin: 0;
-  padding: 0;
 }
 
 /* Reset links */
@@ -34,85 +24,30 @@ a {
   color: black;
 }
 
-/* ==========================================
-   TYPOGRAPHY CLASSES
-   ========================================== */
-
+/* Custom classes */
 .heading-xl {
-  font-size: 3rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-@media (min-width: 768px) {
-  .heading-xl {
-    font-size: 4.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .heading-xl {
-    font-size: 6rem;
-  }
+  @apply text-5xl md:text-7xl lg:text-8xl font-light tracking-tight leading-none;
 }
 
 .heading-lg {
-  font-size: 2.5rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
-}
-
-@media (min-width: 768px) {
-  .heading-lg {
-    font-size: 3.5rem;
-  }
+  @apply text-4xl md:text-5xl lg:text-6xl font-light tracking-tight;
 }
 
 .heading-md {
-  font-size: 2rem;
-  font-weight: 300;
-}
-
-@media (min-width: 768px) {
-  .heading-md {
-    font-size: 2.5rem;
-  }
+  @apply text-3xl md:text-4xl font-light;
 }
 
 .heading-sm {
-  font-size: 1.25rem;
-  font-weight: 300;
-}
-
-@media (min-width: 768px) {
-  .heading-sm {
-    font-size: 1.5rem;
-  }
+  @apply text-xl md:text-2xl font-light;
 }
 
 .text-elegant {
-  font-size: 1.25rem;
-  font-weight: 300;
-  font-style: italic;
-}
-
-@media (min-width: 768px) {
-  .text-elegant {
-    font-size: 1.5rem;
-  }
+  @apply text-xl md:text-2xl font-light italic;
 }
 
 .label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #737373;
+  @apply text-xs uppercase tracking-widest text-neutral-500;
 }
-
-/* ==========================================
-   UTILITY CLASSES
-   ========================================== */
 
 .text-gold {
   color: #c9a962;
@@ -122,15 +57,7 @@ a {
   background-color: #c9a962;
 }
 
-.border-gold {
-  border-color: #c9a962;
-}
-
 /* Animations */
-.animate-fade-in {
-  animation: fadeIn 1s ease-out forwards;
-}
-
 .animate-fade-up {
   animation: fadeUp 1s ease-out forwards;
 }
@@ -138,6 +65,10 @@ a {
 .animate-fade-up-delay {
   animation: fadeUp 1s ease-out 0.3s forwards;
   opacity: 0;
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
 }
 
 @keyframes fadeIn {
@@ -156,23 +87,20 @@ a {
   }
 }
 
-/* Image zoom effect */
+/* Image zoom */
 .img-zoom {
-  overflow: hidden;
+  @apply overflow-hidden;
 }
 
 .img-zoom img {
-  transition: transform 0.7s ease-out;
+  @apply transition-transform duration-700;
 }
 
 .img-zoom:hover img {
-  transform: scale(1.05);
+  @apply scale-105;
 }
 
-/* ==========================================
-   SCROLLBAR
-   ========================================== */
-
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -183,8 +111,4 @@ a {
 
 ::-webkit-scrollbar-thumb {
   background: #333;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
 }
