@@ -235,13 +235,26 @@ export default function HomePage() {
             <div>
               <p className="label mb-6">Navigation</p>
               <ul className="space-y-4">
-                {['Collection', 'Artistes', 'À propos', 'Contact'].map((item) => (
-                  <li key={item}>
-                    <Link href="#" className="text-neutral-400 hover:text-white transition-colors">
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/catalogue" className="text-neutral-400 hover:text-white transition-colors">
+                    Collection
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/artistes" className="text-neutral-400 hover:text-white transition-colors">
+                    Artistes
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/a-propos" className="text-neutral-400 hover:text-white transition-colors">
+                    À propos
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="text-neutral-400 hover:text-white transition-colors">
+                    Contact
+                  </Link>
+                </li>
               </ul>
             </div>
             
@@ -264,12 +277,12 @@ export default function HomePage() {
           {/* Bottom */}
           <div className="mt-20 pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-neutral-600 text-sm">
-              © 2024 Galerie ELFAKIR. Tous droits réservés.
+              © {new Date().getFullYear()} Galerie ELFAKIR. Tous droits réservés.
             </p>
             <div className="flex gap-8 text-sm text-neutral-600">
-              <Link href="#" className="hover:text-white transition-colors">Mentions légales</Link>
-              <Link href="#" className="hover:text-white transition-colors">CGV</Link>
-              <Link href="#" className="hover:text-white transition-colors">Confidentialité</Link>
+              <Link href="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
+              <Link href="/cgv" className="hover:text-white transition-colors">CGV</Link>
+              <Link href="/confidentialite" className="hover:text-white transition-colors">Confidentialité</Link>
             </div>
           </div>
         </div>
