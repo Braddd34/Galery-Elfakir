@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* FORCE STYLES - Test si le CSS se charge */
+html, body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  margin: 0;
+  padding: 0;
+}
+
 /* ==========================================
    GALERIE ELFAKIR - DESIGN SYSTEM
    ========================================== */
