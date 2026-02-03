@@ -3,18 +3,15 @@
 @tailwind utilities;
 
 /* ==========================================
-   DESIGN SYSTEM - Inspired by Vercel, Cursor, Apple
+   DESIGN SYSTEM - Clean & Modern
    ========================================== */
 
 @layer base {
   :root {
-    /* Colors - Minimal palette */
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 0 0% 4%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 4%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 4%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 96%;
@@ -23,44 +20,10 @@
     --muted-foreground: 0 0% 45%;
     --accent: 0 0% 96%;
     --accent-foreground: 0 0% 9%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
     --ring: 0 0% 4%;
-    --radius: 0.75rem;
-    
-    /* Glassmorphism */
-    --glass-bg: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  }
-
-  .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 0 0% 83%;
-    
-    /* Dark Glassmorphism */
-    --glass-bg: rgba(20, 20, 20, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --radius: 1rem;
   }
 }
 
@@ -74,8 +37,8 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply antialiased;
+    background: #f5f5f7;
   }
   
   ::selection {
@@ -84,221 +47,60 @@
 }
 
 /* ==========================================
-   GLASSMORPHISM COMPONENTS
+   COMPONENTS
    ========================================== */
 
 @layer components {
-  /* Glass Card - Apple Style */
+  /* Card with visible background */
+  .card {
+    @apply bg-white rounded-2xl border border-gray-200/80 shadow-sm;
+  }
+  
+  .card-hover {
+    @apply bg-white rounded-2xl border border-gray-200/80 shadow-sm 
+           transition-all duration-300 
+           hover:shadow-lg hover:shadow-gray-200/50 
+           hover:border-gray-300/80 
+           hover:-translate-y-1;
+  }
+  
+  /* Glass effect - more visible */
   .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+    @apply bg-white/80 backdrop-blur-xl rounded-2xl border border-white/50 shadow-lg shadow-black/5;
   }
   
-  .glass-subtle {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Dark card */
+  .card-dark {
+    @apply bg-gray-900 text-white rounded-2xl;
   }
   
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Gradient backgrounds */
+  .bg-gradient-subtle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   
-  /* Gradient Backgrounds */
-  .gradient-mesh {
-    background: 
-      radial-gradient(at 40% 20%, hsla(0, 0%, 100%, 1) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, hsla(220, 100%, 97%, 1) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, hsla(220, 100%, 97%, 1) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, hsla(340, 100%, 97%, 1) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(220, 100%, 97%, 1) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, hsla(220, 100%, 97%, 1) 0px, transparent 50%);
-  }
-  
-  .gradient-radial {
-    background: radial-gradient(ellipse at top, rgba(255,255,255,0.8) 0%, transparent 50%),
-                radial-gradient(ellipse at bottom, rgba(240,240,255,0.4) 0%, transparent 50%);
-  }
-  
-  /* Animated gradient border */
-  .gradient-border {
-    position: relative;
-    background: white;
-    border-radius: 1rem;
-  }
-  
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0.05), rgba(0,0,0,0.1));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-  }
-  
-  /* Vercel-style dots background */
-  .dots-bg {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  .bg-dots {
+    background-image: radial-gradient(circle, #d1d5db 1px, transparent 1px);
     background-size: 24px 24px;
-  }
-  
-  /* Grid background like Vercel */
-  .grid-bg {
-    background-size: 64px 64px;
-    background-image: 
-      linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-  }
-  
-  /* Noise texture overlay */
-  .noise {
-    position: relative;
-  }
-  
-  .noise::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.02;
-    pointer-events: none;
   }
 }
 
 /* ==========================================
-   ANIMATIONS
+   UTILITIES
    ========================================== */
 
 @layer utilities {
-  /* Fade in up animation */
-  .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out forwards;
+  .text-balance {
+    text-wrap: balance;
   }
   
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
-  /* Fade in animation */
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  /* Scale in animation */
-  .animate-scale-in {
-    animation: scaleIn 0.3s ease-out forwards;
-  }
-  
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
-  /* Slide in from bottom */
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out forwards;
-  }
-  
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Blur in animation */
-  .animate-blur-in {
-    animation: blurIn 0.5s ease-out forwards;
-  }
-  
-  @keyframes blurIn {
-    from {
-      opacity: 0;
-      filter: blur(10px);
-    }
-    to {
-      opacity: 1;
-      filter: blur(0);
-    }
-  }
-  
-  /* Stagger children animation delay */
-  .stagger-1 { animation-delay: 0.1s; }
-  .stagger-2 { animation-delay: 0.2s; }
-  .stagger-3 { animation-delay: 0.3s; }
-  .stagger-4 { animation-delay: 0.4s; }
-  .stagger-5 { animation-delay: 0.5s; }
-  
-  /* Hover lift effect */
-  .hover-lift {
-    @apply transition-all duration-300;
-  }
-  
-  .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Glow effect on hover */
-  .hover-glow {
-    @apply transition-all duration-300;
-  }
-  
-  .hover-glow:hover {
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
-  }
-  
-  /* Text gradient */
-  .text-gradient {
-    background: linear-gradient(135deg, #000 0%, #444 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  /* Shimmer effect for loading */
-  .shimmer {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-  
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -316,54 +118,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+  background: #d1d5db;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
-}
-
-/* ==========================================
-   TYPOGRAPHY
-   ========================================== */
-
-.text-balance {
-  text-wrap: balance;
-}
-
-.text-pretty {
-  text-wrap: pretty;
-}
-
-/* Heading styles */
-h1, h2, h3, h4, h5, h6 {
-  @apply font-semibold tracking-tight;
-}
-
-/* ==========================================
-   RESPONSIVE UTILITIES
-   ========================================== */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* ==========================================
-   NO SCROLLBAR UTILITY
-   ========================================== */
-
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+  background: #9ca3af;
 }
