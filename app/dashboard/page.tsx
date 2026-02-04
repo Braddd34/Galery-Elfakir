@@ -155,6 +155,15 @@ export default async function DashboardPage() {
                   Voir et gérer les commandes
                 </p>
               </Link>
+              <Link
+                href="/dashboard/favoris"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Mes favoris</h3>
+                <p className="text-neutral-500 text-sm">
+                  Œuvres sauvegardées
+                </p>
+              </Link>
             </>
           )}
 

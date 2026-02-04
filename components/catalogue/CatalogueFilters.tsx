@@ -79,11 +79,32 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearchKeyDown}
             placeholder="Rechercher une œuvre, un artiste..."
-            className="w-full bg-neutral-900 border border-neutral-700 px-5 py-4 pr-12 text-white placeholder:text-neutral-500 focus:border-white focus:outline-none transition-colors"
+            className="w-full bg-neutral-900 border border-neutral-700 px-5 py-4 pr-20 text-white placeholder:text-neutral-500 focus:border-white focus:outline-none transition-colors"
           />
+          {/* Bouton effacer la recherche */}
+          {search && (
+            <button 
+              onClick={() => {
+                setSearch("")
+                // Si c'était le seul filtre actif, réinitialiser tout
+                if (!minPrice && !maxPrice && artistId === "all" && sort === "newest") {
+                  router.push(currentFilters.category && currentFilters.category !== "all" 
+                    ? `/catalogue?category=${currentFilters.category}` 
+                    : "/catalogue")
+                }
+              }}
+              className="absolute right-12 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+              title="Effacer la recherche"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
           <button 
             onClick={applyFilters}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+            title="Rechercher"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
