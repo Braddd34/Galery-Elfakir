@@ -8,14 +8,14 @@ export default withAuth(
 
     // Routes admin - seulement pour les admins
     if (path.startsWith("/admin")) {
-      if (token?.role !== "ADMIN") {
+      if (token?.userRole !== "ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url))
       }
     }
 
     // Routes artiste - seulement pour les artistes
     if (path.startsWith("/dashboard/artiste")) {
-      if (token?.role !== "ARTIST" && token?.role !== "ADMIN") {
+      if (token?.userRole !== "ARTIST" && token?.userRole !== "ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url))
       }
     }
