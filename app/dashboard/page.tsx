@@ -13,7 +13,7 @@ async function getAdminStats() {
       prisma.order.count(),
       prisma.order.aggregate({
         where: { status: { in: ["PAID", "SHIPPED", "DELIVERED"] } },
-        _sum: { totalAmount: true }
+        _sum: { total: true }
       })
     ])
     
@@ -21,7 +21,7 @@ async function getAdminStats() {
       artworks: artworksCount,
       artists: artistsCount,
       orders: ordersCount,
-      revenue: revenueData._sum.totalAmount || 0
+      revenue: revenueData._sum.total || 0
     }
   } catch {
     return { artworks: 0, artists: 0, orders: 0, revenue: 0 }
@@ -69,14 +69,14 @@ async function getBuyerStats(userId: string) {
       prisma.favorite.count({ where: { userId } }),
       prisma.order.aggregate({
         where: { userId, status: { in: ["PAID", "SHIPPED", "DELIVERED"] } },
-        _sum: { totalAmount: true }
+        _sum: { total: true }
       })
     ])
     
     return {
       orders: ordersCount,
       favorites: favoritesCount,
-      totalSpent: totalSpent._sum.totalAmount || 0
+      totalSpent: totalSpent._sum.total || 0
     }
   } catch {
     return { orders: 0, favorites: 0, totalSpent: 0 }
