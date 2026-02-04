@@ -3,6 +3,7 @@
 import { useCart, CartItem } from "@/lib/cart-context"
 import { useState } from "react"
 import FavoriteButton from "@/components/ui/FavoriteButton"
+import { useToast } from "@/lib/toast-context"
 
 interface AddToCartButtonProps {
   artwork: CartItem
@@ -10,6 +11,7 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
   const { addItem, removeItem, isInCart } = useCart()
+  const { showToast } = useToast()
   const [isAdding, setIsAdding] = useState(false)
   
   const inCart = isInCart(artwork.id)
@@ -17,9 +19,11 @@ export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
   const handleClick = () => {
     if (inCart) {
       removeItem(artwork.id)
+      showToast("Œuvre retirée du panier", "info")
     } else {
       setIsAdding(true)
       addItem(artwork)
+      showToast("Œuvre ajoutée au panier", "success")
       setTimeout(() => setIsAdding(false), 500)
     }
   }

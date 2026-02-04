@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/lib/toast-context"
 
 interface FavoriteButtonProps {
   artworkId: string
@@ -12,6 +13,7 @@ interface FavoriteButtonProps {
 export default function FavoriteButton({ artworkId, className = "" }: FavoriteButtonProps) {
   const { data: session } = useSession()
   const router = useRouter()
+  const { showToast } = useToast()
   const [isFavorite, setIsFavorite] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -31,7 +33,7 @@ export default function FavoriteButton({ artworkId, className = "" }: FavoriteBu
 
   const handleClick = async () => {
     if (!session) {
-      // Rediriger vers la connexion si pas connecté
+      showToast("Connectez-vous pour sauvegarder des œuvres", "info")
       router.push("/login")
       return
     }
@@ -47,9 +49,13 @@ export default function FavoriteButton({ artworkId, className = "" }: FavoriteBu
       if (res.ok) {
         const data = await res.json()
         setIsFavorite(data.isFavorite)
+        showToast(
+          data.isFavorite ? "Ajouté aux favoris" : "Retiré des favoris",
+          data.isFavorite ? "success" : "info"
+        )
       }
     } catch (error) {
-      console.error("Erreur:", error)
+      showToast("Une erreur est survenue", "error")
     } finally {
       setLoading(false)
     }

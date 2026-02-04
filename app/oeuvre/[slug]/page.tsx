@@ -5,6 +5,59 @@ import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
 import { ArtworkCategory } from "@prisma/client"
 import AddToCartButton from "@/components/cart/AddToCartButton"
+import { Metadata } from "next"
+
+// Générer les meta tags dynamiques pour le SEO
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const artwork = await prisma.artwork.findUnique({
+    where: { slug: params.slug },
+    include: {
+      artist: {
+        include: {
+          user: { select: { name: true } }
+        }
+      }
+    }
+  })
+
+  if (!artwork) {
+    return {
+      title: "Œuvre non trouvée"
+    }
+  }
+
+  const artistName = artwork.artist.user.name || "Artiste"
+  let imageUrl = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200"
+  
+  try {
+    const images = typeof artwork.images === 'string' ? JSON.parse(artwork.images) : artwork.images
+    if (images?.[0]?.url) imageUrl = images[0].url
+  } catch {}
+
+  return {
+    title: `${artwork.title} par ${artistName}`,
+    description: artwork.description.substring(0, 160),
+    openGraph: {
+      title: `${artwork.title} — ELFAKIR`,
+      description: artwork.description.substring(0, 160),
+      type: "article",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: artwork.title
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${artwork.title} — ELFAKIR`,
+      description: artwork.description.substring(0, 160),
+      images: [imageUrl]
+    }
+  }
+}
 
 // Mapping des catégories
 const categoryLabels: Record<ArtworkCategory, string> = {

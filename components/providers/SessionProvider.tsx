@@ -2,6 +2,7 @@
 
 import { SessionProvider as NextAuthSessionProvider } from "next-auth/react"
 import { CartProvider } from "@/lib/cart-context"
+import { ToastProvider } from "@/lib/toast-context"
 
 export default function SessionProvider({
   children,
@@ -10,9 +11,11 @@ export default function SessionProvider({
 }) {
   return (
     <NextAuthSessionProvider>
-      <CartProvider>
-        {children}
-      </CartProvider>
+      <ToastProvider>
+        <CartProvider>
+          {children}
+        </CartProvider>
+      </ToastProvider>
     </NextAuthSessionProvider>
   )
 }

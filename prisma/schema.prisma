@@ -312,3 +312,17 @@ model Setting {
   
   @@map("settings")
 }
+
+// ==========================================
+// NEWSLETTER
+// ==========================================
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  active    Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  
+  @@map("newsletter_subscribers")
+}

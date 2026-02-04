@@ -8,12 +8,33 @@ export const metadata: Metadata = {
     template: "%s — ELFAKIR",
   },
   description: "Galerie d'art contemporain en ligne. Découvrez une collection exclusive d'œuvres originales d'artistes internationaux.",
-  keywords: ["galerie d'art", "art contemporain", "œuvres originales", "artistes", "peinture", "sculpture"],
+  keywords: ["galerie d'art", "art contemporain", "œuvres originales", "artistes", "peinture", "sculpture", "acheter art", "collection art"],
   authors: [{ name: "ELFAKIR" }],
+  creator: "ELFAKIR Gallery",
+  publisher: "ELFAKIR",
+  metadataBase: new URL("https://galeryelfakir.vercel.app"),
   openGraph: {
     type: "website",
     locale: "fr_FR",
     siteName: "ELFAKIR",
+    title: "ELFAKIR — Galerie d'Art Contemporain",
+    description: "Découvrez une collection exclusive d'œuvres originales d'artistes internationaux.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ELFAKIR — Galerie d'Art Contemporain",
+    description: "Découvrez une collection exclusive d'œuvres originales d'artistes internationaux.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 }
 

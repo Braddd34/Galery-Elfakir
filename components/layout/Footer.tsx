@@ -1,8 +1,26 @@
 import Link from "next/link"
+import NewsletterForm from "@/components/ui/NewsletterForm"
 
 export default function Footer() {
   return (
     <footer className="bg-black border-t border-neutral-800">
+      {/* Newsletter Section */}
+      <div className="border-b border-neutral-800">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h3 className="text-xl font-light mb-2">Restez informé</h3>
+              <p className="text-neutral-500 text-sm">
+                Recevez en avant-première nos nouvelles œuvres et événements exclusifs.
+              </p>
+            </div>
+            <div className="md:w-1/2 lg:w-1/3">
+              <NewsletterForm />
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-4 gap-12">
           {/* Logo & Description */}
