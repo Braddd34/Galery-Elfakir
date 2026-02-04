@@ -21,11 +21,12 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         onClick={onClose}
       />
 
-      {/* Drawer */}
+      {/* Drawer - s'adapte au contenu */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-neutral-950 z-50 transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-4 right-4 w-full max-w-md bg-neutral-950 z-50 transform transition-all duration-300 shadow-2xl ${
+          isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
+        style={{ maxHeight: 'calc(100vh - 2rem)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-800">
@@ -41,10 +42,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         </div>
 
         {/* Content */}
-        <div className="flex flex-col h-[calc(100%-80px)]">
+        <div className="flex flex-col">
           {items.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-              <svg className="w-16 h-16 text-neutral-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <svg className="w-12 h-12 text-neutral-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               <p className="text-neutral-500 mb-4">Votre panier est vide</p>
@@ -57,14 +58,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
           ) : (
             <>
-              {/* Items */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Items - scroll si beaucoup d'articles */}
+              <div className="overflow-y-auto p-6 space-y-6" style={{ maxHeight: '50vh' }}>
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <Link 
                       href={`/oeuvre/${item.slug}`}
                       onClick={onClose}
-                      className="w-24 h-24 bg-neutral-900 flex-shrink-0"
+                      className="w-20 h-20 bg-neutral-900 flex-shrink-0"
                     >
                       <img
                         src={item.image}
@@ -81,7 +82,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         {item.title}
                       </Link>
                       <p className="text-neutral-500 text-sm mt-1">{item.artistName}</p>
-                      <p className="text-lg mt-2">€{item.price.toLocaleString()}</p>
+                      <p className="text-lg mt-1">€{item.price.toLocaleString()}</p>
                     </div>
                     <button
                       onClick={() => removeItem(item.id)}
@@ -105,11 +106,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   Frais de livraison calculés à l'étape suivante
                 </p>
                 <Link
-                  href="/checkout"
+                  href="/contact"
                   onClick={onClose}
-                  className="block w-full bg-white text-black py-4 text-center text-sm tracking-[0.15em] uppercase font-medium hover:bg-gold transition-colors"
+                  className="block w-full bg-white text-black py-4 text-center text-sm tracking-[0.15em] uppercase font-medium hover:bg-neutral-200 transition-colors"
                 >
-                  Commander
+                  Nous contacter pour commander
                 </Link>
                 <button
                   onClick={clearCart}
