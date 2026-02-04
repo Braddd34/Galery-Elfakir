@@ -38,14 +38,13 @@ async function getArtistStats(userId: string) {
     
     if (!artistProfile) return { artworks: 0, available: 0, sold: 0, revenue: 0 }
     
-    const [artworksCount, availableCount, soldCount, salesData] = await Promise.all([
+    const [artworksCount, availableCount, soldCount, revenueData] = await Promise.all([
       prisma.artwork.count({ where: { artistId: artistProfile.id } }),
       prisma.artwork.count({ where: { artistId: artistProfile.id, status: "AVAILABLE" } }),
       prisma.artwork.count({ where: { artistId: artistProfile.id, status: "SOLD" } }),
-      prisma.orderItem.aggregate({
-        where: {
-          artwork: { artistId: artistProfile.id, status: "SOLD" }
-        },
+      // Calculer les revenus à partir des œuvres vendues
+      prisma.artwork.aggregate({
+        where: { artistId: artistProfile.id, status: "SOLD" },
         _sum: { price: true }
       })
     ])
@@ -54,7 +53,7 @@ async function getArtistStats(userId: string) {
       artworks: artworksCount,
       available: availableCount,
       sold: soldCount,
-      revenue: salesData._sum.price || 0
+      revenue: revenueData._sum.price || 0
     }
   } catch {
     return { artworks: 0, available: 0, sold: 0, revenue: 0 }
