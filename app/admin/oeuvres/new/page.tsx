@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import ImageUpload from "@/components/ui/ImageUpload"
 
 interface Artist {
   id: string
@@ -16,6 +17,7 @@ export default function NewArtworkPage() {
   const [artists, setArtists] = useState<Artist[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [images, setImages] = useState<{ url: string; key?: string }[]>([])
   
   const [formData, setFormData] = useState({
     title: "",
@@ -30,7 +32,6 @@ export default function NewArtworkPage() {
     price: "",
     artistId: "",
     status: "DRAFT",
-    imageUrl: "",
   })
 
   useEffect(() => {
@@ -44,13 +45,22 @@ export default function NewArtworkPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (images.length === 0) {
+      setError("Veuillez ajouter au moins une image")
+      return
+    }
+
     setLoading(true)
 
     try {
       const response = await fetch("/api/admin/artworks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          images: images, // Envoyer le tableau d'images
+        }),
       })
 
       const data = await response.json()
@@ -253,35 +263,12 @@ export default function NewArtworkPage() {
             </div>
 
             <div className="bg-neutral-900 border border-neutral-800 p-6">
-              <h2 className="text-lg font-light mb-6">Image</h2>
-              
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                  URL de l'image *
-                </label>
-                <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  required
-                  className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-                  placeholder="https://..."
-                />
-                <p className="text-neutral-600 text-xs mt-2">
-                  Utilisez une URL d'image (Unsplash, etc.) pour le moment.
-                  L'upload direct sera ajouté prochainement.
-                </p>
-              </div>
-
-              {formData.imageUrl && (
-                <div className="mt-4">
-                  <img 
-                    src={formData.imageUrl} 
-                    alt="Aperçu" 
-                    className="max-h-48 object-contain"
-                  />
-                </div>
-              )}
+              <h2 className="text-lg font-light mb-6">Images *</h2>
+              <ImageUpload
+                images={images}
+                onChange={setImages}
+                maxImages={5}
+              />
             </div>
           </div>
 

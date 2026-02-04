@@ -35,11 +35,13 @@ export async function POST(request: NextRequest) {
       price,
       artistId,
       status,
-      imageUrl,
+      images, // Nouveau: tableau d'images
+      imageUrl, // Ancien: pour compatibilité
     } = body
 
     // Validation
-    if (!title || !description || !category || !year || !width || !height || !medium || !price || !artistId || !imageUrl) {
+    const hasImages = (images && images.length > 0) || imageUrl
+    if (!title || !description || !category || !year || !width || !height || !medium || !price || !artistId || !hasImages) {
       return NextResponse.json(
         { error: "Tous les champs obligatoires doivent être remplis" },
         { status: 400 }
@@ -67,6 +69,20 @@ export async function POST(request: NextRequest) {
       slug = `${slug}-${Date.now()}`
     }
 
+    // Préparer les images
+    let imagesData
+    if (images && images.length > 0) {
+      // Nouveau format: tableau d'images avec url et key
+      imagesData = images.map((img: any, index: number) => ({
+        url: img.url,
+        key: img.key,
+        order: index
+      }))
+    } else {
+      // Ancien format: simple URL
+      imagesData = [{ url: imageUrl, order: 0 }]
+    }
+
     // Créer l'œuvre
     const artwork = await prisma.artwork.create({
       data: {
@@ -83,7 +99,7 @@ export async function POST(request: NextRequest) {
         artistId,
         status: status as any || "DRAFT",
         slug,
-        images: JSON.stringify([{ url: imageUrl, order: 0 }]),
+        images: JSON.stringify(imagesData),
         tags: [],
         publishedAt: status === "AVAILABLE" ? new Date() : null,
       }
