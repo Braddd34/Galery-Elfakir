@@ -147,16 +147,6 @@ async function getSimilarArtworks(artworkId: string, category: ArtworkCategory, 
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const artwork = await getArtwork(params.slug)
-  if (!artwork) return { title: "Œuvre non trouvée" }
-  
-  return {
-    title: artwork.title,
-    description: artwork.description?.substring(0, 160),
-  }
-}
-
 export default async function ArtworkPage({ params }: { params: { slug: string } }) {
   const artwork = await getArtwork(params.slug)
   
