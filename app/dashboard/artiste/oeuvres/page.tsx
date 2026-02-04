@@ -81,7 +81,7 @@ export default async function ArtistOeuvresPage() {
             <p className="text-neutral-500">{artworks.length} œuvre{artworks.length > 1 ? 's' : ''}</p>
           </div>
           <Link
-            href="/admin/oeuvres/new"
+            href="/dashboard/artiste/oeuvres/new"
             className="bg-white text-black px-6 py-3 text-sm tracking-wider hover:bg-neutral-200 transition-colors"
           >
             + Ajouter une œuvre
@@ -135,7 +135,7 @@ export default async function ArtistOeuvresPage() {
           <div className="text-center py-24 border border-neutral-800">
             <p className="text-neutral-500 mb-4">Vous n'avez pas encore d'œuvres</p>
             <Link
-              href="/admin/oeuvres/new"
+              href="/dashboard/artiste/oeuvres/new"
               className="text-white underline hover:text-neutral-300"
             >
               Ajouter votre première œuvre

@@ -2,7 +2,8 @@ import Link from "next/link"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
-import { ArtworkCategory } from "@prisma/client"
+import { ArtworkCategory, Prisma } from "@prisma/client"
+import CatalogueFilters from "@/components/catalogue/CatalogueFilters"
 
 // Mapping des catégories pour l'affichage
 const categoryLabels: Record<ArtworkCategory, string> = {
@@ -28,23 +29,75 @@ function getImageUrl(images: any): string {
   }
 }
 
-// Récupérer les œuvres avec filtres
-async function getArtworks(category?: string) {
+// Types pour les filtres
+interface FilterParams {
+  category?: string
+  search?: string
+  minPrice?: string
+  maxPrice?: string
+  artistId?: string
+  sort?: string
+}
+
+// Récupérer les œuvres avec filtres avancés
+async function getArtworks(filters: FilterParams) {
   try {
-    const where: any = {
+    const where: Prisma.ArtworkWhereInput = {
       status: "AVAILABLE"
     }
     
-    // Filtre par catégorie si spécifié
-    if (category && category !== "all") {
-      where.category = category.toUpperCase() as ArtworkCategory
+    // Filtre par catégorie
+    if (filters.category && filters.category !== "all") {
+      where.category = filters.category.toUpperCase() as ArtworkCategory
+    }
+    
+    // Recherche par titre ou description
+    if (filters.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+        { medium: { contains: filters.search, mode: 'insensitive' } }
+      ]
+    }
+    
+    // Filtre par prix minimum
+    if (filters.minPrice) {
+      where.price = { ...where.price as any, gte: parseFloat(filters.minPrice) }
+    }
+    
+    // Filtre par prix maximum
+    if (filters.maxPrice) {
+      where.price = { ...where.price as any, lte: parseFloat(filters.maxPrice) }
+    }
+    
+    // Filtre par artiste
+    if (filters.artistId && filters.artistId !== "all") {
+      where.artistId = filters.artistId
+    }
+    
+    // Tri
+    let orderBy: Prisma.ArtworkOrderByWithRelationInput = { createdAt: "desc" }
+    switch (filters.sort) {
+      case "price_asc":
+        orderBy = { price: "asc" }
+        break
+      case "price_desc":
+        orderBy = { price: "desc" }
+        break
+      case "newest":
+        orderBy = { createdAt: "desc" }
+        break
+      case "oldest":
+        orderBy = { createdAt: "asc" }
+        break
+      case "title":
+        orderBy = { title: "asc" }
+        break
     }
     
     const artworks = await prisma.artwork.findMany({
       where,
-      orderBy: {
-        createdAt: "desc"
-      },
+      orderBy,
       include: {
         artist: {
           include: {
@@ -60,6 +113,32 @@ async function getArtworks(category?: string) {
     return artworks
   } catch (error) {
     console.error("Erreur récupération œuvres:", error)
+    return []
+  }
+}
+
+// Récupérer tous les artistes avec des œuvres disponibles
+async function getArtists() {
+  try {
+    const artists = await prisma.artistProfile.findMany({
+      where: {
+        artworks: {
+          some: {
+            status: "AVAILABLE"
+          }
+        }
+      },
+      include: {
+        user: {
+          select: { name: true }
+        },
+        _count: {
+          select: { artworks: true }
+        }
+      }
+    })
+    return artists
+  } catch {
     return []
   }
 }
@@ -86,13 +165,21 @@ export const metadata = {
 }
 
 interface PageProps {
-  searchParams: { category?: string }
+  searchParams: { 
+    category?: string
+    search?: string
+    minPrice?: string
+    maxPrice?: string
+    artistId?: string
+    sort?: string
+  }
 }
 
 export default async function CataloguePage({ searchParams }: PageProps) {
   const currentCategory = searchParams.category || "all"
-  const artworks = await getArtworks(currentCategory)
+  const artworks = await getArtworks(searchParams)
   const categoryCounts = await getCategoryCounts()
+  const artists = await getArtists()
   
   // Calculer le total
   const totalCount = categoryCounts.reduce((acc, cat) => acc + cat._count, 0)
@@ -106,6 +193,12 @@ export default async function CataloguePage({ searchParams }: PageProps) {
       count: categoryCounts.find(c => c.category === key)?._count || 0
     })).filter(cat => cat.count > 0) // Ne montrer que les catégories avec des œuvres
   ]
+  
+  // Transformer les artistes pour le composant
+  const artistsForFilter = artists.map(a => ({
+    id: a.id,
+    name: a.user.name || "Artiste"
+  }))
 
   return (
     <>
@@ -130,23 +223,41 @@ export default async function CataloguePage({ searchParams }: PageProps) {
         {/* Filters */}
         <div className="border-b border-neutral-800 sticky top-[73px] bg-black z-40">
           <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-6">
-            <div className="flex flex-wrap items-center justify-between gap-6">
-              {/* Categories */}
+            {/* Barre de recherche et filtres avancés */}
+            <CatalogueFilters 
+              artists={artistsForFilter}
+              currentFilters={searchParams}
+            />
+            
+            {/* Categories */}
+            <div className="flex flex-wrap items-center justify-between gap-6 mt-6">
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                {categories.map((category) => (
-                  <Link
-                    key={category.key}
-                    href={category.key === "all" ? "/catalogue" : `/catalogue?category=${category.key}`}
-                    className={`px-6 py-3 text-sm tracking-[0.1em] uppercase transition-all border whitespace-nowrap ${
-                      currentCategory === category.key
-                        ? "bg-white text-black border-white"
-                        : "border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white"
-                    }`}
-                  >
-                    {category.label}
-                    <span className="ml-2 text-xs opacity-60">({category.count})</span>
-                  </Link>
-                ))}
+                {categories.map((category) => {
+                  // Construire l'URL en gardant les autres filtres
+                  const params = new URLSearchParams()
+                  if (category.key !== "all") params.set("category", category.key)
+                  if (searchParams.search) params.set("search", searchParams.search)
+                  if (searchParams.minPrice) params.set("minPrice", searchParams.minPrice)
+                  if (searchParams.maxPrice) params.set("maxPrice", searchParams.maxPrice)
+                  if (searchParams.artistId) params.set("artistId", searchParams.artistId)
+                  if (searchParams.sort) params.set("sort", searchParams.sort)
+                  const href = params.toString() ? `/catalogue?${params.toString()}` : "/catalogue"
+                  
+                  return (
+                    <Link
+                      key={category.key}
+                      href={href}
+                      className={`px-6 py-3 text-sm tracking-[0.1em] uppercase transition-all border whitespace-nowrap ${
+                        currentCategory === category.key
+                          ? "bg-white text-black border-white"
+                          : "border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white"
+                      }`}
+                    >
+                      {category.label}
+                      <span className="ml-2 text-xs opacity-60">({category.count})</span>
+                    </Link>
+                  )
+                })}
               </div>
               
               {/* Count */}
