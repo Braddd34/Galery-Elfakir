@@ -4,6 +4,10 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 
+// Force le rendu dynamique (pas de cache)
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 function getImageUrl(images: any): string {
   const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
   if (!images) return fallback

@@ -86,15 +86,20 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
         body: JSON.stringify({ artworkId: artwork.id })
       })
 
+      const data = await res.json()
+      
       if (res.ok) {
-        const data = await res.json()
         setIsFavorite(data.isFavorite)
         showToast(
           data.isFavorite ? "Ajouté aux favoris" : "Retiré des favoris",
           data.isFavorite ? "success" : "info"
         )
+      } else {
+        console.error("Erreur favoris:", data.error)
+        showToast(data.error || "Une erreur est survenue", "error")
       }
-    } catch {
+    } catch (error) {
+      console.error("Erreur favoris:", error)
       showToast("Une erreur est survenue", "error")
     } finally {
       setLoading(false)
