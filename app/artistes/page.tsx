@@ -75,11 +75,6 @@ function getImageUrl(images: any): string {
   }
 }
 
-export const metadata = {
-  title: "Nos Artistes",
-  description: "Découvrez les artistes talentueux de notre galerie d'art contemporain.",
-}
-
 export default async function ArtistesPage() {
   const artists = await getArtists()
 

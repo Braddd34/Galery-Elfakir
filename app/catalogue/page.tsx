@@ -185,11 +185,6 @@ async function getCategoryCounts() {
   }
 }
 
-export const metadata = {
-  title: "Catalogue",
-  description: "Découvrez notre collection d'œuvres d'art contemporain",
-}
-
 interface PageProps {
   searchParams: { 
     category?: string
