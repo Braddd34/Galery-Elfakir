@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
 import { ArtworkCategory, Prisma } from "@prisma/client"
 import CatalogueFilters from "@/components/catalogue/CatalogueFilters"
+import ArtworkCard from "@/components/catalogue/ArtworkCard"
 
 // Mapping des catégories pour l'affichage
 const categoryLabels: Record<ArtworkCategory, string> = {
@@ -15,18 +16,6 @@ const categoryLabels: Record<ArtworkCategory, string> = {
   DIGITAL: "Art numérique",
   MIXED_MEDIA: "Technique mixte",
   OTHER: "Autre"
-}
-
-// Helper pour extraire l'URL de l'image
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
-  }
 }
 
 // Types pour les filtres
@@ -203,115 +192,82 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   return (
     <>
       <Header />
-      <main className="bg-black text-white min-h-screen pt-28">
+      <main className="bg-black text-white min-h-screen pt-32">
         {/* Hero Header */}
-        <header className="pt-12 pb-20 border-b border-neutral-800">
-          <div className="max-w-[1800px] mx-auto px-8 md:px-16">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-              <div>
-                <p className="label mb-4 text-gold">Notre collection</p>
-                <h1 className="heading-xl">Œuvres</h1>
-              </div>
-              <p className="text-neutral-500 max-w-md">
-                Une sélection minutieuse d'œuvres originales, 
-                choisies pour leur qualité artistique exceptionnelle.
-              </p>
-            </div>
+        <header className="py-16 text-center">
+          <div className="max-w-[1800px] mx-auto px-6 md:px-12">
+            <h1 className="text-3xl md:text-4xl font-light tracking-wide mb-4">
+              Œuvres d'Art Originales à Vendre
+            </h1>
+            <p className="text-neutral-400 max-w-2xl mx-auto">
+              Découvrez notre sélection d'œuvres d'art originales d'artistes contemporains.
+            </p>
           </div>
         </header>
 
-        {/* Filters */}
-        <div className="border-b border-neutral-800 sticky top-[73px] bg-black z-40">
-          <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-6">
-            {/* Barre de recherche et filtres avancés */}
-            <CatalogueFilters 
-              artists={artistsForFilter}
-              currentFilters={searchParams}
-            />
-            
-            {/* Categories */}
-            <div className="flex flex-wrap items-center justify-between gap-6 mt-6">
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                {categories.map((category) => {
-                  // Construire l'URL en gardant les autres filtres
-                  const params = new URLSearchParams()
-                  if (category.key !== "all") params.set("category", category.key)
-                  if (searchParams.search) params.set("search", searchParams.search)
-                  if (searchParams.minPrice) params.set("minPrice", searchParams.minPrice)
-                  if (searchParams.maxPrice) params.set("maxPrice", searchParams.maxPrice)
-                  if (searchParams.artistId) params.set("artistId", searchParams.artistId)
-                  if (searchParams.sort) params.set("sort", searchParams.sort)
-                  const href = params.toString() ? `/catalogue?${params.toString()}` : "/catalogue"
-                  
-                  return (
-                    <Link
-                      key={category.key}
-                      href={href}
-                      className={`px-6 py-3 text-sm tracking-[0.1em] uppercase transition-all border whitespace-nowrap ${
-                        currentCategory === category.key
-                          ? "bg-white text-black border-white"
-                          : "border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white"
-                      }`}
-                    >
-                      {category.label}
-                      <span className="ml-2 text-xs opacity-60">({category.count})</span>
-                    </Link>
-                  )
-                })}
+        {/* Filters Bar */}
+        <div className="border-y border-neutral-800 sticky top-[105px] bg-black/95 backdrop-blur-sm z-40">
+          <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              {/* Left: Filters */}
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
+                <CatalogueFilters 
+                  artists={artistsForFilter}
+                  currentFilters={searchParams}
+                />
               </div>
               
-              {/* Count */}
-              <p className="text-neutral-500 text-sm">
+              {/* Right: Count & Sort info */}
+              <p className="text-neutral-500 text-sm whitespace-nowrap">
                 {artworks.length} œuvre{artworks.length > 1 ? 's' : ''}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Artworks Grid */}
-        <section className="py-20">
-          <div className="max-w-[1800px] mx-auto px-8 md:px-16">
-            {artworks.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-                {artworks.map((artwork) => (
-                  <Link 
-                    key={artwork.id} 
-                    href={`/oeuvre/${artwork.slug}`}
-                    className="group"
+        {/* Category Pills */}
+        <div className="border-b border-neutral-800">
+          <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-4">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              {categories.map((category) => {
+                const params = new URLSearchParams()
+                if (category.key !== "all") params.set("category", category.key)
+                if (searchParams.search) params.set("search", searchParams.search)
+                if (searchParams.minPrice) params.set("minPrice", searchParams.minPrice)
+                if (searchParams.maxPrice) params.set("maxPrice", searchParams.maxPrice)
+                if (searchParams.artistId) params.set("artistId", searchParams.artistId)
+                if (searchParams.sort) params.set("sort", searchParams.sort)
+                const href = params.toString() ? `/catalogue?${params.toString()}` : "/catalogue"
+                
+                return (
+                  <Link
+                    key={category.key}
+                    href={href}
+                    className={`px-4 py-2 text-sm rounded-full transition-all whitespace-nowrap ${
+                      currentCategory === category.key
+                        ? "bg-white text-black"
+                        : "bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                    }`}
                   >
-                    {/* Image */}
-                    <div className="relative img-zoom aspect-[3/4] bg-neutral-900 mb-6">
-                      <img
-                        src={getImageUrl(artwork.images)}
-                        alt={artwork.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
-                      
-                      {/* Quick View Overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <span className="text-sm tracking-[0.2em] uppercase border border-white px-8 py-4 bg-black/50 backdrop-blur">
-                          Voir l'œuvre
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {/* Info */}
-                    <div className="space-y-2">
-                      <p className="text-[11px] tracking-[0.2em] uppercase text-neutral-500">
-                        {categoryLabels[artwork.category]} — {artwork.year}
-                      </p>
-                      <h3 className="text-lg font-light group-hover:text-gold transition-colors duration-300">
-                        {artwork.title}
-                      </h3>
-                      <p className="text-neutral-500 text-sm">{artwork.artist.user.name}</p>
-                      <p className="text-lg pt-2">€{Number(artwork.price).toLocaleString()}</p>
-                    </div>
+                    {category.label}
+                    <span className="ml-1.5 text-xs opacity-60">({category.count})</span>
                   </Link>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Artworks Grid */}
+        <section className="py-12">
+          <div className="max-w-[1800px] mx-auto px-6 md:px-12">
+            {artworks.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+                {artworks.map((artwork) => (
+                  <ArtworkCard key={artwork.id} artwork={artwork as any} />
                 ))}
               </div>
             ) : (
-              // Message si pas d'œuvres
               <div className="text-center py-24">
                 <p className="text-neutral-500 text-lg mb-4">
                   Aucune œuvre disponible dans cette catégorie.
