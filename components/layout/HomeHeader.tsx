@@ -44,7 +44,7 @@ export default function HomeHeader() {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
       scrolled || menuOpen 
         ? "bg-black/95 backdrop-blur-md border-b border-neutral-800" 
-        : "bg-transparent"
+        : "bg-black/80 backdrop-blur-sm border-b border-neutral-800/50"
     }`}>
       {/* Top Bar */}
       <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-4">
@@ -140,10 +140,8 @@ export default function HomeHeader() {
         </div>
       </div>
 
-      {/* Categories Bar - Desktop (visible after scroll) */}
-      <div className={`hidden md:block border-t border-neutral-800 transition-all duration-500 overflow-hidden ${
-        scrolled ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
-      }`}>
+      {/* Categories Bar - Desktop (toujours visible) */}
+      <div className="hidden md:block border-t border-neutral-800/50">
         <div className="max-w-[1800px] mx-auto px-6 md:px-12">
           <div className="flex items-center justify-center gap-1">
             <Link 
