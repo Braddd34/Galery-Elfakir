@@ -1,5 +1,6 @@
 import Link from "next/link"
 import prisma from "@/lib/prisma"
+import ArtworksTable from "@/components/admin/ArtworksTable"
 
 async function getArtworks() {
   const artworks = await prisma.artwork.findMany({
@@ -23,15 +24,6 @@ async function getArtworks() {
 
 export default async function AdminOeuvresPage() {
   const artworks = await getArtworks()
-
-  const statusLabels: Record<string, { label: string; color: string }> = {
-    DRAFT: { label: "Brouillon", color: "text-neutral-500" },
-    PENDING: { label: "En attente", color: "text-yellow-500" },
-    AVAILABLE: { label: "Disponible", color: "text-green-500" },
-    RESERVED: { label: "Réservée", color: "text-blue-500" },
-    SOLD: { label: "Vendue", color: "text-purple-500" },
-    ARCHIVED: { label: "Archivée", color: "text-neutral-600" },
-  }
 
   return (
     <div>
@@ -84,104 +76,7 @@ export default async function AdminOeuvresPage() {
       </div>
 
       {/* Table */}
-      {artworks.length > 0 ? (
-        <div className="border border-neutral-800 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-neutral-900">
-              <tr>
-                <th className="text-left px-6 py-4 text-xs uppercase tracking-wider text-neutral-500 font-medium">
-                  Œuvre
-                </th>
-                <th className="text-left px-6 py-4 text-xs uppercase tracking-wider text-neutral-500 font-medium">
-                  Artiste
-                </th>
-                <th className="text-left px-6 py-4 text-xs uppercase tracking-wider text-neutral-500 font-medium">
-                  Prix
-                </th>
-                <th className="text-left px-6 py-4 text-xs uppercase tracking-wider text-neutral-500 font-medium">
-                  Statut
-                </th>
-                <th className="text-left px-6 py-4 text-xs uppercase tracking-wider text-neutral-500 font-medium">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-800">
-              {artworks.map((artwork) => {
-                let imageUrl = ""
-                try {
-                  const images = typeof artwork.images === 'string' 
-                    ? JSON.parse(artwork.images) 
-                    : artwork.images
-                  if (images[0]?.url) imageUrl = images[0].url
-                } catch (e) {}
-
-                return (
-                  <tr key={artwork.id} className="hover:bg-neutral-900/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        {imageUrl && (
-                          <div className="w-12 h-12 bg-neutral-800 overflow-hidden flex-shrink-0">
-                            <img 
-                              src={imageUrl} 
-                              alt={artwork.title}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-medium">{artwork.title}</p>
-                          <p className="text-neutral-500 text-sm">{artwork.category}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-neutral-400">
-                      {artwork.artist.user.name}
-                    </td>
-                    <td className="px-6 py-4">
-                      {Number(artwork.price).toLocaleString('fr-FR')} €
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={statusLabels[artwork.status]?.color}>
-                        {statusLabels[artwork.status]?.label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <Link
-                          href={`/admin/oeuvres/${artwork.id}`}
-                          className="text-sm text-neutral-400 hover:text-white transition-colors"
-                        >
-                          Modifier
-                        </Link>
-                        <Link
-                          href={`/oeuvre/${artwork.slug}`}
-                          className="text-sm text-neutral-500 hover:text-white transition-colors"
-                          target="_blank"
-                        >
-                          Voir
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="border border-neutral-800 p-12 text-center">
-          <p className="text-neutral-500 mb-4">
-            Aucune œuvre pour le moment
-          </p>
-          <Link
-            href="/admin/oeuvres/new"
-            className="inline-block border border-white px-6 py-3 text-sm hover:bg-white hover:text-black transition-all"
-          >
-            Ajouter la première œuvre
-          </Link>
-        </div>
-      )}
+      <ArtworksTable artworks={artworks as any} />
     </div>
   )
 }

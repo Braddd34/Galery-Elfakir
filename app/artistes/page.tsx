@@ -3,46 +3,69 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
 
-export const metadata = {
-  title: "Artistes",
-  description: "Découvrez nos artistes talentueux",
-}
-
+// Récupérer tous les artistes avec des œuvres disponibles
 async function getArtists() {
-  const artists = await prisma.artistProfile.findMany({
-    where: {
-      user: {
-        status: "ACTIVE"
-      }
-    },
-    include: {
-      user: {
-        select: {
-          name: true,
-          image: true,
+  try {
+    const artists = await prisma.artistProfile.findMany({
+      where: {
+        artworks: {
+          some: {
+            status: "AVAILABLE"
+          }
         }
       },
-      artworks: {
-        where: {
-          status: "AVAILABLE"
+      include: {
+        user: {
+          select: {
+            name: true,
+            image: true
+          }
         },
-        take: 1,
-        select: {
-          images: true,
-        }
-      },
-      _count: {
-        select: {
-          artworks: {
-            where: {
-              status: "AVAILABLE"
+        artworks: {
+          where: {
+            status: "AVAILABLE"
+          },
+          take: 4,
+          orderBy: {
+            createdAt: "desc"
+          }
+        },
+        _count: {
+          select: {
+            artworks: {
+              where: {
+                status: "AVAILABLE"
+              }
             }
           }
         }
+      },
+      orderBy: {
+        createdAt: "desc"
       }
-    }
-  })
-  return artists
+    })
+    return artists
+  } catch (error) {
+    console.error("Erreur récupération artistes:", error)
+    return []
+  }
+}
+
+// Helper pour extraire l'URL d'une image d'œuvre
+function getImageUrl(images: any): string {
+  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
+  if (!images) return fallback
+  try {
+    const parsed = typeof images === 'string' ? JSON.parse(images) : images
+    return parsed[0]?.url || fallback
+  } catch {
+    return fallback
+  }
+}
+
+export const metadata = {
+  title: "Nos Artistes",
+  description: "Découvrez les artistes talentueux de notre galerie d'art contemporain.",
 }
 
 export default async function ArtistesPage() {
@@ -51,94 +74,111 @@ export default async function ArtistesPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-black text-white pt-28">
-        {/* Hero */}
-        <section className="py-24 px-6">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-light tracking-tight mb-6">
-              Nos Artistes
-            </h1>
-            <p className="text-xl text-neutral-400 max-w-2xl">
-              Découvrez les artistes talentueux qui exposent leurs œuvres 
-              dans notre galerie. Chacun apporte une vision unique et personnelle.
-            </p>
+      <main className="bg-black text-white min-h-screen pt-28">
+        {/* Hero Header */}
+        <header className="pt-12 pb-20 border-b border-neutral-800">
+          <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div>
+                <p className="label mb-4 text-gold">La galerie</p>
+                <h1 className="heading-xl">Nos Artistes</h1>
+              </div>
+              <p className="text-neutral-500 max-w-md">
+                Des talents uniques, des visions singulières. Découvrez les artistes 
+                qui font la richesse de notre collection.
+              </p>
+            </div>
           </div>
-        </section>
+        </header>
 
         {/* Artists Grid */}
-        <section className="px-6 pb-24">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-20">
+          <div className="max-w-[1800px] mx-auto px-8 md:px-16">
             {artists.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {artists.map((artist) => {
-                  const firstArtwork = artist.artworks[0]
-                  let imageUrl = "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600"
-                  
-                  if (firstArtwork && firstArtwork.images) {
-                    try {
-                      const images = typeof firstArtwork.images === 'string' 
-                        ? JSON.parse(firstArtwork.images) 
-                        : firstArtwork.images
-                      if (images[0]?.url) imageUrl = images[0].url
-                    } catch (e) {}
-                  }
-
-                  return (
-                    <Link 
-                      key={artist.id} 
-                      href={`/artiste/${artist.id}`}
-                      className="group"
-                    >
-                      <div className="aspect-[4/5] overflow-hidden bg-neutral-900 mb-4">
-                        <img
-                          src={imageUrl}
-                          alt={artist.user.name || "Artiste"}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {artists.map((artist) => (
+                  <Link
+                    key={artist.id}
+                    href={`/artiste/${artist.id}`}
+                    className="group"
+                  >
+                    {/* Artist Card */}
+                    <div className="border border-neutral-800 hover:border-neutral-600 transition-colors">
+                      {/* Preview Images Grid */}
+                      <div className="grid grid-cols-2 gap-1 p-1">
+                        {artist.artworks.slice(0, 4).map((artwork, i) => (
+                          <div 
+                            key={artwork.id} 
+                            className="aspect-square bg-neutral-900 overflow-hidden"
+                          >
+                            <img
+                              src={getImageUrl(artwork.images)}
+                              alt={artwork.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          </div>
+                        ))}
+                        {/* Fill empty slots if less than 4 artworks */}
+                        {Array.from({ length: Math.max(0, 4 - artist.artworks.length) }).map((_, i) => (
+                          <div 
+                            key={`empty-${i}`} 
+                            className="aspect-square bg-neutral-900"
+                          />
+                        ))}
                       </div>
-                      <h3 className="text-xl font-light mb-1">
-                        {artist.user.name}
-                      </h3>
-                      <p className="text-neutral-500 text-sm">
-                        {artist.city && artist.country 
-                          ? `${artist.city}, ${artist.country}` 
-                          : artist.country || ""}
-                      </p>
-                      <p className="text-neutral-600 text-sm mt-1">
-                        {artist._count.artworks} œuvre{artist._count.artworks > 1 ? 's' : ''} disponible{artist._count.artworks > 1 ? 's' : ''}
-                      </p>
-                    </Link>
-                  )
-                })}
+                      
+                      {/* Artist Info */}
+                      <div className="p-6 border-t border-neutral-800">
+                        <h3 className="text-xl font-light mb-2 group-hover:text-gold transition-colors">
+                          {artist.user.name || "Artiste"}
+                        </h3>
+                        {artist.bio && (
+                          <p className="text-neutral-500 text-sm line-clamp-2 mb-4">
+                            {artist.bio}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-neutral-500">
+                            {artist._count.artworks} œuvre{artist._count.artworks > 1 ? 's' : ''} disponible{artist._count.artworks > 1 ? 's' : ''}
+                          </span>
+                          <span className="text-gold group-hover:underline">
+                            Voir le profil →
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
             ) : (
-              <div className="text-center py-24">
-                <p className="text-neutral-500 text-lg">
+              <div className="text-center py-24 border border-neutral-800">
+                <p className="text-neutral-500 mb-4">
                   Aucun artiste pour le moment.
                 </p>
-                <p className="text-neutral-600 mt-2">
-                  Revenez bientôt pour découvrir nos artistes.
-                </p>
+                <Link 
+                  href="/catalogue" 
+                  className="text-white underline hover:text-neutral-300"
+                >
+                  Voir le catalogue
+                </Link>
               </div>
             )}
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="border-t border-neutral-800 py-24 px-6">
-          <div className="max-w-7xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-light mb-6">
-              Vous êtes artiste ?
-            </h2>
-            <p className="text-neutral-400 mb-8 max-w-xl mx-auto">
-              Rejoignez notre galerie et exposez vos œuvres à une audience 
-              internationale de collectionneurs passionnés.
+        {/* Call to Action */}
+        <section className="py-20 border-t border-neutral-800">
+          <div className="max-w-[1800px] mx-auto px-8 md:px-16 text-center">
+            <h2 className="heading-md mb-6">Vous êtes artiste ?</h2>
+            <p className="text-neutral-500 max-w-xl mx-auto mb-8">
+              Rejoignez notre galerie et présentez vos œuvres à une clientèle internationale 
+              passionnée d'art contemporain.
             </p>
             <Link
-              href="/register?role=artist"
-              className="inline-block border border-white px-8 py-4 text-sm tracking-wider hover:bg-white hover:text-black transition-all"
+              href="/contact"
+              className="inline-block border border-white px-8 py-4 text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-all"
             >
-              DEVENIR ARTISTE
+              Nous contacter
             </Link>
           </div>
         </section>
