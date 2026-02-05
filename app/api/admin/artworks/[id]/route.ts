@@ -73,22 +73,28 @@ export async function PUT(
       })))
     }
 
+    // Préparer les données de mise à jour
+    const updateData: any = {
+      title,
+      description,
+      category,
+      status,
+      year: parseInt(year),
+      medium,
+      price: parseFloat(price),
+      images: imagesData
+    }
+    
+    // Ajouter les dimensions seulement si fournies
+    if (width) updateData.width = parseFloat(width)
+    if (height) updateData.height = parseFloat(height)
+    if (depth) updateData.depth = parseFloat(depth)
+    else updateData.depth = null
+
     // Mettre à jour l'œuvre
     const artwork = await prisma.artwork.update({
       where: { id: params.id },
-      data: {
-        title,
-        description,
-        category,
-        status,
-        year: parseInt(year),
-        width: width ? parseFloat(width) : null,
-        height: height ? parseFloat(height) : null,
-        depth: depth ? parseFloat(depth) : null,
-        medium,
-        price: parseFloat(price),
-        images: imagesData
-      }
+      data: updateData
     })
 
     return NextResponse.json({ 
