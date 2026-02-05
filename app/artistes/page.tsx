@@ -2,6 +2,18 @@ import Link from "next/link"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
+import { Metadata } from "next"
+
+// Métadonnées pour le SEO
+export const metadata: Metadata = {
+  title: "Nos Artistes",
+  description: "Découvrez les artistes talentueux de la galerie ELFAKIR. Peintres, sculpteurs, photographes et créateurs d'art contemporain du monde entier.",
+  openGraph: {
+    title: "Nos Artistes — ELFAKIR Gallery",
+    description: "Découvrez les artistes talentueux de la galerie ELFAKIR. Peintres, sculpteurs, photographes et créateurs d'art contemporain du monde entier.",
+    type: "website",
+  }
+}
 
 // Récupérer tous les artistes avec des œuvres disponibles
 async function getArtists() {

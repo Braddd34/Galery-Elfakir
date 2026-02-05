@@ -52,8 +52,66 @@ export default async function HomePage() {
     ? getImageUrl(featuredArtworks[0].images) 
     : "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1920&h=1080&fit=crop"
 
+  const baseUrl = "https://galeryelfakir.vercel.app"
+
+  // JSON-LD pour la galerie (Organization + ArtGallery)
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["Organization", "ArtGallery"],
+    name: "ELFAKIR Gallery",
+    alternateName: "Galerie ELFAKIR",
+    url: baseUrl,
+    logo: `${baseUrl}/logo.png`,
+    description: "Galerie d'art contemporain en ligne. Découvrez une collection exclusive d'œuvres originales d'artistes internationaux.",
+    foundingDate: "2024",
+    founder: {
+      "@type": "Person",
+      name: "Mehdi Elfakir"
+    },
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "FR"
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: "contact@elfakir.art",
+      telephone: "+33 1 23 45 67 89",
+      availableLanguage: ["French", "English"]
+    },
+    sameAs: [
+      "https://instagram.com/elfakir.gallery",
+      "https://twitter.com/elfakirgallery"
+    ]
+  }
+
+  // JSON-LD pour le site web
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "ELFAKIR Gallery",
+    url: baseUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${baseUrl}/catalogue?search={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+
   return (
     <main className="bg-black text-white min-h-screen">
+      {/* JSON-LD pour le SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       
       {/* Navigation */}
       <HomeHeader />

@@ -69,8 +69,71 @@ export default async function ArtistePage({ params }: { params: { id: string } }
     return "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
   }
 
+  const baseUrl = "https://galeryelfakir.vercel.app"
+  const artistName = artist.user.name || "Artiste"
+
+  // JSON-LD pour l'artiste (Person)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: artistName,
+    url: `${baseUrl}/artiste/${artist.id}`,
+    image: artist.user.image || undefined,
+    description: artist.bio || undefined,
+    jobTitle: "Artiste",
+    worksFor: {
+      "@type": "Organization",
+      name: "ELFAKIR Gallery",
+      url: baseUrl
+    },
+    address: artist.city && artist.country ? {
+      "@type": "PostalAddress",
+      addressLocality: artist.city,
+      addressCountry: artist.country
+    } : undefined,
+    sameAs: [
+      artist.website,
+      artist.instagram ? `https://instagram.com/${artist.instagram.replace('@', '')}` : undefined
+    ].filter(Boolean)
+  }
+
+  // Breadcrumb JSON-LD
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Accueil",
+        item: baseUrl
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Artistes",
+        item: `${baseUrl}/artistes`
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: artistName,
+        item: `${baseUrl}/artiste/${artist.id}`
+      }
+    ]
+  }
+
   return (
     <>
+      {/* JSON-LD pour le SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Header />
       <main className="min-h-screen bg-black text-white pt-28">
         {/* Breadcrumb */}

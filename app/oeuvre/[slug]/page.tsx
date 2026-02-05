@@ -156,9 +156,90 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
   
   const images = getImages(artwork.images)
   const similarArtworks = await getSimilarArtworks(artwork.id, artwork.category, artwork.artistId)
+  const artistName = artwork.artist.user.name || "Artiste"
+  const baseUrl = "https://galeryelfakir.vercel.app"
+
+  // Données structurées JSON-LD pour le SEO (Product + VisualArtwork)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["Product", "VisualArtwork"],
+    name: artwork.title,
+    description: artwork.description,
+    image: images.map(img => img.url),
+    url: `${baseUrl}/oeuvre/${artwork.slug}`,
+    brand: {
+      "@type": "Organization",
+      name: "ELFAKIR Gallery"
+    },
+    creator: {
+      "@type": "Person",
+      name: artistName,
+      url: `${baseUrl}/artiste/${artwork.artistId}`
+    },
+    artMedium: artwork.medium,
+    artworkSurface: artwork.support || undefined,
+    dateCreated: artwork.year.toString(),
+    width: {
+      "@type": "Distance",
+      name: `${Number(artwork.width)} cm`
+    },
+    height: {
+      "@type": "Distance",
+      name: `${Number(artwork.height)} cm`
+    },
+    artform: categoryLabels[artwork.category],
+    offers: {
+      "@type": "Offer",
+      url: `${baseUrl}/oeuvre/${artwork.slug}`,
+      priceCurrency: "EUR",
+      price: Number(artwork.price),
+      availability: artwork.status === "AVAILABLE" 
+        ? "https://schema.org/InStock" 
+        : "https://schema.org/SoldOut",
+      seller: {
+        "@type": "Organization",
+        name: "ELFAKIR Gallery"
+      }
+    }
+  }
+
+  // Breadcrumb JSON-LD
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Accueil",
+        item: baseUrl
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Collection",
+        item: `${baseUrl}/catalogue`
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: artwork.title,
+        item: `${baseUrl}/oeuvre/${artwork.slug}`
+      }
+    ]
+  }
 
   return (
     <>
+      {/* JSON-LD pour le SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Header />
       <main className="bg-black text-white min-h-screen pt-28">
         {/* Breadcrumb */}

@@ -5,6 +5,43 @@ import prisma from "@/lib/prisma"
 import { ArtworkCategory, Prisma } from "@prisma/client"
 import CatalogueFilters from "@/components/catalogue/CatalogueFilters"
 import ArtworkCard from "@/components/catalogue/ArtworkCard"
+import { Metadata } from "next"
+
+// Métadonnées dynamiques pour le SEO
+export async function generateMetadata({ searchParams }: { searchParams: { category?: string; search?: string } }): Promise<Metadata> {
+  const categoryLabelsMap: Record<string, string> = {
+    painting: "Peintures",
+    sculpture: "Sculptures",
+    photography: "Photographies",
+    drawing: "Dessins",
+    print: "Estampes",
+    digital: "Art numérique",
+    mixed_media: "Techniques mixtes",
+  }
+
+  let title = "Catalogue des œuvres d'art"
+  let description = "Découvrez notre collection d'œuvres d'art contemporain originales. Peintures, sculptures, photographies et plus encore."
+
+  if (searchParams.category && categoryLabelsMap[searchParams.category]) {
+    title = `${categoryLabelsMap[searchParams.category]} - Catalogue`
+    description = `Explorez notre collection de ${categoryLabelsMap[searchParams.category].toLowerCase()} originales d'artistes contemporains.`
+  }
+
+  if (searchParams.search) {
+    title = `Recherche "${searchParams.search}" - Catalogue`
+    description = `Résultats de recherche pour "${searchParams.search}" dans notre galerie d'art contemporain.`
+  }
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} — ELFAKIR`,
+      description,
+      type: "website",
+    }
+  }
+}
 
 // Mapping des catégories pour l'affichage
 const categoryLabels: Record<ArtworkCategory, string> = {
