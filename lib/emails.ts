@@ -346,7 +346,7 @@ export async function sendContactEmail(
     await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: 'contact@elfakir.art', // Remplacer par votre email
-      replyTo: email,
+      reply_to: email,
       subject: `[Contact] ${subject}`,
       html: baseTemplate(content)
     })
