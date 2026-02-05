@@ -3,17 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
-import { OrderStatus } from "@prisma/client"
-
-const statusLabels: Record<OrderStatus, { label: string; color: string }> = {
-  PENDING: { label: "En attente", color: "bg-yellow-500" },
-  PROCESSING: { label: "En cours", color: "bg-blue-500" },
-  PAID: { label: "Payé", color: "bg-green-500" },
-  SHIPPED: { label: "Expédié", color: "bg-purple-500" },
-  DELIVERED: { label: "Livré", color: "bg-green-600" },
-  CANCELLED: { label: "Annulé", color: "bg-red-500" },
-  REFUNDED: { label: "Remboursé", color: "bg-orange-500" },
-}
+import OrdersList from "@/components/admin/OrdersList"
 
 async function getAllOrders() {
   const orders = await prisma.order.findMany({
@@ -24,7 +14,13 @@ async function getAllOrders() {
       }
     }
   })
-  return orders
+  // Sérialiser les dates pour le composant client
+  return orders.map(order => ({
+    ...order,
+    createdAt: order.createdAt,
+    shippedAt: order.shippedAt,
+    deliveredAt: order.deliveredAt,
+  }))
 }
 
 async function getOrderStats() {
@@ -91,51 +87,7 @@ export default async function AdminCommandesPage() {
         </div>
 
         {/* Orders List */}
-        {orders.length > 0 ? (
-          <div className="space-y-4">
-            {orders.map((order) => {
-              const snapshot = order.artworkSnapshot as any
-              return (
-                <div
-                  key={order.id}
-                  className="bg-neutral-900 border border-neutral-800 p-6"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="font-light">#{order.orderNumber}</p>
-                      <p className="text-neutral-500 text-sm">
-                        {order.user.name || order.user.email} • {order.createdAt.toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <span className={`px-3 py-1 text-xs ${statusLabels[order.status].color}`}>
-                      {statusLabels[order.status].label}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <p className="text-neutral-400">{snapshot?.title}</p>
-                    <p className="text-lg">€{Number(order.total).toLocaleString()}</p>
-                  </div>
-
-                  <div className="flex gap-3 mt-4 pt-4 border-t border-neutral-800">
-                    <button className="px-4 py-2 border border-neutral-700 text-sm hover:border-white transition-colors">
-                      Voir détails
-                    </button>
-                    {order.status === "PAID" && (
-                      <button className="px-4 py-2 bg-purple-600 text-sm hover:bg-purple-700 transition-colors">
-                        Marquer expédié
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-16 border border-neutral-800">
-            <p className="text-neutral-500">Aucune commande pour le moment</p>
-          </div>
-        )}
+        <OrdersList orders={orders as any} />
       </div>
     </main>
   )

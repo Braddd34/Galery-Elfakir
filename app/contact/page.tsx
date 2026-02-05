@@ -17,10 +17,26 @@ export default function ContactPage() {
     e.preventDefault()
     setStatus("loading")
     
-    // Simuler l'envoi (à connecter avec Resend plus tard)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setStatus("success")
-    setFormData({ name: "", email: "", subject: "", message: "" })
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setStatus("success")
+        setFormData({ name: "", email: "", subject: "", message: "" })
+      } else {
+        setStatus("error")
+        alert(data.error || "Une erreur est survenue")
+      }
+    } catch (error) {
+      setStatus("error")
+      alert("Une erreur est survenue")
+    }
   }
 
   return (

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcrypt"
 import prisma from "@/lib/prisma"
+import { sendWelcomeEmail } from "@/lib/emails"
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,11 @@ export async function POST(request: NextRequest) {
         }
       })
     }
+
+    // Envoyer email de bienvenue (en arrière-plan, sans bloquer)
+    sendWelcomeEmail(user.email, user.name || "").catch(err => {
+      console.error("Erreur envoi email bienvenue:", err)
+    })
 
     return NextResponse.json({
       message: userRole === "ARTIST" 
