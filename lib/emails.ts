@@ -313,6 +313,86 @@ export async function sendArtworkApprovedEmail(artistEmail: string, artwork: Art
 /**
  * Email de formulaire de contact
  */
+/**
+ * Email de réinitialisation de mot de passe
+ */
+export async function sendPasswordResetEmail(email: string, resetUrl: string) {
+  const content = `
+    <h2 style="margin: 0 0 20px 0; color: #ffffff; font-size: 24px; font-weight: 300;">
+      Réinitialisation de votre mot de passe
+    </h2>
+    <p style="margin: 0 0 20px 0; color: #999; font-size: 16px; line-height: 1.6;">
+      Vous avez demandé à réinitialiser votre mot de passe. 
+      Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
+    </p>
+    <p style="margin: 0 0 30px 0; color: #999; font-size: 14px; line-height: 1.6;">
+      Ce lien expire dans 1 heure.
+    </p>
+    <a href="${resetUrl}" style="display: inline-block; padding: 15px 30px; background-color: #b8860b; color: #000; text-decoration: none; font-size: 14px; letter-spacing: 0.1em;">
+      RÉINITIALISER MON MOT DE PASSE
+    </a>
+    <p style="margin: 30px 0 0 0; color: #666; font-size: 12px; line-height: 1.6;">
+      Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.
+      Votre mot de passe ne sera pas modifié.
+    </p>
+  `
+
+  try {
+    await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: email,
+      subject: 'Réinitialisation de votre mot de passe — ELFAKIR',
+      html: baseTemplate(content)
+    })
+    console.log(`Email reset password envoyé à ${email}`)
+    return { success: true }
+  } catch (error) {
+    console.error('Erreur envoi email reset password:', error)
+    return { success: false, error }
+  }
+}
+
+/**
+ * Email de vérification d'email
+ */
+export async function sendEmailVerificationEmail(email: string, name: string, verifyUrl: string) {
+  const content = `
+    <h2 style="margin: 0 0 20px 0; color: #ffffff; font-size: 24px; font-weight: 300;">
+      Vérifiez votre adresse email
+    </h2>
+    <p style="margin: 0 0 20px 0; color: #999; font-size: 16px; line-height: 1.6;">
+      Bonjour ${name || 'cher amateur d\'art'},
+    </p>
+    <p style="margin: 0 0 20px 0; color: #999; font-size: 16px; line-height: 1.6;">
+      Pour finaliser votre inscription et accéder à toutes les fonctionnalités de la galerie, 
+      veuillez confirmer votre adresse email.
+    </p>
+    <p style="margin: 0 0 30px 0; color: #999; font-size: 14px; line-height: 1.6;">
+      Ce lien expire dans 24 heures.
+    </p>
+    <a href="${verifyUrl}" style="display: inline-block; padding: 15px 30px; background-color: #b8860b; color: #000; text-decoration: none; font-size: 14px; letter-spacing: 0.1em;">
+      VÉRIFIER MON EMAIL
+    </a>
+  `
+
+  try {
+    await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: email,
+      subject: 'Vérifiez votre adresse email — ELFAKIR',
+      html: baseTemplate(content)
+    })
+    console.log(`Email vérification envoyé à ${email}`)
+    return { success: true }
+  } catch (error) {
+    console.error('Erreur envoi email vérification:', error)
+    return { success: false, error }
+  }
+}
+
+/**
+ * Email de formulaire de contact
+ */
 export async function sendContactEmail(
   name: string, 
   email: string, 

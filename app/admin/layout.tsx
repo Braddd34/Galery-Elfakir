@@ -50,6 +50,12 @@ export default async function AdminLayout({
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center gap-8 h-12">
             <Link 
+              href="/admin" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              Vue d'ensemble
+            </Link>
+            <Link 
               href="/admin/oeuvres" 
               className="text-sm text-neutral-400 hover:text-white transition-colors"
             >

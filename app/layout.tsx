@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import SessionProvider from "@/components/providers/SessionProvider"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: {
@@ -53,6 +55,8 @@ export default function RootLayout({
         <SessionProvider>
           {children}
         </SessionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

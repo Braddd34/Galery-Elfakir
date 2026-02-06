@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcrypt"
+import crypto from "crypto"
 import prisma from "@/lib/prisma"
-import { sendWelcomeEmail } from "@/lib/emails"
+import { sendWelcomeEmail, sendEmailVerificationEmail } from "@/lib/emails"
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
     const userRole = role === "ARTIST" ? "ARTIST" : "BUYER"
     const userStatus = role === "ARTIST" ? "PENDING" : "ACTIVE" // Les artistes doivent être validés
 
-    // Créer l'utilisateur
+    // Créer l'utilisateur (email non vérifié)
     const user = await prisma.user.create({
       data: {
         email,
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
         name,
         role: userRole,
         status: userStatus,
-        emailVerified: new Date(), // Pour simplifier, on vérifie directement
+        emailVerified: null, // L'email doit être vérifié
       }
     })
 
@@ -69,21 +70,43 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Envoyer email de bienvenue (en arrière-plan, sans bloquer)
+    // Créer un token de vérification d'email
+    const verificationToken = crypto.randomBytes(32).toString("hex")
+    const expires = new Date(Date.now() + 24 * 3600000) // 24 heures
+
+    await prisma.emailVerificationToken.create({
+      data: {
+        email: user.email,
+        token: verificationToken,
+        expires
+      }
+    })
+
+    // Construire l'URL de vérification
+    const baseUrl = process.env.NEXTAUTH_URL || "https://galeryelfakir.vercel.app"
+    const verifyUrl = `${baseUrl}/verify-email?token=${verificationToken}`
+
+    // Envoyer email de vérification (en arrière-plan, sans bloquer)
+    sendEmailVerificationEmail(user.email, user.name || "", verifyUrl).catch(err => {
+      console.error("Erreur envoi email vérification:", err)
+    })
+
+    // Envoyer aussi l'email de bienvenue
     sendWelcomeEmail(user.email, user.name || "").catch(err => {
       console.error("Erreur envoi email bienvenue:", err)
     })
 
     return NextResponse.json({
       message: userRole === "ARTIST" 
-        ? "Compte créé ! Votre profil artiste est en attente de validation."
-        : "Compte créé avec succès !",
+        ? "Compte créé ! Vérifiez votre email et attendez la validation de votre profil artiste."
+        : "Compte créé ! Vérifiez votre email pour activer votre compte.",
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
-      }
+      },
+      requiresVerification: true
     })
 
   } catch (error) {
