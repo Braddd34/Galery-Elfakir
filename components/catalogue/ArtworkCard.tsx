@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -47,12 +48,16 @@ function getImageUrl(images: any): string {
   }
 }
 
+// Placeholder blur générique (gris neutre)
+const blurDataURL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjYyNjI2Ii8+PC9zdmc+"
+
 export default function ArtworkCard({ artwork }: ArtworkCardProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
   const [isFavorite, setIsFavorite] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   // Vérifier si l'œuvre est dans les favoris
   useEffect(() => {
@@ -136,11 +141,17 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
       <Link href={`/oeuvre/${artwork.slug}`}>
         {/* Image */}
         <div className="relative aspect-[3/4] bg-neutral-900 mb-4 overflow-hidden rounded-sm">
-          <img
+          <Image
             src={getImageUrl(artwork.images)}
             alt={artwork.title}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            loading="lazy"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className={`object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+              imageLoaded ? "blur-0 scale-100" : "blur-md scale-105"
+            }`}
+            placeholder="blur"
+            blurDataURL={blurDataURL}
+            onLoad={() => setImageLoaded(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           

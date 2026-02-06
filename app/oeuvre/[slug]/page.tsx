@@ -241,7 +241,7 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <Header />
-      <main className="bg-black text-white min-h-screen pt-28">
+      <main id="main-content" className="bg-black text-white min-h-screen pt-28">
         {/* Breadcrumb */}
         <div className="border-b border-neutral-800/50">
           <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-4">

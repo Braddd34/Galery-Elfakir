@@ -102,7 +102,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="bg-black text-white min-h-screen">
+    <main id="main-content" className="bg-black text-white min-h-screen">
       {/* JSON-LD pour le SEO */}
       <script
         type="application/ld+json"

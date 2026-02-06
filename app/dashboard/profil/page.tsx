@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import ChangePasswordForm from "@/components/profile/ChangePasswordForm"
 
 interface BuyerProfile {
   firstName: string
@@ -210,6 +211,12 @@ export default function ProfilPage() {
             {saving ? "Enregistrement..." : "Enregistrer les modifications"}
           </button>
         </form>
+
+        {/* Section sécurité */}
+        <div className="mt-12 pt-12 border-t border-neutral-800">
+          <h2 className="text-xl font-light mb-6">Sécurité</h2>
+          <ChangePasswordForm />
+        </div>
       </div>
     </main>
   )

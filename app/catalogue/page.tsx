@@ -224,7 +224,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   return (
     <>
       <Header />
-      <main className="bg-black text-white min-h-screen pt-32">
+      <main id="main-content" className="bg-black text-white min-h-screen pt-32">
         {/* Hero Header */}
         <header className="py-16 text-center">
           <div className="max-w-[1800px] mx-auto px-6 md:px-12">

@@ -6,69 +6,121 @@ import { useState } from "react"
 interface OptimizedImageProps {
   src: string
   alt: string
-  className?: string
-  fill?: boolean
   width?: number
   height?: number
+  fill?: boolean
+  className?: string
   priority?: boolean
   sizes?: string
 }
 
-// Image placeholder de fallback
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
-
+/**
+ * OptimizedImage - Composant Image optimisé avec placeholder blur
+ * 
+ * Caractéristiques :
+ * - Placeholder blur pendant le chargement
+ * - Gestion des erreurs avec fallback
+ * - Lazy loading automatique
+ * - Styles de transition fluides
+ */
 export default function OptimizedImage({
   src,
   alt,
-  className = "",
-  fill = false,
   width,
   height,
+  fill = false,
+  className = "",
   priority = false,
-  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+  sizes,
 }: OptimizedImageProps) {
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [loading, setLoading] = useState(true)
 
-  const imageSrc = error ? FALLBACK_IMAGE : src
+  // Image de fallback en cas d'erreur
+  const fallbackSrc = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
+  
+  // Placeholder blur SVG minimaliste (gris neutre)
+  const blurDataURL = `data:image/svg+xml;base64,${btoa(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width || 800} ${height || 600}">
+      <filter id="blur" filterUnits="userSpaceOnUse">
+        <feGaussianBlur stdDeviation="20"/>
+      </filter>
+      <rect width="100%" height="100%" fill="#262626" filter="url(#blur)"/>
+    </svg>`
+  )}`
+
+  const imageProps = {
+    src: error ? fallbackSrc : src,
+    alt,
+    className: `transition-all duration-500 ${
+      isLoading ? "scale-105 blur-lg" : "scale-100 blur-0"
+    } ${className}`,
+    onLoad: () => setIsLoading(false),
+    onError: () => {
+      setError(true)
+      setIsLoading(false)
+    },
+    placeholder: "blur" as const,
+    blurDataURL,
+    priority,
+    sizes: sizes || "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
+  }
+
+  if (fill) {
+    return (
+      <Image
+        {...imageProps}
+        fill
+        style={{ objectFit: "cover" }}
+      />
+    )
+  }
 
   return (
-    <div className={`relative ${fill ? "w-full h-full" : ""} ${className}`}>
-      {/* Skeleton pendant le chargement */}
-      {loading && (
-        <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
-      )}
-      
-      {fill ? (
-        <Image
-          src={imageSrc}
-          alt={alt}
-          fill
-          sizes={sizes}
-          priority={priority}
-          className={`object-cover transition-opacity duration-300 ${loading ? "opacity-0" : "opacity-100"}`}
-          onLoad={() => setLoading(false)}
-          onError={() => {
-            setError(true)
-            setLoading(false)
-          }}
+    <Image
+      {...imageProps}
+      width={width || 800}
+      height={height || 600}
+    />
+  )
+}
+
+/**
+ * Composant pour les images d'arrière-plan avec overlay
+ */
+interface BackgroundImageProps {
+  src: string
+  alt: string
+  children?: React.ReactNode
+  overlay?: boolean
+  overlayOpacity?: number
+  className?: string
+}
+
+export function BackgroundImage({
+  src,
+  alt,
+  children,
+  overlay = true,
+  overlayOpacity = 50,
+  className = "",
+}: BackgroundImageProps) {
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <OptimizedImage
+        src={src}
+        alt={alt}
+        fill
+        priority
+        className="object-cover"
+      />
+      {overlay && (
+        <div 
+          className="absolute inset-0 bg-black" 
+          style={{ opacity: overlayOpacity / 100 }}
         />
-      ) : (
-        <Image
-          src={imageSrc}
-          alt={alt}
-          width={width || 800}
-          height={height || 600}
-          sizes={sizes}
-          priority={priority}
-          className={`transition-opacity duration-300 ${loading ? "opacity-0" : "opacity-100"}`}
-          onLoad={() => setLoading(false)}
-          onError={() => {
-            setError(true)
-            setLoading(false)
-          }}
-        />
       )}
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }

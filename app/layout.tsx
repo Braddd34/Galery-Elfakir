@@ -3,6 +3,7 @@ import "./globals.css"
 import SessionProvider from "@/components/providers/SessionProvider"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import SkipLink from "@/components/ui/SkipLink"
 
 export const metadata: Metadata = {
   title: {
@@ -52,6 +53,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-black text-white min-h-screen">
+        <SkipLink />
         <SessionProvider>
           {children}
         </SessionProvider>

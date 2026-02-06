@@ -135,7 +135,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <Header />
-      <main className="min-h-screen bg-black text-white pt-28">
+      <main id="main-content" className="min-h-screen bg-black text-white pt-28">
         {/* Breadcrumb */}
         <div className="border-b border-neutral-800/50">
           <div className="max-w-7xl mx-auto px-6 py-4">

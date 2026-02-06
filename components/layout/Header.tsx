@@ -3,8 +3,8 @@
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import CartButton from "@/components/cart/CartButton"
+import SearchAutocomplete from "@/components/search/SearchAutocomplete"
 
 const categories = [
   { href: "/catalogue?category=painting", label: "Peinture" },
@@ -17,54 +17,31 @@ const categories = [
 
 export default function Header() {
   const { data: session } = useSession()
-  const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchFocused, setSearchFocused] = useState(false)
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/catalogue?search=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery("")
-    }
-  }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-neutral-800">
-      {/* Top Bar */}
-      <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-4">
-        <div className="flex items-center justify-between gap-8">
-          {/* Logo */}
-          <Link href="/" className="text-xl md:text-2xl tracking-[0.3em] font-light text-white flex-shrink-0">
-            ELFAKIR
-          </Link>
-          
-          {/* Search Bar - Desktop */}
-          <form 
-            onSubmit={handleSearch}
-            className={`hidden md:flex items-center flex-1 max-w-xl mx-8 border transition-colors ${
-              searchFocused ? "border-white" : "border-neutral-700"
-            }`}
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
-              placeholder="Rechercher une œuvre, un artiste..."
-              className="flex-1 bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none"
-            />
-            <button 
-              type="submit"
-              className="px-4 py-2.5 text-neutral-400 hover:text-white transition-colors"
+    <header role="banner">
+      <nav 
+        className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-neutral-800"
+        aria-label="Navigation principale"
+      >
+        {/* Top Bar */}
+        <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-4">
+          <div className="flex items-center justify-between gap-8">
+            {/* Logo */}
+            <Link 
+              href="/" 
+              className="text-xl md:text-2xl tracking-[0.3em] font-light text-white flex-shrink-0"
+              aria-label="ELFAKIR - Retour à l'accueil"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </form>
+              ELFAKIR
+            </Link>
+            
+            {/* Search Bar avec Autocomplete - Desktop */}
+            <SearchAutocomplete
+              className="hidden md:block flex-1 max-w-xl mx-8"
+              inputClassName="w-full bg-transparent border border-neutral-700 px-4 py-2.5 pr-12 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-white transition-colors"
+            />
           
           {/* Right side - Desktop */}
           <div className="hidden md:flex items-center gap-2">
@@ -72,20 +49,20 @@ export default function Header() {
               <>
                 <Link 
                   href="/dashboard/favoris" 
-                  className="p-2.5 text-neutral-400 hover:text-white transition-colors"
-                  title="Mes favoris"
+                  className="p-2.5 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
+                  aria-label="Mes favoris"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </Link>
                 <CartButton />
                 <Link 
                   href="/dashboard" 
-                  className="p-2.5 text-neutral-400 hover:text-white transition-colors"
-                  title="Mon compte"
+                  className="p-2.5 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
+                  aria-label="Mon compte"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </Link>
@@ -95,7 +72,7 @@ export default function Header() {
                 <CartButton />
                 <Link 
                   href="/login" 
-                  className="px-4 py-2 text-sm text-white border border-neutral-700 hover:border-white transition-colors"
+                  className="px-4 py-2 text-sm text-white border border-neutral-700 hover:border-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
                 >
                   Connexion
                 </Link>
@@ -106,8 +83,11 @@ export default function Header() {
             <button 
               className="md:hidden p-2 ml-2"
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
             >
-              <div className="w-6 flex flex-col gap-1.5">
+              <div className="w-6 flex flex-col gap-1.5" aria-hidden="true">
                 <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
                 <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></span>
                 <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
@@ -119,10 +99,13 @@ export default function Header() {
           <div className="flex md:hidden items-center gap-2">
             <CartButton />
             <button 
-              className="p-2"
+              className="p-2 focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
             >
-              <div className="w-6 flex flex-col gap-1.5">
+              <div className="w-6 flex flex-col gap-1.5" aria-hidden="true">
                 <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
                 <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></span>
                 <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
@@ -163,29 +146,15 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-neutral-800 bg-black">
+        <div id="mobile-menu" className="md:hidden border-t border-neutral-800 bg-black">
           <div className="max-w-[1800px] mx-auto px-6 py-6">
-            {/* Mobile Search */}
-            <form 
-              onSubmit={handleSearch}
-              className="flex items-center border border-neutral-700 mb-6"
-            >
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher..."
-                className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:outline-none"
-              />
-              <button 
-                type="submit"
-                className="px-4 py-3 text-neutral-400"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-            </form>
+            {/* Mobile Search avec Autocomplete */}
+            <SearchAutocomplete
+              className="mb-6"
+              inputClassName="w-full bg-transparent border border-neutral-700 px-4 py-3 pr-12 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-white transition-colors"
+              placeholder="Rechercher..."
+              onSearch={() => setMenuOpen(false)}
+            />
 
             {/* Mobile Categories */}
             <div className="space-y-1 mb-6">
@@ -257,5 +226,6 @@ export default function Header() {
         </div>
       )}
     </nav>
+    </header>
   )
 }

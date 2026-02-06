@@ -18,6 +18,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'elfakir-gallery.s3.eu-west-3.amazonaws.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'utfs.io', // UploadThing
+      },
+      {
+        protocol: 'https',
+        hostname: '*.utfs.io', // UploadThing CDN
+      },
     ],
   },
   // Optimizations

@@ -81,7 +81,7 @@ export default async function ArtistesPage() {
   return (
     <>
       <Header />
-      <main className="bg-black text-white min-h-screen pt-28">
+      <main id="main-content" className="bg-black text-white min-h-screen pt-28">
         {/* Hero Header */}
         <header className="pt-12 pb-20 border-b border-neutral-800">
           <div className="max-w-[1800px] mx-auto px-8 md:px-16">
