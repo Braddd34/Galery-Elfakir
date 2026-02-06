@@ -6,9 +6,10 @@ interface ImageUploadProps {
   images: { url: string; key?: string }[]
   onChange: (images: { url: string; key?: string }[]) => void
   maxImages?: number
+  disabled?: boolean
 }
 
-export default function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProps) {
+export default function ImageUpload({ images, onChange, maxImages = 5, disabled = false }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -96,6 +97,7 @@ export default function ImageUpload({ images, onChange, maxImages = 5 }: ImageUp
                 alt={`Image ${index + 1}`}
                 className="w-full h-full object-cover"
               />
+              {!disabled && (
               <button
                 type="button"
                 onClick={() => removeImage(index)}
@@ -105,6 +107,7 @@ export default function ImageUpload({ images, onChange, maxImages = 5 }: ImageUp
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+              )}
               {index === 0 && (
                 <span className="absolute bottom-2 left-2 bg-white text-black text-xs px-2 py-1">
                   Principale
@@ -116,7 +119,7 @@ export default function ImageUpload({ images, onChange, maxImages = 5 }: ImageUp
       )}
 
       {/* Zone d'upload */}
-      {images.length < maxImages && (
+      {images.length < maxImages && !disabled && (
         <div
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed border-neutral-700 p-8 text-center cursor-pointer hover:border-neutral-500 transition-colors ${
