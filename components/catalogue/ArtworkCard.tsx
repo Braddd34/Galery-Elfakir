@@ -107,19 +107,20 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
   }
 
   return (
-    <div className="group relative">
+    <div className="group relative card-hover">
       {/* Favorite Button */}
       <button
         onClick={handleFavoriteClick}
         disabled={loading}
-        className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-all ${
+        className={`absolute top-4 right-4 z-10 p-2.5 rounded-full transition-all duration-300 ${
           isFavorite 
-            ? "bg-white text-red-500" 
-            : "bg-black/50 text-white opacity-0 group-hover:opacity-100"
-        } hover:scale-110 disabled:opacity-50`}
+            ? "bg-white text-red-500 scale-100" 
+            : "bg-black/60 backdrop-blur-sm text-white opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+        } hover:scale-110 active:scale-95 disabled:opacity-50`}
+        aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
       >
         <svg 
-          className={`w-5 h-5 ${isFavorite ? "fill-current" : "fill-none"}`} 
+          className={`w-5 h-5 transition-transform duration-300 ${loading ? "animate-pulse" : ""} ${isFavorite ? "fill-current" : "fill-none"}`} 
           stroke="currentColor" 
           viewBox="0 0 24 24"
         >
@@ -134,29 +135,39 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
 
       <Link href={`/oeuvre/${artwork.slug}`}>
         {/* Image */}
-        <div className="relative aspect-[3/4] bg-neutral-900 mb-4 overflow-hidden">
+        <div className="relative aspect-[3/4] bg-neutral-900 mb-4 overflow-hidden rounded-sm">
           <img
             src={getImageUrl(artwork.images)}
             alt={artwork.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            loading="lazy"
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          {/* Quick view hint */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <span className="bg-white/90 text-black px-4 py-2 text-xs tracking-wider uppercase font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+              Voir l'œuvre
+            </span>
+          </div>
         </div>
         
         {/* Info */}
         <div className="space-y-1">
-          <p className="text-neutral-500 text-sm">
+          <p className="text-neutral-500 text-sm transition-colors duration-300 group-hover:text-neutral-400">
             {artwork.artist.user.name || "Artiste"}
           </p>
-          <h3 className="text-white font-light italic group-hover:text-gold transition-colors">
+          <h3 className="text-white font-light italic group-hover:text-gold transition-colors duration-300">
             {artwork.title}
           </h3>
-          <p className="text-neutral-500 text-sm">
-            {Number(artwork.width)}×{Number(artwork.height)} cm
-          </p>
-          <p className="text-white text-lg pt-1">
-            {Number(artwork.price).toLocaleString('fr-FR')} €
-          </p>
+          <div className="flex items-center justify-between pt-1">
+            <p className="text-neutral-500 text-sm">
+              {Number(artwork.width)}×{Number(artwork.height)} cm
+            </p>
+            <p className="text-white text-lg font-medium">
+              {Number(artwork.price).toLocaleString('fr-FR')} €
+            </p>
+          </div>
         </div>
       </Link>
     </div>
