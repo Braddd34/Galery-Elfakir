@@ -4,34 +4,69 @@ import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { loginSchema } from "@/lib/validations"
+import FormField, { Input } from "@/components/ui/FormField"
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [serverError, setServerError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  // Validation en temps réel
+  const validateField = (field: string, value: string) => {
+    const data = { email, password, [field]: value }
+    const result = loginSchema.safeParse(data)
+    
+    if (!result.success) {
+      const fieldError = result.error.errors.find(e => e.path[0] === field)
+      setErrors(prev => ({
+        ...prev,
+        [field]: fieldError?.message || ""
+      }))
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setServerError("")
+
+    // Validation complète
+    const result = loginSchema.safeParse({ email, password })
+    if (!result.success) {
+      const newErrors: Record<string, string> = {}
+      result.error.errors.forEach(err => {
+        newErrors[err.path[0] as string] = err.message
+      })
+      setErrors(newErrors)
+      return
+    }
+
     setLoading(true)
 
     try {
-      const result = await signIn("credentials", {
+      const signInResult = await signIn("credentials", {
         email,
         password,
         redirect: false,
       })
 
-      if (result?.error) {
-        setError(result.error)
+      if (signInResult?.error) {
+        setServerError(signInResult.error)
       } else {
         router.push("/dashboard")
         router.refresh()
       }
-    } catch (err) {
-      setError("Une erreur est survenue")
+    } catch {
+      setServerError("Une erreur est survenue")
     } finally {
       setLoading(false)
     }
@@ -52,31 +87,35 @@ export default function LoginPage() {
             Accédez à votre espace personnel
           </p>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 mb-6 text-sm">
-              {error}
+          {serverError && (
+            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 mb-6 text-sm flex items-center gap-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {serverError}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Email
-              </label>
-              <input
+            <FormField label="Email" error={errors.email} required>
+              <Input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  validateField("email", e.target.value)
+                }}
+                onBlur={() => validateField("email", email)}
+                error={!!errors.email}
                 placeholder="votre@email.com"
+                autoComplete="email"
               />
-            </div>
+            </FormField>
 
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs uppercase tracking-wider text-neutral-500">
-                  Mot de passe
+                  Mot de passe <span className="text-red-400">*</span>
                 </label>
                 <Link 
                   href="/forgot-password" 
@@ -85,14 +124,26 @@ export default function LoginPage() {
                   Mot de passe oublié ?
                 </Link>
               </div>
-              <input
+              <Input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  validateField("password", e.target.value)
+                }}
+                onBlur={() => validateField("password", password)}
+                error={!!errors.password}
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
+              {errors.password && (
+                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             <button

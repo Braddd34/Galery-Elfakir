@@ -3,6 +3,8 @@
 import { useState } from "react"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import { contactSchema } from "@/lib/validations"
+import FormField, { Input, Textarea, Select } from "@/components/ui/FormField"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,10 +13,47 @@ export default function ContactPage() {
     subject: "",
     message: "",
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [serverError, setServerError] = useState("")
+
+  const validateField = (field: string, value: string) => {
+    const data = { ...formData, [field]: value }
+    const result = contactSchema.safeParse(data)
+    
+    if (!result.success) {
+      const fieldError = result.error.errors.find(e => e.path[0] === field)
+      if (fieldError) {
+        setErrors(prev => ({ ...prev, [field]: fieldError.message }))
+      }
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setServerError("")
+
+    // Validation complète
+    const result = contactSchema.safeParse(formData)
+    if (!result.success) {
+      const newErrors: Record<string, string> = {}
+      result.error.errors.forEach(err => {
+        newErrors[err.path[0] as string] = err.message
+      })
+      setErrors(newErrors)
+      return
+    }
+    
     setStatus("loading")
     
     try {
@@ -29,13 +68,14 @@ export default function ContactPage() {
       if (res.ok) {
         setStatus("success")
         setFormData({ name: "", email: "", subject: "", message: "" })
+        setErrors({})
       } else {
         setStatus("error")
-        alert(data.error || "Une erreur est survenue")
+        setServerError(data.error || "Une erreur est survenue")
       }
-    } catch (error) {
+    } catch {
       setStatus("error")
-      alert("Une erreur est survenue")
+      setServerError("Une erreur est survenue")
     }
   }
 
@@ -68,82 +108,119 @@ export default function ContactPage() {
 
                 {status === "success" ? (
                   <div className="bg-green-500/10 border border-green-500/50 p-8 text-center">
-                    <p className="text-green-400">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-green-400 text-lg">
                       Votre message a été envoyé avec succès !
                     </p>
                     <p className="text-neutral-500 text-sm mt-2">
                       Nous vous répondrons dans les plus brefs délais.
                     </p>
+                    <button
+                      onClick={() => setStatus("idle")}
+                      className="mt-6 text-sm text-neutral-400 hover:text-white transition-colors"
+                    >
+                      Envoyer un autre message
+                    </button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                        Nom complet
-                      </label>
-                      <input
+                    {serverError && (
+                      <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 text-sm flex items-center gap-2">
+                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {serverError}
+                      </div>
+                    )}
+
+                    <FormField label="Nom complet" error={errors.name} required>
+                      <Input
                         type="text"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                        className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                        onChange={(e) => {
+                          handleChange("name", e.target.value)
+                          validateField("name", e.target.value)
+                        }}
+                        onBlur={() => validateField("name", formData.name)}
+                        error={!!errors.name}
                         placeholder="Votre nom"
                       />
-                    </div>
+                    </FormField>
 
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                        Email
-                      </label>
-                      <input
+                    <FormField label="Email" error={errors.email} required>
+                      <Input
                         type="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                        className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                        onChange={(e) => {
+                          handleChange("email", e.target.value)
+                          validateField("email", e.target.value)
+                        }}
+                        onBlur={() => validateField("email", formData.email)}
+                        error={!!errors.email}
                         placeholder="votre@email.com"
                       />
-                    </div>
+                    </FormField>
 
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                        Sujet
-                      </label>
-                      <select
+                    <FormField label="Sujet" error={errors.subject} required>
+                      <Select
                         value={formData.subject}
-                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        required
-                        className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                        onChange={(e) => {
+                          handleChange("subject", e.target.value)
+                          validateField("subject", e.target.value)
+                        }}
+                        error={!!errors.subject}
                       >
                         <option value="">Sélectionnez un sujet</option>
-                        <option value="artwork">Question sur une œuvre</option>
-                        <option value="order">Question sur une commande</option>
-                        <option value="artist">Devenir artiste</option>
-                        <option value="partnership">Partenariat</option>
-                        <option value="other">Autre</option>
-                      </select>
-                    </div>
+                        <option value="Question sur une œuvre">Question sur une œuvre</option>
+                        <option value="Question sur une commande">Question sur une commande</option>
+                        <option value="Devenir artiste">Devenir artiste</option>
+                        <option value="Partenariat">Partenariat</option>
+                        <option value="Autre">Autre</option>
+                      </Select>
+                    </FormField>
 
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                        Message
-                      </label>
-                      <textarea
+                    <FormField 
+                      label="Message" 
+                      error={errors.message} 
+                      required
+                      hint="Minimum 20 caractères"
+                    >
+                      <Textarea
                         value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        required
+                        onChange={(e) => {
+                          handleChange("message", e.target.value)
+                          validateField("message", e.target.value)
+                        }}
+                        onBlur={() => validateField("message", formData.message)}
+                        error={!!errors.message}
                         rows={6}
-                        className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors resize-none"
                         placeholder="Votre message..."
                       />
-                    </div>
+                      {formData.message && (
+                        <p className="text-neutral-600 text-xs mt-1">
+                          {formData.message.length}/2000 caractères
+                        </p>
+                      )}
+                    </FormField>
 
                     <button
                       type="submit"
                       disabled={status === "loading"}
                       className="w-full bg-white text-black py-4 font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50"
                     >
-                      {status === "loading" ? "Envoi..." : "Envoyer le message"}
+                      {status === "loading" ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Envoi en cours...
+                        </span>
+                      ) : "Envoyer le message"}
                     </button>
                   </form>
                 )}

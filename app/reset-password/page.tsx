@@ -3,35 +3,79 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import { resetPasswordSchema } from "@/lib/validations"
+import FormField, { Input } from "@/components/ui/FormField"
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get("token")
 
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: ""
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [error, setError] = useState("")
+  const [serverError, setServerError] = useState("")
 
   useEffect(() => {
     if (!token) {
-      setError("Lien de réinitialisation invalide")
+      setServerError("Lien de réinitialisation invalide")
     }
   }, [token])
 
+  const validateField = (field: string, value: string) => {
+    const data = { ...formData, [field]: value }
+    const result = resetPasswordSchema.safeParse(data)
+    
+    if (!result.success) {
+      const fieldError = result.error.errors.find(e => e.path[0] === field)
+      if (fieldError) {
+        setErrors(prev => ({ ...prev, [field]: fieldError.message }))
+      }
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const getPasswordStrength = () => {
+    const pwd = formData.password
+    if (!pwd) return { level: 0, text: "", color: "" }
+    let score = 0
+    if (pwd.length >= 8) score++
+    if (/[A-Z]/.test(pwd)) score++
+    if (/[0-9]/.test(pwd)) score++
+    if (/[^A-Za-z0-9]/.test(pwd)) score++
+    
+    if (score <= 1) return { level: 1, text: "Faible", color: "bg-red-500" }
+    if (score === 2) return { level: 2, text: "Moyen", color: "bg-yellow-500" }
+    if (score === 3) return { level: 3, text: "Fort", color: "bg-green-500" }
+    return { level: 4, text: "Très fort", color: "bg-green-400" }
+  }
+
+  const passwordStrength = getPasswordStrength()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setServerError("")
 
-    if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas")
-      return
-    }
-
-    if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères")
+    const result = resetPasswordSchema.safeParse(formData)
+    if (!result.success) {
+      const newErrors: Record<string, string> = {}
+      result.error.errors.forEach(err => {
+        newErrors[err.path[0] as string] = err.message
+      })
+      setErrors(newErrors)
       return
     }
 
@@ -41,22 +85,21 @@ function ResetPasswordForm() {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password })
+        body: JSON.stringify({ token, password: formData.password })
       })
 
       const data = await res.json()
 
       if (res.ok) {
         setSuccess(true)
-        // Rediriger vers login après 3 secondes
         setTimeout(() => {
           router.push("/login")
         }, 3000)
       } else {
-        setError(data.error || "Une erreur est survenue")
+        setServerError(data.error || "Une erreur est survenue")
       }
     } catch {
-      setError("Une erreur est survenue")
+      setServerError("Une erreur est survenue")
     } finally {
       setLoading(false)
     }
@@ -116,44 +159,65 @@ function ResetPasswordForm() {
         Choisissez un nouveau mot de passe sécurisé
       </p>
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-          {error}
+      {serverError && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {serverError}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm text-neutral-400 mb-2">
-            Nouveau mot de passe
-          </label>
-          <input
+        <FormField 
+          label="Nouveau mot de passe" 
+          error={errors.password} 
+          required
+          hint="Minimum 8 caractères, 1 majuscule, 1 chiffre"
+        >
+          <Input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
+            value={formData.password}
+            onChange={(e) => {
+              handleChange("password", e.target.value)
+              validateField("password", e.target.value)
+            }}
+            onBlur={() => validateField("password", formData.password)}
+            error={!!errors.password}
             placeholder="••••••••"
-            className="w-full bg-transparent border border-neutral-800 px-4 py-3 text-white placeholder-neutral-600 focus:border-white focus:outline-none transition-colors"
+            autoComplete="new-password"
           />
-          <p className="text-neutral-600 text-xs mt-2">
-            Minimum 8 caractères
-          </p>
-        </div>
+          {formData.password && (
+            <div className="mt-2">
+              <div className="flex gap-1 mb-1">
+                {[1, 2, 3, 4].map((level) => (
+                  <div
+                    key={level}
+                    className={`h-1 flex-1 rounded ${
+                      level <= passwordStrength.level ? passwordStrength.color : "bg-neutral-700"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-neutral-500">{passwordStrength.text}</p>
+            </div>
+          )}
+        </FormField>
 
-        <div>
-          <label className="block text-sm text-neutral-400 mb-2">
-            Confirmer le mot de passe
-          </label>
-          <input
+        <FormField label="Confirmer le mot de passe" error={errors.confirmPassword} required>
+          <Input
             type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
+            value={formData.confirmPassword}
+            onChange={(e) => {
+              handleChange("confirmPassword", e.target.value)
+              validateField("confirmPassword", e.target.value)
+            }}
+            onBlur={() => validateField("confirmPassword", formData.confirmPassword)}
+            error={!!errors.confirmPassword}
             placeholder="••••••••"
-            className="w-full bg-transparent border border-neutral-800 px-4 py-3 text-white placeholder-neutral-600 focus:border-white focus:outline-none transition-colors"
+            autoComplete="new-password"
           />
-        </div>
+        </FormField>
 
         <button
           type="submit"

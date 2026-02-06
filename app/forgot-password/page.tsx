@@ -2,17 +2,37 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { forgotPasswordSchema } from "@/lib/validations"
+import FormField, { Input } from "@/components/ui/FormField"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
+  const [emailError, setEmailError] = useState("")
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
-  const [error, setError] = useState("")
+  const [serverError, setServerError] = useState("")
+
+  const validateEmail = (value: string) => {
+    const result = forgotPasswordSchema.safeParse({ email: value })
+    if (!result.success) {
+      const error = result.error.errors[0]
+      setEmailError(error?.message || "")
+    } else {
+      setEmailError("")
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setServerError("")
+
+    const result = forgotPasswordSchema.safeParse({ email })
+    if (!result.success) {
+      setEmailError(result.error.errors[0]?.message || "Email invalide")
+      return
+    }
+
     setLoading(true)
-    setError("")
 
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -26,10 +46,10 @@ export default function ForgotPasswordPage() {
       if (res.ok) {
         setSent(true)
       } else {
-        setError(data.error || "Une erreur est survenue")
+        setServerError(data.error || "Une erreur est survenue")
       }
     } catch {
-      setError("Une erreur est survenue")
+      setServerError("Une erreur est survenue")
     } finally {
       setLoading(false)
     }
@@ -74,26 +94,29 @@ export default function ForgotPasswordPage() {
               Entrez votre email pour recevoir un lien de réinitialisation
             </p>
 
-            {error && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                {error}
+            {serverError && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {serverError}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm text-neutral-400 mb-2">
-                  Adresse email
-                </label>
-                <input
+              <FormField label="Adresse email" error={emailError} required>
+                <Input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    validateEmail(e.target.value)
+                  }}
+                  onBlur={() => validateEmail(email)}
+                  error={!!emailError}
                   placeholder="votre@email.com"
-                  className="w-full bg-transparent border border-neutral-800 px-4 py-3 text-white placeholder-neutral-600 focus:border-white focus:outline-none transition-colors"
                 />
-              </div>
+              </FormField>
 
               <button
                 type="submit"
