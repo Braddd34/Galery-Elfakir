@@ -2,7 +2,7 @@
 
 import { useCart } from "@/lib/cart-context"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -12,20 +12,54 @@ interface CartDrawerProps {
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { items, removeItem, total, clearCart } = useCart()
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const drawerRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
 
-  // Fermer avec Escape
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) onClose()
+  // Focus trap - garde le focus à l'intérieur du drawer
+  const handleTabKey = useCallback((e: KeyboardEvent) => {
+    if (!isOpen || !drawerRef.current) return
+
+    const focusableElements = drawerRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (e.key === "Tab") {
+      if (e.shiftKey) {
+        // Shift + Tab : retour au dernier élément si on est au premier
+        if (document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement?.focus()
+        }
+      } else {
+        // Tab : retour au premier élément si on est au dernier
+        if (document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement?.focus()
+        }
+      }
     }
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
-  }, [isOpen, onClose])
+  }, [isOpen])
 
-  // Bloquer le scroll du body
+  // Fermer avec Escape + focus trap
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose()
+      }
+      handleTabKey(e)
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [isOpen, onClose, handleTabKey])
+
+  // Bloquer le scroll du body + focus initial
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
+      // Focus sur le bouton fermer à l'ouverture
+      setTimeout(() => closeButtonRef.current?.focus(), 100)
     } else {
       document.body.style.overflow = ""
     }
@@ -52,6 +86,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
       {/* Drawer - responsive et animé */}
       <div
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Panier"
         className={`fixed top-0 right-0 h-full w-full sm:w-[420px] bg-neutral-950 z-50 transform transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-2xl border-l border-neutral-800 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
@@ -59,7 +97,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-800">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-light tracking-wider">Panier</h2>
+            <h2 id="cart-title" className="text-xl font-light tracking-wider">Panier</h2>
             {items.length > 0 && (
               <span className="px-2.5 py-0.5 bg-white text-black text-xs font-medium rounded-full">
                 {items.length}
@@ -67,6 +105,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             )}
           </div>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             className="p-2 hover:bg-neutral-800 rounded-lg transition-all duration-200 hover:rotate-90"
             aria-label="Fermer le panier"

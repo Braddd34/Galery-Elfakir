@@ -163,6 +163,13 @@ model BuyerProfile {
   
   stripeCustomerId String? @unique
   
+  // Préférences de notification
+  notifyNewArtworks     Boolean @default(true)  // Nouvelles œuvres
+  notifyPriceDrops      Boolean @default(true)  // Baisses de prix
+  notifyArtistNews      Boolean @default(false) // Actualités artistes suivis
+  notifyNewsletter      Boolean @default(true)  // Newsletter mensuelle
+  notifyOrderUpdates    Boolean @default(true)  // Mises à jour commandes
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

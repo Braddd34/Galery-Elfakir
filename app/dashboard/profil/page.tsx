@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm"
+import ProfilePhotoUpload from "@/components/profile/ProfilePhotoUpload"
+import NotificationPreferences from "@/components/profile/NotificationPreferences"
 
 interface BuyerProfile {
   firstName: string
@@ -17,7 +19,7 @@ interface BuyerProfile {
 }
 
 export default function ProfilPage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   
   const [profile, setProfile] = useState<BuyerProfile>({
@@ -29,6 +31,7 @@ export default function ProfilPage() {
     country: "",
     phone: ""
   })
+  const [profileImage, setProfileImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
@@ -39,6 +42,9 @@ export default function ProfilPage() {
       router.push("/login")
       return
     }
+
+    // Initialiser l'image depuis la session
+    setProfileImage(session.user?.image || null)
 
     // Charger le profil
     fetch("/api/user/profile")
@@ -59,6 +65,12 @@ export default function ProfilPage() {
       })
       .catch(() => setLoading(false))
   }, [session, status, router])
+
+  const handlePhotoChange = async (newImageUrl: string) => {
+    setProfileImage(newImageUrl)
+    // Mettre à jour la session pour refléter la nouvelle image
+    await update({ image: newImageUrl })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -108,8 +120,18 @@ export default function ProfilPage() {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-light mb-2">Mon profil</h1>
-        <p className="text-neutral-500 mb-8">{session?.user?.email}</p>
+        {/* En-tête avec photo */}
+        <div className="flex flex-col sm:flex-row items-center gap-6 mb-10">
+          <ProfilePhotoUpload
+            currentImage={profileImage}
+            userName={session?.user?.name}
+            onPhotoChange={handlePhotoChange}
+          />
+          <div className="text-center sm:text-left">
+            <h1 className="text-3xl font-light mb-1">{session?.user?.name || "Mon profil"}</h1>
+            <p className="text-neutral-500">{session?.user?.email}</p>
+          </div>
+        </div>
 
         {message && (
           <div className={`mb-6 p-4 border ${message.includes("succès") ? "border-green-500 text-green-400" : "border-red-500 text-red-400"}`}>
@@ -216,6 +238,12 @@ export default function ProfilPage() {
         <div className="mt-12 pt-12 border-t border-neutral-800">
           <h2 className="text-xl font-light mb-6">Sécurité</h2>
           <ChangePasswordForm />
+        </div>
+
+        {/* Section notifications */}
+        <div className="mt-12 pt-12 border-t border-neutral-800">
+          <h2 className="text-xl font-light mb-6">Notifications</h2>
+          <NotificationPreferences />
         </div>
       </div>
     </main>
