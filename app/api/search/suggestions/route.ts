@@ -48,7 +48,6 @@ export async function GET(req: NextRequest) {
       // Artistes correspondants
       prisma.artistProfile.findMany({
         where: {
-          verified: true,
           user: {
             name: { contains: query, mode: "insensitive" },
           },
