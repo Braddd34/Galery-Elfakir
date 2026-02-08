@@ -270,7 +270,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   const totalCount = categoryCounts.reduce((acc, cat) => acc + cat._count, 0)
   
   // Breadcrumbs dynamiques
-  const breadcrumbItems = [{ label: "Catalogue", href: "/catalogue" }]
+  const breadcrumbItems: { label: string; href?: string }[] = [{ label: "Catalogue", href: "/catalogue" }]
   const categoryLabelsMap: Record<string, string> = {
     painting: "Peintures",
     sculpture: "Sculptures",
