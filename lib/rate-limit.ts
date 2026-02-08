@@ -26,9 +26,10 @@ const tokenCache = new Map<string, { count: number; resetTime: number }>()
 // Nettoyer le cache périodiquement pour éviter les fuites mémoire
 setInterval(() => {
   const now = Date.now()
-  for (const [key, value] of tokenCache.entries()) {
-    if (now > value.resetTime) {
-      tokenCache.delete(key)
+  const entries = Array.from(tokenCache.entries())
+  for (let i = 0; i < entries.length; i++) {
+    if (now > entries[i][1].resetTime) {
+      tokenCache.delete(entries[i][0])
     }
   }
 }, 60000) // Nettoyage toutes les minutes
@@ -44,9 +45,10 @@ export function rateLimit(options: RateLimitOptions) {
         // Vérifier qu'on ne dépasse pas le nombre max de tokens
         if (tokenCache.size >= options.uniqueTokenPerInterval) {
           // Supprimer les entrées expirées
-          for (const [key, value] of tokenCache.entries()) {
-            if (now > value.resetTime) {
-              tokenCache.delete(key)
+          const entries = Array.from(tokenCache.entries())
+          for (let i = 0; i < entries.length; i++) {
+            if (now > entries[i][1].resetTime) {
+              tokenCache.delete(entries[i][0])
             }
           }
         }
