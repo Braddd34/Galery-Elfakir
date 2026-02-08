@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import FavoriteButton from "@/components/favorites/FavoriteButton"
+import FavoriteButton from "@/components/ui/FavoriteButton"
 
 interface ArtworkListItemProps {
   artwork: {
