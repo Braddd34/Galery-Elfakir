@@ -1,6 +1,7 @@
 import Link from "next/link"
 import HomeHeader from "@/components/layout/HomeHeader"
 import prisma from "@/lib/prisma"
+import Recommendations from "@/components/artwork/Recommendations"
 import { Metadata } from "next"
 
 // Métadonnées SEO pour la page d'accueil
@@ -279,6 +280,13 @@ export default async function HomePage() {
               </p>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Recommandations personnalisées */}
+      <section className="py-24 border-t border-neutral-800">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+          <Recommendations limit={8} />
         </div>
       </section>
 

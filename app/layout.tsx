@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 import SessionProvider from "@/components/providers/SessionProvider"
 import { CompareProvider } from "@/components/artwork/CompareDrawer"
+import ThemeProvider from "@/components/providers/ThemeProvider"
+import LanguageProvider from "@/components/providers/LanguageProvider"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import SkipLink from "@/components/ui/SkipLink"
@@ -48,17 +50,34 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" className="bg-black">
+    <html lang="fr" className="dark" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Script inline pour éviter le flash de thème au chargement */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var theme = localStorage.getItem('theme');
+              if (theme === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                document.documentElement.style.colorScheme = 'light';
+              }
+            } catch(e) {}
+          })();
+        `}} />
       </head>
-      <body className="bg-black text-white min-h-screen">
+      <body className="theme-bg theme-text min-h-screen transition-colors duration-300">
         <SkipLink />
         <SessionProvider>
-          <CompareProvider>
-            {children}
-          </CompareProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <CompareProvider>
+                {children}
+              </CompareProvider>
+            </LanguageProvider>
+          </ThemeProvider>
         </SessionProvider>
         <Analytics />
         <SpeedInsights />

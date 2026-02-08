@@ -10,6 +10,8 @@ import ViewTracker from "@/components/artwork/ViewTracker"
 import ReviewSection from "@/components/reviews/ReviewSection"
 import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import ShareButtons from "@/components/artwork/ShareButtons"
+import ImageLightbox from "@/components/artwork/ImageLightbox"
+import Recommendations from "@/components/artwork/Recommendations"
 import { Metadata } from "next"
 
 // Générer les meta tags dynamiques pour le SEO
@@ -115,35 +117,8 @@ async function getArtwork(slug: string) {
   }
 }
 
-// Récupérer des œuvres similaires
-async function getSimilarArtworks(artworkId: string, category: ArtworkCategory, artistId: string) {
-  try {
-    const artworks = await prisma.artwork.findMany({
-      where: {
-        status: "AVAILABLE",
-        id: { not: artworkId },
-        OR: [
-          { category },
-          { artistId }
-        ]
-      },
-      take: 4,
-      orderBy: { createdAt: "desc" },
-      include: {
-        artist: {
-          include: {
-            user: {
-              select: { name: true }
-            }
-          }
-        }
-      }
-    })
-    return artworks
-  } catch {
-    return []
-  }
-}
+// La section "Vous aimerez aussi" est maintenant gérée côté client
+// via le composant Recommendations qui appelle l'API /api/recommendations
 
 export default async function ArtworkPage({ params }: { params: { slug: string } }) {
   const artwork = await getArtwork(params.slug)
@@ -153,7 +128,6 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
   }
   
   const images = getImages(artwork.images)
-  const similarArtworks = await getSimilarArtworks(artwork.id, artwork.category, artwork.artistId)
   const artistName = artwork.artist.user.name || "Artiste"
   const baseUrl = "https://galeryelfakir.vercel.app"
 
@@ -252,32 +226,9 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
           <div className="max-w-[1800px] mx-auto px-8 md:px-16">
             <div className="grid lg:grid-cols-12 gap-16">
               
-              {/* Left: Images */}
-              <div className="lg:col-span-7 space-y-4">
-                {/* Main Image */}
-                <div className="aspect-[4/5] bg-neutral-900">
-                  <img 
-                    src={images[0]?.url} 
-                    alt={artwork.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                {/* Thumbnails */}
-                {images.length > 1 && (
-                  <div className="grid grid-cols-3 gap-4">
-                    {images.map((img, i) => (
-                      <div 
-                        key={i}
-                        className={`aspect-square bg-neutral-900 cursor-pointer transition-opacity ${
-                          i === 0 ? "ring-1 ring-white" : "opacity-60 hover:opacity-100"
-                        }`}
-                      >
-                        <img src={img.url} alt="" className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* Left: Images avec zoom */}
+              <div className="lg:col-span-7">
+                <ImageLightbox images={images} alt={artwork.title} />
               </div>
 
               {/* Right: Info */}
@@ -415,42 +366,12 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
         {/* View Tracker */}
         <ViewTracker artworkId={artwork.id} />
 
-        {/* Related Works */}
-        {similarArtworks.length > 0 && (
-          <section className="py-24 border-t border-neutral-800">
-            <div className="max-w-[1800px] mx-auto px-8 md:px-16">
-              <div className="flex justify-between items-end mb-16">
-                <div>
-                  <p className="label text-gold mb-4">Explorer</p>
-                  <h2 className="heading-sm">Œuvres similaires</h2>
-                </div>
-                <Link href="/catalogue" className="text-sm tracking-[0.15em] uppercase text-neutral-500 hover:text-white transition-colors">
-                  Voir tout
-                </Link>
-              </div>
-              
-              <div className="grid md:grid-cols-4 gap-8">
-                {similarArtworks.map((similar) => {
-                  const similarImages = getImages(similar.images)
-                  return (
-                    <Link key={similar.id} href={`/oeuvre/${similar.slug}`} className="group">
-                      <div className="img-zoom aspect-[3/4] bg-neutral-900 mb-4">
-                        <img 
-                          src={similarImages[0]?.url}
-                          alt={similar.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <h3 className="font-light group-hover:text-gold transition-colors">{similar.title}</h3>
-                      <p className="text-neutral-500 text-sm">{similar.artist.user.name}</p>
-                      <p className="mt-1">€{Number(similar.price).toLocaleString()}</p>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* Recommandations personnalisées "Vous aimerez aussi" */}
+        <section className="py-24 border-t border-neutral-800">
+          <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+            <Recommendations artworkId={artwork.id} limit={4} />
+          </div>
+        </section>
       </main>
       <Footer />
     </>

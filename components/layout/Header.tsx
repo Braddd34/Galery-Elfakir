@@ -5,19 +5,23 @@ import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
 import CartButton from "@/components/cart/CartButton"
 import SearchAutocomplete from "@/components/search/SearchAutocomplete"
+import ThemeToggle from "@/components/ui/ThemeToggle"
+import LanguageToggle from "@/components/ui/LanguageToggle"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 const categories = [
-  { href: "/catalogue?category=painting", label: "Peinture" },
-  { href: "/catalogue?category=sculpture", label: "Sculpture" },
-  { href: "/catalogue?category=photography", label: "Photographie" },
-  { href: "/catalogue?category=drawing", label: "Dessin" },
-  { href: "/catalogue?category=digital", label: "Art numérique" },
-  { href: "/artistes", label: "Artistes" },
+  { href: "/catalogue?category=painting", labelKey: "nav.painting" },
+  { href: "/catalogue?category=sculpture", labelKey: "nav.sculpture" },
+  { href: "/catalogue?category=photography", labelKey: "nav.photography" },
+  { href: "/catalogue?category=drawing", labelKey: "nav.drawing" },
+  { href: "/catalogue?category=digital", labelKey: "nav.digitalArt" },
+  { href: "/artistes", labelKey: "nav.artists" },
 ]
 
 export default function Header() {
   const { data: session } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { t } = useLanguage()
 
   return (
     <header role="banner">
@@ -45,12 +49,14 @@ export default function Header() {
           
           {/* Right side - Desktop */}
           <div className="hidden md:flex items-center gap-2">
+            <LanguageToggle />
+            <ThemeToggle />
             {session ? (
               <>
                 <Link 
                   href="/dashboard/favoris" 
                   className="p-2.5 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
-                  aria-label="Mes favoris"
+                  aria-label={t("nav.myFavorites")}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -60,7 +66,7 @@ export default function Header() {
                 <Link 
                   href="/dashboard" 
                   className="p-2.5 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
-                  aria-label="Mon compte"
+                  aria-label={t("nav.myAccount")}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -74,7 +80,7 @@ export default function Header() {
                   href="/login" 
                   className="px-4 py-2 text-sm text-white border border-neutral-700 hover:border-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
                 >
-                  Connexion
+                  {t("nav.login")}
                 </Link>
               </>
             )}
@@ -123,7 +129,7 @@ export default function Header() {
               href="/catalogue"
               className="px-5 py-3 text-sm text-neutral-300 hover:text-white transition-colors"
             >
-              Toutes les œuvres
+              {t("nav.allArtworks")}
             </Link>
             {categories.map((cat) => (
               <Link
@@ -131,14 +137,14 @@ export default function Header() {
                 href={cat.href}
                 className="px-5 py-3 text-sm text-neutral-300 hover:text-white transition-colors"
               >
-                {cat.label}
+                {t(cat.labelKey)}
               </Link>
             ))}
             <Link 
               href="/contact"
               className="px-5 py-3 text-sm text-gold hover:opacity-80 transition-opacity"
             >
-              Contact
+              {t("nav.contact")}
             </Link>
           </div>
         </div>
@@ -163,7 +169,7 @@ export default function Header() {
                 className="block py-2 text-sm text-white"
                 onClick={() => setMenuOpen(false)}
               >
-                Toutes les œuvres
+                {t("nav.allArtworks")}
               </Link>
               {categories.map((cat) => (
                 <Link
@@ -172,13 +178,19 @@ export default function Header() {
                   className="block py-2 text-sm text-neutral-400 hover:text-white"
                   onClick={() => setMenuOpen(false)}
                 >
-                  {cat.label}
+                  {t(cat.labelKey)}
                 </Link>
               ))}
             </div>
 
             {/* Mobile Account */}
             <div className="pt-6 border-t border-neutral-800 space-y-3">
+              {/* Langue et thème en mobile */}
+              <div className="flex items-center gap-4 mb-4">
+                <LanguageToggle />
+                <ThemeToggle />
+              </div>
+              
               {session ? (
                 <>
                   <Link 
@@ -186,14 +198,14 @@ export default function Header() {
                     className="block py-2 text-sm text-white"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Mon compte
+                    {t("nav.myAccount")}
                   </Link>
                   <Link 
                     href="/dashboard/favoris" 
                     className="block py-2 text-sm text-neutral-400"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Mes favoris
+                    {t("nav.myFavorites")}
                   </Link>
                   <button
                     onClick={() => {
@@ -202,7 +214,7 @@ export default function Header() {
                     }}
                     className="block py-2 text-sm text-neutral-500"
                   >
-                    Déconnexion
+                    {t("nav.logout")}
                   </button>
                 </>
               ) : (
@@ -211,7 +223,7 @@ export default function Header() {
                   className="block py-2 text-sm text-white"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Connexion
+                  {t("nav.login")}
                 </Link>
               )}
               <Link 
@@ -219,7 +231,7 @@ export default function Header() {
                 className="block py-2 text-sm text-gold"
                 onClick={() => setMenuOpen(false)}
               >
-                Contact
+                {t("nav.contact")}
               </Link>
             </div>
           </div>
