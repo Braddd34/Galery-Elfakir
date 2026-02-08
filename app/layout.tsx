@@ -7,6 +7,7 @@ import LanguageProvider from "@/components/providers/LanguageProvider"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import SkipLink from "@/components/ui/SkipLink"
+import NetworkStatus from "@/components/ui/NetworkStatus"
 
 export const metadata: Metadata = {
   title: {
@@ -70,6 +71,7 @@ export default function RootLayout({
       </head>
       <body className="theme-bg theme-text min-h-screen transition-colors duration-300">
         <SkipLink />
+        <NetworkStatus />
         <SessionProvider>
           <ThemeProvider>
             <LanguageProvider>

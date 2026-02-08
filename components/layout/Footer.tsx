@@ -53,6 +53,9 @@ export default function Footer() {
               <Link href="/contact" className="text-neutral-400 hover:text-white transition-colors text-sm">
                 Contact
               </Link>
+              <Link href="/faq" className="text-neutral-400 hover:text-white transition-colors text-sm">
+                FAQ
+              </Link>
             </nav>
           </div>
 

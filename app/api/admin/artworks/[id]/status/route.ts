@@ -17,7 +17,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
-    const { status } = await request.json()
+    const { status, comment } = await request.json()
 
     // Valider le statut
     const validStatuses = ["DRAFT", "PENDING", "AVAILABLE", "RESERVED", "SOLD", "ARCHIVED"]
@@ -57,9 +57,9 @@ export async function PATCH(
         .catch(err => console.error("Erreur notification approbation:", err))
     }
 
-    // Notifier si l'œuvre est archivée/refusée
+    // Notifier si l'œuvre est archivée/refusée, avec le commentaire de l'admin
     if ((status === "ARCHIVED" || status === "DRAFT") && artwork.artist?.user) {
-      notifyArtworkRejected(artwork.artist.user.id, artwork.title)
+      notifyArtworkRejected(artwork.artist.user.id, artwork.title, comment || undefined)
         .catch(err => console.error("Erreur notification rejet:", err))
     }
 

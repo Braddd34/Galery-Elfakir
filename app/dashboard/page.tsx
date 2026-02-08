@@ -166,6 +166,15 @@ export default async function DashboardPage() {
                 </p>
               </Link>
               <Link
+                href="/admin/settings"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Paramètres</h3>
+                <p className="text-neutral-500 text-sm">
+                  Commission, frais de port, configuration
+                </p>
+              </Link>
+              <Link
                 href="/dashboard/favoris"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
@@ -196,6 +205,15 @@ export default async function DashboardPage() {
                 <h3 className="text-lg font-light mb-2">Statistiques & Ventes</h3>
                 <p className="text-neutral-500 text-sm">
                   Graphiques, export CSV et historique
+                </p>
+              </Link>
+              <Link
+                href="/dashboard/artiste/expositions"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Mes expositions</h3>
+                <p className="text-neutral-500 text-sm">
+                  Gérer mes expositions passées et actuelles
                 </p>
               </Link>
               <Link
