@@ -150,11 +150,11 @@ function CompareModal({ onClose }: { onClose: () => void }) {
     OTHER: "Autre"
   }
   
-  const compareFields = [
+  const compareFields: { label: string; key: string; format?: (v: any) => string }[] = [
     { label: "Artiste", key: "artistName" },
-    { label: "Prix", key: "price", format: (v: number) => `€${v.toLocaleString("fr-FR")}` },
+    { label: "Prix", key: "price", format: (v: any) => `€${Number(v).toLocaleString("fr-FR")}` },
     { label: "Année", key: "year" },
-    { label: "Catégorie", key: "category", format: (v: string) => categoryLabels[v] || v },
+    { label: "Catégorie", key: "category", format: (v: any) => categoryLabels[v] || v },
     { label: "Technique", key: "medium" },
     { label: "Dimensions", key: "dimensions" },
   ]
