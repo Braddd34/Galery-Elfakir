@@ -48,8 +48,8 @@ export async function GET(req: NextRequest) {
 
       if (favorites.length > 0) {
         // Extraire les catégories et artistes préférés
-        const favoriteCategories = [...new Set(favorites.map(f => f.artwork.category))]
-        const favoriteArtists = [...new Set(favorites.map(f => f.artwork.artistId))]
+        const favoriteCategories = Array.from(new Set(favorites.map(f => f.artwork.category)))
+        const favoriteArtists = Array.from(new Set(favorites.map(f => f.artwork.artistId)))
         
         // Calculer la fourchette de prix des favoris
         const prices = favorites.map(f => Number(f.artwork.price))
