@@ -35,11 +35,19 @@ export async function generateMetadata({ searchParams }: { searchParams: { categ
   return {
     title,
     description,
+    keywords: ["catalogue art", "œuvres originales", "art contemporain", "acheter art", "galerie en ligne"],
     openGraph: {
       title: `${title} — ELFAKIR`,
       description,
       type: "website",
-    }
+      images: ["/og-image.jpg"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} — ELFAKIR`,
+      description,
+      images: ["/og-image.jpg"],
+    },
   }
 }
 

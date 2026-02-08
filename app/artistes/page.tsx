@@ -8,11 +8,19 @@ import { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Nos Artistes",
   description: "Découvrez les artistes talentueux de la galerie ELFAKIR. Peintres, sculpteurs, photographes et créateurs d'art contemporain du monde entier.",
+  keywords: ["artistes contemporains", "peintres", "sculpteurs", "photographes", "galerie ELFAKIR", "art moderne"],
   openGraph: {
     title: "Nos Artistes — ELFAKIR Gallery",
     description: "Découvrez les artistes talentueux de la galerie ELFAKIR. Peintres, sculpteurs, photographes et créateurs d'art contemporain du monde entier.",
     type: "website",
-  }
+    images: ["/og-image.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nos Artistes — ELFAKIR Gallery",
+    description: "Découvrez les artistes talentueux de la galerie ELFAKIR. Peintres, sculpteurs, photographes et créateurs d'art contemporain.",
+    images: ["/og-image.jpg"],
+  },
 }
 
 // Récupérer tous les artistes avec des œuvres disponibles

@@ -1,6 +1,38 @@
 import Link from "next/link"
 import HomeHeader from "@/components/layout/HomeHeader"
 import prisma from "@/lib/prisma"
+import { Metadata } from "next"
+
+// Métadonnées SEO pour la page d'accueil
+export const metadata: Metadata = {
+  title: "ELFAKIR — Galerie d'Art Contemporain en Ligne",
+  description: "Découvrez une collection exclusive d'œuvres d'art originales. Peintures, sculptures, photographies d'artistes contemporains internationaux. Livraison sécurisée et certificat d'authenticité.",
+  keywords: ["galerie d'art", "art contemporain", "œuvres originales", "peinture", "sculpture", "photographie", "acheter art en ligne", "artistes contemporains"],
+  openGraph: {
+    title: "ELFAKIR — Galerie d'Art Contemporain",
+    description: "Découvrez une collection exclusive d'œuvres d'art originales d'artistes contemporains internationaux.",
+    type: "website",
+    locale: "fr_FR",
+    siteName: "ELFAKIR Gallery",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ELFAKIR Gallery - Art Contemporain",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ELFAKIR — Galerie d'Art Contemporain",
+    description: "Découvrez une collection exclusive d'œuvres d'art originales d'artistes contemporains internationaux.",
+    images: ["/og-image.jpg"],
+  },
+  alternates: {
+    canonical: "https://galeryelfakir.vercel.app",
+  },
+}
 
 // Helper pour extraire l'URL de l'image depuis le JSON
 function getImageUrl(images: any, index: number = 0): string {

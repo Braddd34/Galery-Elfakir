@@ -8,9 +8,34 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const artist = await getArtist(params.id)
   if (!artist) return { title: "Artiste non trouvé" }
   
+  const artistName = artist.user.name || "Artiste"
+  const description = artist.bio 
+    ? artist.bio.substring(0, 160) 
+    : `Découvrez les œuvres de ${artistName} sur la galerie ELFAKIR.`
+  const imageUrl = artist.user.image || "/og-image.jpg"
+  
   return {
-    title: artist.user.name,
-    description: artist.bio || `Découvrez les œuvres de ${artist.user.name}`,
+    title: artistName,
+    description,
+    openGraph: {
+      title: `${artistName} — ELFAKIR Gallery`,
+      description,
+      type: "profile",
+      images: [
+        {
+          url: imageUrl,
+          width: 400,
+          height: 400,
+          alt: artistName,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title: `${artistName} — ELFAKIR Gallery`,
+      description,
+      images: [imageUrl],
+    },
   }
 }
 
