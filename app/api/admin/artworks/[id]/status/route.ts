@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { sendArtworkApprovedEmail } from "@/lib/emails"
+import { notifyArtworkApproved, notifyArtworkRejected } from "@/lib/notifications"
 
 // PATCH: Changer le statut d'une œuvre rapidement
 export async function PATCH(
@@ -23,15 +25,47 @@ export async function PATCH(
       return NextResponse.json({ error: "Statut invalide" }, { status: 400 })
     }
 
-    // Mettre à jour le statut
+    // Mettre à jour le statut (et publier si approuvé)
     const artwork = await prisma.artwork.update({
       where: { id: params.id },
-      data: { status }
+      data: { 
+        status,
+        ...(status === "AVAILABLE" ? { publishedAt: new Date() } : {})
+      },
+      include: {
+        artist: {
+          include: {
+            user: { select: { id: true, name: true, email: true } }
+          }
+        }
+      }
     })
+
+    // Envoyer notification + email si l'œuvre est approuvée
+    if (status === "AVAILABLE" && artwork.artist?.user) {
+      const artistUser = artwork.artist.user
+
+      // Email d'approbation
+      sendArtworkApprovedEmail(artistUser.email, {
+        title: artwork.title,
+        artistName: artistUser.name || "Artiste",
+        artistEmail: artistUser.email
+      }).catch(err => console.error("Erreur email approbation:", err))
+
+      // Notification in-app
+      notifyArtworkApproved(artistUser.id, artwork.title)
+        .catch(err => console.error("Erreur notification approbation:", err))
+    }
+
+    // Notifier si l'œuvre est archivée/refusée
+    if ((status === "ARCHIVED" || status === "DRAFT") && artwork.artist?.user) {
+      notifyArtworkRejected(artwork.artist.user.id, artwork.title)
+        .catch(err => console.error("Erreur notification rejet:", err))
+    }
 
     return NextResponse.json({ 
       success: true, 
-      artwork,
+      artwork: { id: artwork.id, status: artwork.status },
       message: `Statut mis à jour: ${status}`
     })
 

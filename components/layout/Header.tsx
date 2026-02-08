@@ -7,6 +7,7 @@ import CartButton from "@/components/cart/CartButton"
 import SearchAutocomplete from "@/components/search/SearchAutocomplete"
 import ThemeToggle from "@/components/ui/ThemeToggle"
 import LanguageToggle from "@/components/ui/LanguageToggle"
+import NotificationBell from "@/components/ui/NotificationBell"
 import { useLanguage } from "@/components/providers/LanguageProvider"
 
 const categories = [
@@ -53,6 +54,7 @@ export default function Header() {
             <ThemeToggle />
             {session ? (
               <>
+                <NotificationBell />
                 <Link 
                   href="/dashboard/favoris" 
                   className="p-2.5 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 rounded"

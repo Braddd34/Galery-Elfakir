@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { notifyNewMessage } from "@/lib/notifications"
 
 // GET - Récupérer les messages de l'utilisateur
 export async function GET(req: NextRequest) {
@@ -143,6 +144,13 @@ export async function POST(req: NextRequest) {
       }
     })
     
+    // Notifier le destinataire
+    notifyNewMessage(
+      receiverId,
+      session.user.name || "Un utilisateur",
+      subject || undefined
+    ).catch(err => console.error("Erreur notification message:", err))
+
     return NextResponse.json(message, { status: 201 })
   } catch (error) {
     console.error("Erreur envoi message:", error)

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { notifyOrderDelivered } from "@/lib/notifications"
 
 // POST: Marquer une commande comme livrée
 export async function POST(
@@ -18,7 +19,8 @@ export async function POST(
 
     // Vérifier que la commande existe et est expédiée
     const order = await prisma.order.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
+      select: { id: true, status: true, userId: true, orderNumber: true }
     })
 
     if (!order) {
@@ -39,6 +41,10 @@ export async function POST(
         deliveredAt: new Date()
       }
     })
+
+    // Notification in-app pour l'acheteur
+    notifyOrderDelivered(order.userId, order.orderNumber)
+      .catch(err => console.error("Erreur notification livraison:", err))
 
     return NextResponse.json({ 
       success: true,

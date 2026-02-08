@@ -53,6 +53,22 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
   const [loading, setLoading] = useState(false)
   const [trackingNumber, setTrackingNumber] = useState("")
   const [shippingCarrier, setShippingCarrier] = useState("")
+  const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState("")
+
+  // Filtrer les commandes par statut et recherche
+  const filteredOrders = orders.filter(order => {
+    const matchesStatus = filterStatus === "all" || order.status === filterStatus
+    const snapshot = order.artworkSnapshot as any
+    const searchLower = searchQuery.toLowerCase()
+    const matchesSearch = !searchQuery || 
+      order.orderNumber.toLowerCase().includes(searchLower) ||
+      order.user.name?.toLowerCase().includes(searchLower) ||
+      order.user.email.toLowerCase().includes(searchLower) ||
+      snapshot?.title?.toLowerCase().includes(searchLower) ||
+      snapshot?.artistName?.toLowerCase().includes(searchLower)
+    return matchesStatus && matchesSearch
+  })
 
   const handleShip = async () => {
     if (!selectedOrder) return
@@ -123,9 +139,56 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
 
   return (
     <>
-      {orders.length > 0 ? (
+      {/* Filtres et recherche */}
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="flex-1">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher par n° de commande, client, œuvre..."
+            className="w-full bg-black border border-neutral-700 px-4 py-3 text-white placeholder:text-neutral-600 focus:border-white focus:outline-none text-sm"
+          />
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { value: "all", label: "Toutes", color: "border-neutral-700" },
+            { value: "PENDING", label: "En attente", color: "border-yellow-500" },
+            { value: "PAID", label: "Payées", color: "border-green-500" },
+            { value: "SHIPPED", label: "Expédiées", color: "border-purple-500" },
+            { value: "DELIVERED", label: "Livrées", color: "border-green-600" },
+            { value: "CANCELLED", label: "Annulées", color: "border-red-500" },
+          ].map(filter => (
+            <button
+              key={filter.value}
+              onClick={() => setFilterStatus(filter.value)}
+              className={`px-4 py-2 text-xs border transition-colors ${
+                filterStatus === filter.value 
+                  ? `${filter.color} text-white bg-neutral-800` 
+                  : "border-neutral-800 text-neutral-500 hover:text-white"
+              }`}
+            >
+              {filter.label}
+              {filter.value !== "all" && (
+                <span className="ml-1 text-neutral-600">
+                  ({orders.filter(o => o.status === filter.value).length})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Compteur de résultats */}
+      <p className="text-neutral-500 text-sm mb-4">
+        {filteredOrders.length} commande{filteredOrders.length !== 1 ? "s" : ""}
+        {filterStatus !== "all" && ` (filtre: ${statusLabels[filterStatus as OrderStatus]?.label})`}
+        {searchQuery && ` — recherche: "${searchQuery}"`}
+      </p>
+
+      {filteredOrders.length > 0 ? (
         <div className="space-y-4">
-          {orders.map((order) => {
+          {filteredOrders.map((order) => {
             const snapshot = order.artworkSnapshot as any
             const address = order.shippingAddress as any
             

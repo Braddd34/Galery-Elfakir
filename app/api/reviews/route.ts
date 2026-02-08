@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { notifyNewReview } from "@/lib/notifications"
 
 // GET - Récupérer les avis d'une œuvre
 export async function GET(req: NextRequest) {
@@ -122,6 +123,22 @@ export async function POST(req: NextRequest) {
         }
       }
     })
+
+    // Notifier l'artiste de la nouvelle critique
+    try {
+      const artwork = await prisma.artwork.findUnique({
+        where: { id: artworkId },
+        include: {
+          artist: {
+            select: { userId: true }
+          }
+        }
+      })
+      if (artwork?.artist?.userId) {
+        notifyNewReview(artwork.artist.userId, artwork.title, rating)
+          .catch(err => console.error("Erreur notification review:", err))
+      }
+    } catch {}
     
     return NextResponse.json(review, { status: 201 })
   } catch (error) {

@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sendContactEmail } from "@/lib/emails"
+import { formLimiter, getClientIP } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting : max 3 messages par minute par IP
+    const ip = getClientIP(request)
+    const { success } = await formLimiter.check(`contact-${ip}`, 3)
+    if (!success) {
+      return NextResponse.json(
+        { error: "Trop de messages envoyés. Veuillez réessayer dans une minute." },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { name, email, subject, message } = body
 
@@ -10,6 +21,14 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: "Tous les champs sont requis" },
+        { status: 400 }
+      )
+    }
+
+    // Validation longueur
+    if (name.length > 100 || subject.length > 200 || message.length > 5000) {
+      return NextResponse.json(
+        { error: "Un ou plusieurs champs dépassent la limite autorisée" },
         { status: 400 }
       )
     }

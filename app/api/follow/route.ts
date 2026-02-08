@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { notifyNewFollower } from "@/lib/notifications"
 
 // GET - Vérifier si l'utilisateur suit un artiste
 export async function GET(req: NextRequest) {
@@ -72,7 +73,8 @@ export async function POST(req: NextRequest) {
     
     // Vérifier que l'artiste existe
     const artist = await prisma.artistProfile.findUnique({
-      where: { id: artistId }
+      where: { id: artistId },
+      select: { id: true, userId: true }
     })
     
     if (!artist) {
@@ -120,6 +122,10 @@ export async function POST(req: NextRequest) {
         where: { artistId }
       })
       
+      // Notifier l'artiste
+      notifyNewFollower(artist.userId, session.user.name || "Un utilisateur")
+        .catch(err => console.error("Erreur notification follow:", err))
+
       return NextResponse.json({
         isFollowing: true,
         followersCount,

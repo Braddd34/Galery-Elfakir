@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { sendShippingNotificationEmail } from "@/lib/emails"
+import { notifyOrderShipped } from "@/lib/notifications"
 
 // POST: Marquer une commande comme expédiée
 export async function POST(
@@ -52,7 +53,7 @@ export async function POST(
 
     // Envoyer email de notification au client
     const snapshot = order.artworkSnapshot as any
-    await sendShippingNotificationEmail(order.user.email, {
+    sendShippingNotificationEmail(order.user.email, {
       orderNumber: order.orderNumber,
       customerName: order.user.name || "Client",
       artworkTitle: snapshot?.title || "Œuvre",
@@ -60,7 +61,11 @@ export async function POST(
       total: Number(order.total),
       trackingNumber: trackingNumber || undefined,
       shippingCarrier: shippingCarrier || undefined
-    })
+    }).catch(err => console.error("Erreur email expédition:", err))
+
+    // Créer une notification in-app
+    notifyOrderShipped(order.userId, order.orderNumber, trackingNumber || undefined)
+      .catch(err => console.error("Erreur notification expédition:", err))
 
     return NextResponse.json({ 
       success: true,

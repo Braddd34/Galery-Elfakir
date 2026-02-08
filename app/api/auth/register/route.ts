@@ -3,9 +3,20 @@ import bcrypt from "bcrypt"
 import crypto from "crypto"
 import prisma from "@/lib/prisma"
 import { sendWelcomeEmail, sendEmailVerificationEmail } from "@/lib/emails"
+import { authLimiter, getClientIP } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting : max 5 inscriptions par minute par IP
+    const ip = getClientIP(request)
+    const { success } = await authLimiter.check(ip, 5)
+    if (!success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Veuillez réessayer dans une minute." },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { email, password, name, role } = body
 
@@ -17,9 +28,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Adresse email invalide" },
+        { status: 400 }
+      )
+    }
+
     if (password.length < 8) {
       return NextResponse.json(
         { error: "Le mot de passe doit contenir au moins 8 caractères" },
+        { status: 400 }
+      )
+    }
+
+    // Validation nom
+    if (name.length < 2 || name.length > 100) {
+      return NextResponse.json(
+        { error: "Le nom doit contenir entre 2 et 100 caractères" },
         { status: 400 }
       )
     }
