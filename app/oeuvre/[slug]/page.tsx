@@ -5,6 +5,9 @@ import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
 import { ArtworkCategory } from "@prisma/client"
 import AddToCartButton from "@/components/cart/AddToCartButton"
+import ViewTracker from "@/components/artwork/ViewTracker"
+import ReviewSection from "@/components/reviews/ReviewSection"
+import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import { Metadata } from "next"
 
 // Générer les meta tags dynamiques pour le SEO
@@ -93,6 +96,7 @@ async function getArtwork(slug: string) {
           include: {
             user: {
               select: {
+                id: true,
                 name: true,
                 image: true
               }
@@ -101,14 +105,6 @@ async function getArtwork(slug: string) {
         }
       }
     })
-    
-    // Incrémenter les vues
-    if (artwork) {
-      await prisma.artwork.update({
-        where: { id: artwork.id },
-        data: { views: { increment: 1 } }
-      })
-    }
     
     return artwork
   } catch (error) {
@@ -389,11 +385,31 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                     </svg>
                     <span>Livraison mondiale assurée</span>
                   </div>
+                  
+                  {/* Contact artiste */}
+                  <div className="pt-4 border-t border-neutral-800">
+                    <ContactArtistButton 
+                      artistUserId={artwork.artist.user.id}
+                      artistName={artwork.artist.user.name || "Artiste"}
+                      artworkId={artwork.id}
+                      artworkTitle={artwork.title}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
+        
+        {/* Reviews Section */}
+        <section className="py-16 border-t border-neutral-800">
+          <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+            <ReviewSection artworkId={artwork.id} />
+          </div>
+        </section>
+        
+        {/* View Tracker */}
+        <ViewTracker artworkId={artwork.id} />
 
         {/* Related Works */}
         {similarArtworks.length > 0 && (

@@ -5,6 +5,8 @@ import prisma from "@/lib/prisma"
 import { ArtworkCategory, Prisma } from "@prisma/client"
 import CatalogueFilters from "@/components/catalogue/CatalogueFilters"
 import ArtworkCard from "@/components/catalogue/ArtworkCard"
+import ArtworkListItem from "@/components/catalogue/ArtworkListItem"
+import CatalogueViewToggle from "@/components/catalogue/CatalogueViewToggle"
 import { Metadata } from "next"
 
 // Métadonnées dynamiques pour le SEO
@@ -69,6 +71,12 @@ interface FilterParams {
   search?: string
   minPrice?: string
   maxPrice?: string
+  minWidth?: string
+  maxWidth?: string
+  minHeight?: string
+  maxHeight?: string
+  yearFrom?: string
+  yearTo?: string
   artistId?: string
   sort?: string
 }
@@ -109,6 +117,30 @@ async function getArtworks(filters: FilterParams) {
       where.artistId = filters.artistId
     }
     
+    // Filtre par dimensions (largeur)
+    if (filters.minWidth) {
+      where.width = { ...where.width as any, gte: parseFloat(filters.minWidth) }
+    }
+    if (filters.maxWidth) {
+      where.width = { ...where.width as any, lte: parseFloat(filters.maxWidth) }
+    }
+    
+    // Filtre par dimensions (hauteur)
+    if (filters.minHeight) {
+      where.height = { ...where.height as any, gte: parseFloat(filters.minHeight) }
+    }
+    if (filters.maxHeight) {
+      where.height = { ...where.height as any, lte: parseFloat(filters.maxHeight) }
+    }
+    
+    // Filtre par année
+    if (filters.yearFrom) {
+      where.year = { ...where.year as any, gte: parseInt(filters.yearFrom) }
+    }
+    if (filters.yearTo) {
+      where.year = { ...where.year as any, lte: parseInt(filters.yearTo) }
+    }
+    
     // Tri
     let orderBy: Prisma.ArtworkOrderByWithRelationInput = { createdAt: "desc" }
     switch (filters.sort) {
@@ -119,6 +151,7 @@ async function getArtworks(filters: FilterParams) {
         orderBy = { price: "desc" }
         break
       case "newest":
+      case "recent":
         orderBy = { createdAt: "desc" }
         break
       case "oldest":
@@ -126,6 +159,15 @@ async function getArtworks(filters: FilterParams) {
         break
       case "title":
         orderBy = { title: "asc" }
+        break
+      case "popular":
+        orderBy = { views: "desc" }
+        break
+      case "year_desc":
+        orderBy = { year: "desc" }
+        break
+      case "year_asc":
+        orderBy = { year: "asc" }
         break
     }
     
@@ -199,13 +241,21 @@ interface PageProps {
     search?: string
     minPrice?: string
     maxPrice?: string
+    minWidth?: string
+    maxWidth?: string
+    minHeight?: string
+    maxHeight?: string
+    yearFrom?: string
+    yearTo?: string
     artistId?: string
     sort?: string
+    view?: "grid" | "list"
   }
 }
 
 export default async function CataloguePage({ searchParams }: PageProps) {
   const currentCategory = searchParams.category || "all"
+  const currentView = searchParams.view || "grid"
   const artworks = await getArtworks(searchParams)
   const categoryCounts = await getCategoryCounts()
   const artists = await getArtists()
@@ -257,10 +307,13 @@ export default async function CataloguePage({ searchParams }: PageProps) {
                 />
               </div>
               
-              {/* Right: Count & Sort info */}
-              <p className="text-neutral-500 text-sm whitespace-nowrap">
-                {artworks.length} œuvre{artworks.length > 1 ? 's' : ''}
-              </p>
+              {/* Right: Count, View toggle */}
+              <div className="flex items-center gap-4">
+                <p className="text-neutral-500 text-sm whitespace-nowrap">
+                  {artworks.length} œuvre{artworks.length > 1 ? 's' : ''}
+                </p>
+                <CatalogueViewToggle currentView={currentView} />
+              </div>
             </div>
           </div>
         </div>
@@ -298,19 +351,27 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           </div>
         </div>
 
-        {/* Artworks Grid */}
+        {/* Artworks Grid/List */}
         <section className="py-12">
           <div className="max-w-[1800px] mx-auto px-6 md:px-12">
             {artworks.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-                {artworks.map((artwork) => (
-                  <ArtworkCard key={artwork.id} artwork={artwork as any} />
-                ))}
-              </div>
+              currentView === "list" ? (
+                <div className="space-y-4">
+                  {artworks.map((artwork) => (
+                    <ArtworkListItem key={artwork.id} artwork={artwork as any} />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+                  {artworks.map((artwork) => (
+                    <ArtworkCard key={artwork.id} artwork={artwork as any} />
+                  ))}
+                </div>
+              )
             ) : (
               <div className="text-center py-24">
                 <p className="text-neutral-500 text-lg mb-4">
-                  Aucune œuvre disponible dans cette catégorie.
+                  Aucune œuvre disponible avec ces critères.
                 </p>
                 <Link 
                   href="/catalogue" 

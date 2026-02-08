@@ -48,6 +48,11 @@ model User {
   buyerProfile  BuyerProfile?
   orders        Order[]
   favorites     Favorite[]
+  reviews       Review[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  follows       Follow[]
+  artworkViews  ArtworkView[]
   
   @@map("users")
 }
@@ -127,6 +132,9 @@ model ArtistProfile {
   city        String?
   website     String?
   instagram   String?
+  twitter     String?
+  facebook    String?
+  linkedin    String?
   phone       String?
   
   siret       String?
@@ -144,6 +152,8 @@ model ArtistProfile {
   updatedAt   DateTime @updatedAt
   
   artworks    Artwork[]
+  exhibitions Exhibition[]
+  followers   Follow[]
   
   @@map("artist_profiles")
 }
@@ -240,6 +250,8 @@ model Artwork {
   publishedAt DateTime?
   
   favorites   Favorite[]
+  reviews     Review[]
+  artworkViews ArtworkView[]
   
   @@index([artistId])
   @@index([status])
@@ -354,4 +366,137 @@ model NewsletterSubscriber {
   createdAt DateTime @default(now())
   
   @@map("newsletter_subscribers")
+}
+
+// ==========================================
+// AVIS & REVIEWS
+// ==========================================
+
+model Review {
+  id        String   @id @default(cuid())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  artworkId String
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  
+  rating    Int      // 1-5 étoiles
+  title     String?
+  comment   String?  @db.Text
+  
+  verified  Boolean  @default(false) // Achat vérifié
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, artworkId]) // Un seul avis par utilisateur par œuvre
+  @@index([artworkId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+// ==========================================
+// MESSAGERIE INTERNE
+// ==========================================
+
+model Message {
+  id          String   @id @default(cuid())
+  
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  subject     String?
+  content     String   @db.Text
+  
+  read        Boolean  @default(false)
+  readAt      DateTime?
+  
+  // Référence optionnelle à une œuvre
+  artworkId   String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([read])
+  @@map("messages")
+}
+
+// ==========================================
+// SUIVI D'ARTISTES
+// ==========================================
+
+model Follow {
+  id        String   @id @default(cuid())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  artistId  String
+  artist    ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, artistId])
+  @@index([userId])
+  @@index([artistId])
+  @@map("follows")
+}
+
+// ==========================================
+// HISTORIQUE DES VUES DÉTAILLÉ
+// ==========================================
+
+model ArtworkView {
+  id        String   @id @default(cuid())
+  
+  artworkId String
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  
+  userId    String?  // Null si visiteur non connecté
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  ipHash    String?  // Hash de l'IP pour les anonymes
+  userAgent String?
+  referrer  String?
+  
+  viewedAt  DateTime @default(now())
+  
+  @@index([artworkId])
+  @@index([userId])
+  @@index([viewedAt])
+  @@map("artwork_views")
+}
+
+// ==========================================
+// EXPOSITIONS
+// ==========================================
+
+model Exhibition {
+  id          String   @id @default(cuid())
+  
+  artistId    String
+  artist      ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?  @db.Text
+  location    String   // Nom du lieu / galerie
+  city        String?
+  country     String?
+  
+  startDate   DateTime
+  endDate     DateTime?
+  
+  imageUrl    String?
+  link        String?  // Lien externe
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([artistId])
+  @@map("exhibitions")
 }

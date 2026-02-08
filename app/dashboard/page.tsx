@@ -183,9 +183,9 @@ export default async function DashboardPage() {
                 href="/dashboard/artiste/ventes"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mes ventes</h3>
+                <h3 className="text-lg font-light mb-2">Statistiques & Ventes</h3>
                 <p className="text-neutral-500 text-sm">
-                  Historique de mes ventes
+                  Graphiques, export CSV et historique
                 </p>
               </Link>
               <Link
@@ -195,6 +195,15 @@ export default async function DashboardPage() {
                 <h3 className="text-lg font-light mb-2">Mon profil</h3>
                 <p className="text-neutral-500 text-sm">
                   Modifier mes informations
+                </p>
+              </Link>
+              <Link
+                href="/dashboard/favoris"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Mes favoris</h3>
+                <p className="text-neutral-500 text-sm">
+                  Œuvres sauvegardées
                 </p>
               </Link>
             </>
@@ -232,6 +241,22 @@ export default async function DashboardPage() {
               </Link>
             </>
           )}
+          
+          {/* Messages - Pour tous les utilisateurs */}
+          <Link
+            href="/dashboard/messages"
+            className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <h3 className="text-lg font-light">Mes messages</h3>
+            </div>
+            <p className="text-neutral-500 text-sm">
+              Communiquer avec les artistes / acheteurs
+            </p>
+          </Link>
         </div>
 
         {/* Quick Stats for Admin */}

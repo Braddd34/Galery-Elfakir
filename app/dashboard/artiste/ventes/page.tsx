@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
+import ArtistStatsChart from "@/components/dashboard/ArtistStatsChart"
 
 function getImageUrl(images: any): string {
   const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200"
@@ -70,21 +71,10 @@ export default async function ArtistVentesPage() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-light mb-8">Mes ventes</h1>
 
-        {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <p className="text-3xl font-light">{totalSales}</p>
-            <p className="text-neutral-500 text-sm mt-1">Œuvres vendues</p>
-          </div>
-          <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <p className="text-3xl font-light">€{Number(totalRevenue).toLocaleString()}</p>
-            <p className="text-neutral-500 text-sm mt-1">Revenus totaux</p>
-          </div>
-          <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <p className="text-3xl font-light">30%</p>
-            <p className="text-neutral-500 text-sm mt-1">Commission galerie</p>
-          </div>
-        </div>
+        {/* Statistiques détaillées avec graphiques */}
+        <section className="mb-12">
+          <ArtistStatsChart />
+        </section>
 
         {/* Sales List */}
         <h2 className="text-xl font-light mb-6">Historique des ventes</h2>

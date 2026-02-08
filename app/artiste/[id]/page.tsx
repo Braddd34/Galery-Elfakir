@@ -2,6 +2,10 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import FollowButton from "@/components/artist/FollowButton"
+import SocialLinks from "@/components/artist/SocialLinks"
+import ExhibitionsGallery from "@/components/artist/ExhibitionsGallery"
+import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import prisma from "@/lib/prisma"
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
@@ -46,6 +50,7 @@ async function getArtist(id: string) {
       include: {
         user: {
           select: {
+            id: true,
             name: true,
             image: true,
           }
@@ -59,6 +64,7 @@ async function getArtist(id: string) {
           },
           select: {
             id: true,
+            slug: true,
             title: true,
             price: true,
             images: true,
@@ -212,6 +218,18 @@ export default async function ArtistePage({ params }: { params: { id: string } }
                   </p>
                 )}
 
+                {/* Bouton Suivre + Réseaux sociaux */}
+                <div className="flex flex-wrap items-center gap-6 mb-8">
+                  <FollowButton artistId={artist.id} />
+                  <SocialLinks 
+                    website={artist.website}
+                    instagram={artist.instagram}
+                    twitter={artist.twitter}
+                    facebook={artist.facebook}
+                    linkedin={artist.linkedin}
+                  />
+                </div>
+
                 <div className="flex items-center gap-8 pt-6 border-t border-neutral-800">
                   <div>
                     <p className="text-3xl font-light">{artist.artworks.length}</p>
@@ -220,19 +238,20 @@ export default async function ArtistePage({ params }: { params: { id: string } }
                     </p>
                   </div>
                   
-                  {artist.website && (
-                    <a 
-                      href={artist.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-neutral-400 hover:text-white transition-colors underline"
-                    >
-                      Site web
-                    </a>
-                  )}
+                  <ContactArtistButton 
+                    artistUserId={artist.user.id} 
+                    artistName={artist.user.name || "Artiste"} 
+                  />
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Expositions */}
+        <section className="border-t border-neutral-800 py-16 px-6">
+          <div className="max-w-7xl mx-auto">
+            <ExhibitionsGallery artistId={artist.id} />
           </div>
         </section>
 
@@ -248,7 +267,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
                 {artist.artworks.map((artwork) => (
                   <Link 
                     key={artwork.id}
-                    href={`/oeuvre/${artwork.id}`}
+                    href={`/oeuvre/${artwork.slug || artwork.id}`}
                     className="group"
                   >
                     <div className="aspect-[3/4] bg-neutral-900 overflow-hidden mb-4">
