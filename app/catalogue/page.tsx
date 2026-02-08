@@ -1,11 +1,11 @@
 import Link from "next/link"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import Breadcrumbs from "@/components/ui/Breadcrumbs"
 import prisma from "@/lib/prisma"
 import { ArtworkCategory, Prisma } from "@prisma/client"
 import CatalogueFilters from "@/components/catalogue/CatalogueFilters"
-import ArtworkCard from "@/components/catalogue/ArtworkCard"
-import ArtworkListItem from "@/components/catalogue/ArtworkListItem"
+import InfiniteScrollLoader from "@/components/catalogue/InfiniteScrollLoader"
 import CatalogueViewToggle from "@/components/catalogue/CatalogueViewToggle"
 import { Metadata } from "next"
 
@@ -171,25 +171,31 @@ async function getArtworks(filters: FilterParams) {
         break
     }
     
-    const artworks = await prisma.artwork.findMany({
-      where,
-      orderBy,
-      include: {
-        artist: {
-          include: {
-            user: {
-              select: {
-                name: true
+    const LIMIT = 12
+    
+    const [artworks, totalCount] = await Promise.all([
+      prisma.artwork.findMany({
+        where,
+        orderBy,
+        take: LIMIT,
+        include: {
+          artist: {
+            include: {
+              user: {
+                select: {
+                  name: true
+                }
               }
             }
           }
         }
-      }
-    })
-    return artworks
+      }),
+      prisma.artwork.count({ where })
+    ])
+    return { artworks, totalCount }
   } catch (error) {
     console.error("Erreur récupération œuvres:", error)
-    return []
+    return { artworks: [], totalCount: 0 }
   }
 }
 
@@ -256,12 +262,30 @@ interface PageProps {
 export default async function CataloguePage({ searchParams }: PageProps) {
   const currentCategory = searchParams.category || "all"
   const currentView = searchParams.view || "grid"
-  const artworks = await getArtworks(searchParams)
+  const { artworks, totalCount: filteredCount } = await getArtworks(searchParams)
   const categoryCounts = await getCategoryCounts()
   const artists = await getArtists()
   
   // Calculer le total
   const totalCount = categoryCounts.reduce((acc, cat) => acc + cat._count, 0)
+  
+  // Breadcrumbs dynamiques
+  const breadcrumbItems = [{ label: "Catalogue", href: "/catalogue" }]
+  const categoryLabelsMap: Record<string, string> = {
+    painting: "Peintures",
+    sculpture: "Sculptures",
+    photography: "Photographies",
+    drawing: "Dessins",
+    print: "Estampes",
+    digital: "Art numérique",
+    mixed_media: "Techniques mixtes",
+  }
+  if (searchParams.category && categoryLabelsMap[searchParams.category]) {
+    breadcrumbItems.push({ label: categoryLabelsMap[searchParams.category] })
+  }
+  if (searchParams.search) {
+    breadcrumbItems.push({ label: `Recherche : "${searchParams.search}"` })
+  }
   
   // Categories disponibles avec compteur
   const categories = [
@@ -283,6 +307,9 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     <>
       <Header />
       <main id="main-content" className="bg-black text-white min-h-screen pt-32">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={breadcrumbItems} />
+        
         {/* Hero Header */}
         <header className="py-16 text-center">
           <div className="max-w-[1800px] mx-auto px-6 md:px-12">
@@ -310,7 +337,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
               {/* Right: Count, View toggle */}
               <div className="flex items-center gap-4">
                 <p className="text-neutral-500 text-sm whitespace-nowrap">
-                  {artworks.length} œuvre{artworks.length > 1 ? 's' : ''}
+                  {filteredCount} œuvre{filteredCount > 1 ? 's' : ''}
                 </p>
                 <CatalogueViewToggle currentView={currentView} />
               </div>
@@ -351,23 +378,16 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           </div>
         </div>
 
-        {/* Artworks Grid/List */}
+        {/* Artworks Grid/List avec Infinite Scroll */}
         <section className="py-12">
           <div className="max-w-[1800px] mx-auto px-6 md:px-12">
             {artworks.length > 0 ? (
-              currentView === "list" ? (
-                <div className="space-y-4">
-                  {artworks.map((artwork) => (
-                    <ArtworkListItem key={artwork.id} artwork={artwork as any} />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-                  {artworks.map((artwork) => (
-                    <ArtworkCard key={artwork.id} artwork={artwork as any} />
-                  ))}
-                </div>
-              )
+              <InfiniteScrollLoader
+                initialArtworks={artworks as any}
+                totalCount={filteredCount}
+                currentView={currentView}
+                searchParams={searchParams as any}
+              />
             ) : (
               <div className="text-center py-24">
                 <p className="text-neutral-500 text-lg mb-4">

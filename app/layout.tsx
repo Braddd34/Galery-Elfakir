@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import SessionProvider from "@/components/providers/SessionProvider"
+import { CompareProvider } from "@/components/artwork/CompareDrawer"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import SkipLink from "@/components/ui/SkipLink"
@@ -55,7 +56,9 @@ export default function RootLayout({
       <body className="bg-black text-white min-h-screen">
         <SkipLink />
         <SessionProvider>
-          {children}
+          <CompareProvider>
+            {children}
+          </CompareProvider>
         </SessionProvider>
         <Analytics />
         <SpeedInsights />

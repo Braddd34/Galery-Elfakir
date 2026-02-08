@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
+import AdminDashboard from "@/components/admin/AdminDashboard"
 
 // Statistiques pour l'admin
 async function getAdminStats() {
@@ -156,6 +157,15 @@ export default async function DashboardPage() {
                 </p>
               </Link>
               <Link
+                href="/admin/users"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Utilisateurs</h3>
+                <p className="text-neutral-500 text-sm">
+                  Bloquer, promouvoir, gérer les comptes
+                </p>
+              </Link>
+              <Link
                 href="/dashboard/favoris"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
@@ -259,28 +269,11 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {/* Quick Stats for Admin */}
-        {user.role === "ADMIN" && adminStats && (
+        {/* Admin Dashboard avec graphiques et alertes */}
+        {user.role === "ADMIN" && (
           <div className="mt-12">
-            <h2 className="text-xl font-light mb-6">Statistiques</h2>
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="bg-neutral-900 border border-neutral-800 p-6">
-                <p className="text-3xl font-light">{adminStats.artworks}</p>
-                <p className="text-neutral-500 text-sm mt-1">Œuvres</p>
-              </div>
-              <div className="bg-neutral-900 border border-neutral-800 p-6">
-                <p className="text-3xl font-light">{adminStats.artists}</p>
-                <p className="text-neutral-500 text-sm mt-1">Artistes</p>
-              </div>
-              <div className="bg-neutral-900 border border-neutral-800 p-6">
-                <p className="text-3xl font-light">{adminStats.orders}</p>
-                <p className="text-neutral-500 text-sm mt-1">Commandes</p>
-              </div>
-              <div className="bg-neutral-900 border border-neutral-800 p-6">
-                <p className="text-3xl font-light">€{Number(adminStats.revenue).toLocaleString('fr-FR')}</p>
-                <p className="text-neutral-500 text-sm mt-1">Revenus</p>
-              </div>
-            </div>
+            <h2 className="text-xl font-light mb-6">Statistiques & Alertes</h2>
+            <AdminDashboard />
           </div>
         )}
         

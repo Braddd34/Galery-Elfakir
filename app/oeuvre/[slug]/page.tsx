@@ -2,12 +2,14 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import Breadcrumbs from "@/components/ui/Breadcrumbs"
 import prisma from "@/lib/prisma"
 import { ArtworkCategory } from "@prisma/client"
 import AddToCartButton from "@/components/cart/AddToCartButton"
 import ViewTracker from "@/components/artwork/ViewTracker"
 import ReviewSection from "@/components/reviews/ReviewSection"
 import ContactArtistButton from "@/components/artist/ContactArtistButton"
+import ShareButtons from "@/components/artwork/ShareButtons"
 import { Metadata } from "next"
 
 // Générer les meta tags dynamiques pour le SEO
@@ -238,18 +240,12 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
       />
       <Header />
       <main id="main-content" className="bg-black text-white min-h-screen pt-28">
-        {/* Breadcrumb */}
-        <div className="border-b border-neutral-800/50">
-          <div className="max-w-[1800px] mx-auto px-8 md:px-16 py-4">
-            <nav className="flex items-center gap-3 text-sm text-neutral-500">
-              <Link href="/" className="hover:text-white transition-colors">Accueil</Link>
-              <span>/</span>
-              <Link href="/catalogue" className="hover:text-white transition-colors">Collection</Link>
-              <span>/</span>
-              <span className="text-white">{artwork.title}</span>
-            </nav>
-          </div>
-        </div>
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={[
+          { label: "Catalogue", href: "/catalogue" },
+          { label: categoryLabels[artwork.category], href: `/catalogue?category=${artwork.category.toLowerCase()}` },
+          { label: artwork.title }
+        ]} />
 
         {/* Main Content */}
         <section className="py-16 md:py-24">
@@ -293,7 +289,15 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                     {categoryLabels[artwork.category]} — {artwork.year}
                   </p>
                   <h1 className="heading-md mb-2">{artwork.title}</h1>
-                  <p className="text-neutral-500 text-lg">{artwork.medium}</p>
+                  <p className="text-neutral-500 text-lg mb-4">{artwork.medium}</p>
+                  
+                  {/* Partage */}
+                  <ShareButtons
+                    title={artwork.title}
+                    url={`/oeuvre/${artwork.slug}`}
+                    description={`${artwork.title} par ${artistName} - €${Number(artwork.price).toLocaleString()}`}
+                    imageUrl={images[0]?.url}
+                  />
                 </div>
 
                 {/* Artist */}
