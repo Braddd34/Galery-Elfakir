@@ -191,9 +191,9 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error("❌ Erreur:", error)
+    console.error("Erreur setup:", error)
     return NextResponse.json(
-      { error: "Erreur lors de l'initialisation", details: error.message },
+      { error: "Erreur lors de l'initialisation" },
       { status: 500 }
     )
   }

@@ -58,8 +58,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingUser) {
+      // Message générique pour empêcher l'énumération d'emails.
+      // On ne révèle PAS que l'email est déjà inscrit.
       return NextResponse.json(
-        { error: "Cet email est déjà utilisé" },
+        { error: "Impossible de créer le compte. Vérifiez vos informations ou essayez de vous connecter." },
         { status: 400 }
       )
     }
