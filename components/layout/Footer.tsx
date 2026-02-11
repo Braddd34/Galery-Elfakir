@@ -1,9 +1,15 @@
+"use client"
+
 import Link from "next/link"
 import NewsletterForm from "@/components/ui/NewsletterForm"
-import { getServerTranslation } from "@/lib/i18n-server"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
+/**
+ * Footer du site — composant client pour accéder aux traductions dynamiques.
+ * Contient : newsletter, navigation, liens légaux, réseaux sociaux.
+ */
 export default function Footer() {
-  const t = getServerTranslation()
+  const { t } = useLanguage()
 
   return (
     <footer className="bg-black border-t border-neutral-800">
@@ -32,9 +38,9 @@ export default function Footer() {
               ELFAKIR
             </Link>
             <p className="mt-4 text-neutral-500 text-sm leading-relaxed max-w-md">
-              Galerie d'art contemporain dédiée à la promotion d'artistes 
+              Galerie d&apos;art contemporain dédiée à la promotion d&apos;artistes 
               émergents et établis. Chaque œuvre est unique et accompagnée 
-              d'un certificat d'authenticité.
+              d&apos;un certificat d&apos;authenticité.
             </p>
           </div>
 
