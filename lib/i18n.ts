@@ -25,6 +25,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.myFavorites": "Mes favoris",
     "nav.logout": "Déconnexion",
     "nav.search": "Rechercher une œuvre, un artiste...",
+    "nav.about": "À propos",
+    "nav.catalogue": "Catalogue",
 
     // Page d'accueil
     "home.hero.subtitle": "Galerie d'Art Contemporain",
@@ -233,6 +235,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.myFavorites": "My favorites",
     "nav.logout": "Sign out",
     "nav.search": "Search an artwork, an artist...",
+    "nav.about": "About",
+    "nav.catalogue": "Catalogue",
 
     // Homepage
     "home.hero.subtitle": "Contemporary Art Gallery",

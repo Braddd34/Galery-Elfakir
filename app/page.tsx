@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import HomeHeader from "@/components/layout/HomeHeader"
 import prisma from "@/lib/prisma"
 import Recommendations from "@/components/artwork/Recommendations"
@@ -153,10 +154,13 @@ export default async function HomePage() {
       <section className="h-screen relative flex items-end">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <img 
+          <Image 
             src={heroImage}
-            alt="Featured artwork"
-            className="w-full h-full object-cover opacity-40"
+            alt="Œuvre mise en avant"
+            fill
+            className="object-cover opacity-40"
+            priority
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
@@ -225,10 +229,12 @@ export default async function HomePage() {
               {featuredArtworks[0] && (
                 <Link href={`/oeuvre/${featuredArtworks[0].slug}`} className="md:col-span-7 group">
                   <div className="relative img-zoom aspect-[4/5] md:aspect-[3/4] bg-neutral-900">
-                    <img
+                    <Image
                       src={getImageUrl(featuredArtworks[0].images)}
                       alt={featuredArtworks[0].title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 58vw"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
                   </div>
@@ -249,10 +255,12 @@ export default async function HomePage() {
                 {featuredArtworks.slice(1, 3).map((artwork) => (
                   <Link key={artwork.id} href={`/oeuvre/${artwork.slug}`} className="group">
                     <div className="relative img-zoom aspect-[4/3] bg-neutral-900">
-                      <img
+                      <Image
                         src={getImageUrl(artwork.images)}
                         alt={artwork.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 42vw"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
                     </div>
@@ -343,10 +351,12 @@ export default async function HomePage() {
       {/* Artists CTA */}
       <section className="py-32 md:py-48 relative overflow-hidden">
         <div className="absolute inset-0">
-          <img 
+          <Image 
             src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1920&h=800&fit=crop" 
             alt=""
-            className="w-full h-full object-cover opacity-20"
+            fill
+            className="object-cover opacity-20"
+            sizes="100vw"
           />
         </div>
         <div className="relative max-w-[1800px] mx-auto px-8 md:px-16 text-center">

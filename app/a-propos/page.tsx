@@ -2,6 +2,7 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 
 export const metadata: Metadata = {
   title: "À propos",
@@ -41,11 +42,13 @@ export default function AProposPage() {
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-16">
               {/* Image */}
-              <div className="aspect-[4/5] bg-neutral-900 overflow-hidden">
-                <img
+              <div className="relative aspect-[4/5] bg-neutral-900 overflow-hidden">
+                <Image
                   src="https://images.unsplash.com/photo-1577720643272-265f09367456?w=800"
                   alt="Intérieur de la galerie ELFAKIR"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
 
@@ -237,18 +240,22 @@ export default function AProposPage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="aspect-square bg-neutral-900 overflow-hidden">
-                  <img 
+                <div className="relative aspect-square bg-neutral-900 overflow-hidden">
+                  <Image 
                     src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400" 
                     alt="Artiste peignant" 
-                    className="w-full h-full object-cover" 
+                    fill
+                    className="object-cover"
+                    sizes="25vw"
                   />
                 </div>
-                <div className="aspect-square bg-neutral-900 overflow-hidden mt-8">
-                  <img 
+                <div className="relative aspect-square bg-neutral-900 overflow-hidden mt-8">
+                  <Image 
                     src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400" 
                     alt="Atelier d'artiste" 
-                    className="w-full h-full object-cover" 
+                    fill
+                    className="object-cover"
+                    sizes="25vw"
                   />
                 </div>
               </div>

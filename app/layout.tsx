@@ -58,7 +58,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/apple-icon" />
         {/* Script inline pour éviter le flash de thème au chargement */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {

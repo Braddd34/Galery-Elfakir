@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
@@ -307,9 +308,11 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                   href={`/artiste/${artwork.artistId}`}
                   className="flex items-center gap-5 py-6 border-y border-neutral-800 group"
                 >
-                  <img 
+                  <Image 
                     src={artwork.artist.user.image || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400"} 
                     alt={artwork.artist.user.name || "Artiste"}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 object-cover"
                   />
                   <div className="flex-1">

@@ -33,11 +33,14 @@ export default function LanguageProvider({ children }: { children: ReactNode }) 
   const [locale, setLocaleState] = useState<Locale>("fr")
   const [mounted, setMounted] = useState(false)
 
-  // Charger la langue sauvegardée
+  // Charger la langue sauvegardée + synchroniser le cookie
   useEffect(() => {
     const saved = localStorage.getItem("locale") as Locale | null
     if (saved && (saved === "fr" || saved === "en")) {
       setLocaleState(saved)
+      document.cookie = `locale=${saved};path=/;max-age=31536000;SameSite=Lax`
+    } else {
+      document.cookie = `locale=fr;path=/;max-age=31536000;SameSite=Lax`
     }
     setMounted(true)
   }, [])
@@ -46,6 +49,8 @@ export default function LanguageProvider({ children }: { children: ReactNode }) 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)
     localStorage.setItem("locale", newLocale)
+    // Sauvegarder aussi dans un cookie pour le serveur (i18n-server.ts)
+    document.cookie = `locale=${newLocale};path=/;max-age=31536000;SameSite=Lax`
     // Mettre à jour l'attribut lang de la page
     document.documentElement.lang = newLocale
   }, [])

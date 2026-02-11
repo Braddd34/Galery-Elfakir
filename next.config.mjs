@@ -32,9 +32,40 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   
-  // Cache headers pour la performance
+  // Cache headers + sécurité
   async headers() {
     return [
+      {
+        // Headers de sécurité pour toutes les pages
+        source: "/(.*)",
+        headers: [
+          {
+            // Empêche le navigateur de deviner le type MIME (protection XSS)
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            // Empêche l'inclusion en iframe par d'autres sites (protection clickjacking)
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            // Active la protection XSS du navigateur
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+          {
+            // Contrôle les informations envoyées dans le header Referer
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            // Empêche certains types d'attaques via les permissions du navigateur
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
       {
         // Cache immutable pour les assets statiques (images, fonts, JS/CSS)
         source: "/:path*.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|eot)",
@@ -56,7 +87,7 @@ const nextConfig = {
         ],
       },
       {
-        // Cache court pour le service worker
+        // Cache court pour le service worker (doit être revalidé souvent)
         source: "/sw.js",
         headers: [
           {

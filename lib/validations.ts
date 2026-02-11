@@ -222,6 +222,44 @@ export const artworkSchema = z.object({
 })
 
 // ==========================================
+// CHECKOUT
+// ==========================================
+
+export const checkoutAddressSchema = z.object({
+  firstName: z
+    .string()
+    .min(2, "Le prénom doit contenir au moins 2 caractères")
+    .max(50, "Le prénom ne peut pas dépasser 50 caractères"),
+  lastName: z
+    .string()
+    .min(2, "Le nom doit contenir au moins 2 caractères")
+    .max(50, "Le nom ne peut pas dépasser 50 caractères"),
+  email: z
+    .string()
+    .min(1, "L'email est requis")
+    .email("Format d'email invalide"),
+  phone: z
+    .string()
+    .optional()
+    .or(z.literal("")),
+  address: z
+    .string()
+    .min(5, "L'adresse doit contenir au moins 5 caractères")
+    .max(200, "L'adresse ne peut pas dépasser 200 caractères"),
+  postalCode: z
+    .string()
+    .min(3, "Code postal requis")
+    .max(10, "Code postal trop long"),
+  city: z
+    .string()
+    .min(2, "La ville doit contenir au moins 2 caractères")
+    .max(100, "La ville ne peut pas dépasser 100 caractères"),
+  country: z
+    .string()
+    .min(2, "Le pays est requis")
+})
+
+// ==========================================
 // NEWSLETTER
 // ==========================================
 
@@ -245,4 +283,5 @@ export type ContactInput = z.infer<typeof contactSchema>
 export type BuyerProfileInput = z.infer<typeof buyerProfileSchema>
 export type ArtistProfileInput = z.infer<typeof artistProfileSchema>
 export type ArtworkInput = z.infer<typeof artworkSchema>
+export type CheckoutAddressInput = z.infer<typeof checkoutAddressSchema>
 export type NewsletterInput = z.infer<typeof newsletterSchema>

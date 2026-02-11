@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { notifyNewReview } from "@/lib/notifications"
+import { formLimiter, getClientIP } from "@/lib/rate-limit"
 
 // GET - Récupérer les avis d'une œuvre
 export async function GET(req: NextRequest) {
@@ -54,6 +55,14 @@ export async function GET(req: NextRequest) {
 // POST - Créer un avis
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting : max 5 avis/min par IP
+    const ip = getClientIP(req)
+    try {
+      await formLimiter.check(5, ip)
+    } catch {
+      return NextResponse.json({ error: "Trop de tentatives, réessayez plus tard" }, { status: 429 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {

@@ -1,7 +1,10 @@
 import Link from "next/link"
 import NewsletterForm from "@/components/ui/NewsletterForm"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 export default function Footer() {
+  const t = getServerTranslation()
+
   return (
     <footer className="bg-black border-t border-neutral-800">
       {/* Newsletter Section */}
@@ -9,9 +12,9 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h3 className="text-xl font-light mb-2">Restez informé</h3>
+              <h3 className="text-xl font-light mb-2">{t("home.newsletterTitle")}</h3>
               <p className="text-neutral-500 text-sm">
-                Recevez en avant-première nos nouvelles œuvres et événements exclusifs.
+                {t("home.newsletterDesc")}
               </p>
             </div>
             <div className="md:w-1/2 lg:w-1/3">
@@ -42,19 +45,19 @@ export default function Footer() {
             </h4>
             <nav className="flex flex-col gap-3">
               <Link href="/catalogue" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                Catalogue
+                {t("catalogue.title")}
               </Link>
               <Link href="/artistes" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                Artistes
+                {t("nav.artists")}
               </Link>
               <Link href="/a-propos" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                À propos
+                {t("footer.aboutUs")}
               </Link>
               <Link href="/contact" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                Contact
+                {t("footer.contact")}
               </Link>
               <Link href="/faq" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                FAQ
+                {t("footer.faq")}
               </Link>
             </nav>
           </div>
@@ -62,17 +65,17 @@ export default function Footer() {
           {/* Legal */}
           <div>
             <h4 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">
-              Légal
+              {t("footer.legal")}
             </h4>
             <nav className="flex flex-col gap-3">
               <Link href="/mentions-legales" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                Mentions légales
+                {t("footer.legal")}
               </Link>
               <Link href="/cgv" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                CGV
+                {t("footer.terms")}
               </Link>
               <Link href="/confidentialite" className="text-neutral-400 hover:text-white transition-colors text-sm">
-                Confidentialité
+                {t("footer.privacy")}
               </Link>
             </nav>
           </div>
@@ -80,9 +83,9 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-16 pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-neutral-600 text-sm">
-            © {new Date().getFullYear()} ELFAKIR. Tous droits réservés.
-          </p>
+            <p className="text-neutral-600 text-sm">
+              © {new Date().getFullYear()} ELFAKIR. {t("footer.rights")}.
+            </p>
           <div className="flex gap-6">
             <a href="#" className="text-neutral-500 hover:text-white transition-colors text-sm">
               Instagram
