@@ -160,21 +160,26 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
                   setActiveIndex(i)
                 }}
               >
-                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                <img src={img.url} alt={`${alt} — vue ${i + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Modal Lightbox */}
+      {/* Modal Lightbox — role="dialog" pour accessibilité */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center">
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Visionneuse : ${alt}`}
+        >
           {/* Bouton fermer */}
           <button
             onClick={closeLightbox}
             className="absolute top-6 right-6 z-10 p-3 text-white/70 hover:text-white transition-colors"
-            aria-label="Fermer"
+            aria-label="Fermer la visionneuse"
           >
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
@@ -277,7 +282,7 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
                       i === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-40 hover:opacity-80"
                     }`}
                   >
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                    <img src={img.url} alt={`Miniature ${i + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -285,7 +290,7 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
           )}
 
           {/* Instructions */}
-          <div className="absolute bottom-6 right-6 text-white/30 text-xs space-y-1">
+          <div className="absolute bottom-6 right-6 text-white/30 text-xs space-y-1" aria-hidden="true">
             <p>Molette : zoomer · Double-clic : zoom 250%</p>
             <p>← → : naviguer · Échap : fermer</p>
           </div>

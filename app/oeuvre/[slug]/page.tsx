@@ -117,8 +117,31 @@ async function getArtwork(slug: string) {
   }
 }
 
-// La section "Vous aimerez aussi" est maintenant gérée côté client
-// via le composant Recommendations qui appelle l'API /api/recommendations
+// Récupérer les avis pour le JSON-LD (données structurées SEO)
+async function getReviewStats(artworkId: string) {
+  try {
+    const [reviews, stats] = await Promise.all([
+      prisma.review.findMany({
+        where: { artworkId },
+        include: { user: { select: { name: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 10
+      }),
+      prisma.review.aggregate({
+        where: { artworkId },
+        _avg: { rating: true },
+        _count: { rating: true }
+      })
+    ])
+    return {
+      reviews,
+      avgRating: stats._avg.rating || 0,
+      count: stats._count.rating || 0
+    }
+  } catch {
+    return { reviews: [], avgRating: 0, count: 0 }
+  }
+}
 
 export default async function ArtworkPage({ params }: { params: { slug: string } }) {
   const artwork = await getArtwork(params.slug)
@@ -130,6 +153,9 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
   const images = getImages(artwork.images)
   const artistName = artwork.artist.user.name || "Artiste"
   const baseUrl = "https://galeryelfakir.vercel.app"
+  
+  // Récupérer les stats d'avis pour le JSON-LD
+  const reviewData = await getReviewStats(artwork.id)
 
   // Données structurées JSON-LD pour le SEO (Product + VisualArtwork)
   const jsonLd = {
@@ -172,7 +198,32 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
         "@type": "Organization",
         name: "ELFAKIR Gallery"
       }
-    }
+    },
+    // Avis structurés pour Google Rich Snippets (étoiles dans les résultats)
+    ...(reviewData.count > 0 ? {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: reviewData.avgRating.toFixed(1),
+        bestRating: "5",
+        worstRating: "1",
+        ratingCount: reviewData.count
+      },
+      review: reviewData.reviews.slice(0, 5).map(r => ({
+        "@type": "Review",
+        author: {
+          "@type": "Person",
+          name: r.user.name || "Anonyme"
+        },
+        datePublished: r.createdAt.toISOString().split("T")[0],
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: r.rating,
+          bestRating: "5"
+        },
+        ...(r.title ? { name: r.title } : {}),
+        ...(r.comment ? { reviewBody: r.comment } : {})
+      }))
+    } : {})
   }
 
   // Breadcrumb JSON-LD

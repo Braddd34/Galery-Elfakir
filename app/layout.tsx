@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import SkipLink from "@/components/ui/SkipLink"
 import NetworkStatus from "@/components/ui/NetworkStatus"
+import ServiceWorkerRegister from "@/components/ui/ServiceWorkerRegister"
 
 export const metadata: Metadata = {
   title: {
@@ -55,6 +56,9 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
         {/* Script inline pour éviter le flash de thème au chargement */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
@@ -81,6 +85,7 @@ export default function RootLayout({
             </LanguageProvider>
           </ThemeProvider>
         </SessionProvider>
+        <ServiceWorkerRegister />
         <Analytics />
         <SpeedInsights />
       </body>

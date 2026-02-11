@@ -4,6 +4,7 @@ import { useCart, CartItem } from "@/lib/cart-context"
 import { useState } from "react"
 import FavoriteButton from "@/components/ui/FavoriteButton"
 import { useToast } from "@/lib/toast-context"
+import { trackAddToCart } from "@/lib/analytics"
 
 interface AddToCartButtonProps {
   artwork: CartItem
@@ -24,6 +25,7 @@ export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
       setIsAdding(true)
       addItem(artwork)
       showToast("Œuvre ajoutée au panier", "success")
+      trackAddToCart({ id: artwork.id, title: artwork.title, price: artwork.price })
       setTimeout(() => setIsAdding(false), 500)
     }
   }
