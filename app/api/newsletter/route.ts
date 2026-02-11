@@ -7,9 +7,8 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting : max 5 inscriptions/min par IP
     const ip = getClientIP(request)
-    try {
-      await formLimiter.check(5, ip)
-    } catch {
+    const rateLimitResult = await formLimiter.check(ip, 5)
+    if (!rateLimitResult.success) {
       return NextResponse.json({ error: "Trop de tentatives, réessayez plus tard" }, { status: 429 })
     }
 

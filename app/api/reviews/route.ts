@@ -57,9 +57,8 @@ export async function POST(req: NextRequest) {
   try {
     // Rate limiting : max 5 avis/min par IP
     const ip = getClientIP(req)
-    try {
-      await formLimiter.check(5, ip)
-    } catch {
+    const rateLimitResult = await formLimiter.check(ip, 5)
+    if (!rateLimitResult.success) {
       return NextResponse.json({ error: "Trop de tentatives, réessayez plus tard" }, { status: 429 })
     }
 
