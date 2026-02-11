@@ -87,20 +87,6 @@ export default function Header() {
               </>
             )}
 
-            {/* Menu Mobile Button */}
-            <button 
-              className="md:hidden p-2 ml-2"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
-              aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-            >
-              <div className="w-6 flex flex-col gap-1.5" aria-hidden="true">
-                <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
-                <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></span>
-                <span className={`block h-px bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
-              </div>
-            </button>
           </div>
 
           {/* Mobile: Cart + Menu */}

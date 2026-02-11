@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Formats modernes pour réduire la taille des images (avif = ~30% plus petit que webp)
+    formats: ["image/avif", "image/webp"],
+    // Tailles responsives pour les différents écrans
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -31,6 +36,12 @@ const nextConfig = {
   // Optimizations
   reactStrictMode: true,
   swcMinify: true,
+  // Masquer le header X-Powered-By pour la sécurité
+  poweredByHeader: false,
+  // Supprimer les console.log en production (garde console.error et console.warn)
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
+  },
   
   // Cache headers + sécurité
   async headers() {

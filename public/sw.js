@@ -15,7 +15,8 @@ const STATIC_ASSETS = [
   "/",
   "/catalogue",
   "/artistes",
-  "/manifest.json"
+  "/manifest.json",
+  "/offline.html"
 ]
 
 // Installation : pré-cacher les assets de base
@@ -87,7 +88,9 @@ self.addEventListener("fetch", (event) => {
       })
       .catch(() => {
         return caches.match(request).then((cached) => {
-          return cached || caches.match("/")
+          // Si la page est en cache, on la sert
+          // Sinon on affiche la page offline
+          return cached || caches.match("/offline.html")
         })
       })
   )

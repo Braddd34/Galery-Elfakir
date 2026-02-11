@@ -121,8 +121,28 @@ const faqs = [
 ]
 
 export default function FAQPage() {
+  // Données structurées FAQPage pour Google (rich snippets dans les résultats de recherche)
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.flatMap(cat =>
+      cat.questions.map(q => ({
+        "@type": "Question",
+        name: q.q,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: q.a
+        }
+      }))
+    )
+  }
   return (
     <>
+      {/* JSON-LD pour les rich snippets FAQ de Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <Header />
       <main className="min-h-screen bg-black text-white pt-28">
         {/* Hero */}

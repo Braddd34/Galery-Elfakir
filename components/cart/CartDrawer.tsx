@@ -195,11 +195,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   </span>
                 </div>
                 <Link
-                  href="/contact"
+                  href="/checkout"
                   onClick={onClose}
                   className="block w-full bg-white text-black py-4 text-center text-sm tracking-[0.15em] uppercase font-medium hover:bg-neutral-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                 >
-                  Nous contacter pour commander
+                  Commander
                 </Link>
                 <button
                   onClick={clearCart}

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { notifyNewReview } from "@/lib/notifications"
 import { formLimiter, getClientIP } from "@/lib/rate-limit"
+import { sanitize } from "@/lib/sanitize"
 
 // GET - Récupérer les avis d'une œuvre
 export async function GET(req: NextRequest) {
@@ -71,7 +72,11 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    const { artworkId, rating, title, comment } = await req.json()
+    const body = await req.json()
+    const artworkId = body.artworkId
+    const rating = body.rating
+    const title = sanitize(body.title || "")
+    const comment = sanitize(body.comment || "")
     
     if (!artworkId || !rating) {
       return NextResponse.json(

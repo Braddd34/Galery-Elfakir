@@ -318,6 +318,7 @@ model Order {
   @@index([userId])
   @@index([status])
   @@index([orderNumber])
+  @@index([userId, status])   // Index composite pour les requêtes utilisateur filtrées par statut
   @@map("orders")
 }
 
@@ -424,6 +425,7 @@ model Message {
   @@index([senderId])
   @@index([receiverId])
   @@index([read])
+  @@index([receiverId, read])  // Index composite pour les messages non lus d'un utilisateur
   @@map("messages")
 }
 
@@ -470,6 +472,7 @@ model ArtworkView {
   @@index([artworkId])
   @@index([userId])
   @@index([viewedAt])
+  @@index([artworkId, viewedAt])  // Index composite pour les analytics par oeuvre
   @@map("artwork_views")
 }
 
@@ -496,6 +499,7 @@ model Notification {
   @@index([userId])
   @@index([read])
   @@index([createdAt])
+  @@index([userId, read, createdAt])  // Index composite pour les notifs non lues triées par date
   @@map("notifications")
 }
 

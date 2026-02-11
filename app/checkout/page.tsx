@@ -4,23 +4,15 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useCart } from "@/lib/cart-context"
 
 /**
  * Page de checkout (récapitulatif de commande).
  * 
  * Affiche le contenu du panier, permet de saisir l'adresse de livraison,
  * calcule les frais de port et affiche le total avant de passer au paiement.
- * Le panier est stocké dans localStorage (géré par le store zustand).
+ * Le panier est géré par le CartContext (localStorage "elfakir-cart").
  */
-
-interface CartItem {
-  id: string
-  slug: string
-  title: string
-  price: number
-  image: string
-  artistName: string
-}
 
 // Frais de port selon le pays
 const SHIPPING_RATES: Record<string, { label: string; price: number }> = {
@@ -40,7 +32,7 @@ const SHIPPING_RATES: Record<string, { label: string; price: number }> = {
 export default function CheckoutPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const { items: cartItems, total: subtotal, clearCart } = useCart()
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [step, setStep] = useState<"address" | "summary">("address")
@@ -56,27 +48,21 @@ export default function CheckoutPage() {
     country: "FR"
   })
 
-  // Charger le panier depuis localStorage
+  // Vérifier la session
   useEffect(() => {
     if (status === "loading") return
     if (!session) {
       router.push("/login?callbackUrl=/checkout")
       return
     }
-
-    try {
-      const stored = localStorage.getItem("cart-storage")
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        const items = parsed?.state?.items || []
-        setCartItems(items)
-      }
-    } catch {}
+    // Pré-remplir l'email depuis la session
+    if (session.user?.email) {
+      setAddress(prev => ({ ...prev, email: session.user?.email || "" }))
+    }
     setLoading(false)
   }, [session, status, router])
 
   // Calculer les totaux
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0)
   const shippingRate = SHIPPING_RATES[address.country] || SHIPPING_RATES.OTHER
   const shipping = cartItems.length > 0 ? shippingRate.price : 0
   const total = subtotal + shipping

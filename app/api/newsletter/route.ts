@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { formLimiter, getClientIP } from "@/lib/rate-limit"
+import { newsletterSchema } from "@/lib/validations"
 
 // POST: S'inscrire à la newsletter
 export async function POST(request: NextRequest) {
@@ -12,15 +13,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Trop de tentatives, réessayez plus tard" }, { status: 429 })
     }
 
-    const { email } = await request.json()
+    const body = await request.json()
 
-    // Validation de l'email
-    if (!email || !email.includes("@")) {
+    // Validation de l'email avec Zod
+    const validation = newsletterSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Adresse email invalide" },
+        { error: validation.error.errors[0]?.message || "Adresse email invalide" },
         { status: 400 }
       )
     }
+    const { email } = validation.data
 
     // Vérifier si l'email existe déjà
     const existing = await prisma.newsletterSubscriber.findUnique({

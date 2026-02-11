@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { notifyNewMessage } from "@/lib/notifications"
+import { sanitize } from "@/lib/sanitize"
 
 // GET - Récupérer les messages de l'utilisateur
 export async function GET(req: NextRequest) {
@@ -90,7 +91,11 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    const { receiverId, subject, content, artworkId } = await req.json()
+    const body = await req.json()
+    const receiverId = body.receiverId
+    const subject = sanitize(body.subject || "")
+    const content = sanitize(body.content || "")
+    const artworkId = body.artworkId
     
     if (!receiverId || !content) {
       return NextResponse.json(
