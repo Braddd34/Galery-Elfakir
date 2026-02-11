@@ -80,7 +80,7 @@ export default async function AdminLayout({
               Commandes
             </Link>
             <Link 
-              href="/admin/utilisateurs" 
+              href="/admin/users" 
               className="text-sm text-neutral-400 hover:text-white transition-colors"
             >
               Utilisateurs

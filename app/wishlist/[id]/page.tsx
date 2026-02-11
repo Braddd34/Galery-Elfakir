@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
@@ -91,9 +92,11 @@ export default async function WishlistPage({ params }: { params: { id: string } 
         <section className="py-12 text-center border-b border-neutral-800">
           <div className="max-w-3xl mx-auto px-6">
             {user.image && (
-              <img
+              <Image
                 src={user.image}
                 alt={user.name || ""}
+                width={80}
+                height={80}
                 className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
               />
             )}
@@ -117,11 +120,13 @@ export default async function WishlistPage({ params }: { params: { id: string } 
                     href={`/oeuvre/${artwork.slug}`}
                     className="group"
                   >
-                    <div className="aspect-[3/4] bg-neutral-900 overflow-hidden mb-3">
-                      <img
+                    <div className="relative aspect-[3/4] bg-neutral-900 overflow-hidden mb-3">
+                      <Image
                         src={getImageUrl(artwork.images)}
                         alt={artwork.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     </div>
                     <h3 className="font-light group-hover:text-neutral-300 transition-colors">

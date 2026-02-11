@@ -76,12 +76,14 @@ export default function CheckoutPage() {
     setStep("summary")
   }
 
+  const [orderMessage, setOrderMessage] = useState("")
+
   const handleConfirmOrder = async () => {
     setSubmitting(true)
     
-    // Pour l'instant, sans Stripe, on affiche un message
-    // Quand Stripe sera intégré, on créera une session de paiement ici
-    alert("Le paiement Stripe n'est pas encore configuré. Cette page sera fonctionnelle une fois Stripe intégré.")
+    // Quand Stripe sera intégré, on créera une session de paiement ici.
+    // En attendant, on affiche un message clair à l'utilisateur.
+    setOrderMessage("Le paiement en ligne sera bientôt disponible. En attendant, contactez-nous pour finaliser votre commande.")
     setSubmitting(false)
   }
 
@@ -283,13 +285,28 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleConfirmOrder}
-                  disabled={submitting}
-                  className="w-full py-4 bg-white text-black text-sm uppercase tracking-wider font-medium hover:bg-gold transition-colors disabled:opacity-50"
-                >
-                  {submitting ? "Traitement..." : "Procéder au paiement"}
-                </button>
+                {/* Message affiché quand le paiement n'est pas encore disponible */}
+                {orderMessage && (
+                  <div className="bg-gold/10 border border-gold/30 p-6 text-center space-y-3">
+                    <p className="text-gold text-sm">{orderMessage}</p>
+                    <Link
+                      href="/contact"
+                      className="inline-block px-6 py-3 bg-white text-black text-sm uppercase tracking-wider hover:bg-gold transition-colors"
+                    >
+                      Nous contacter
+                    </Link>
+                  </div>
+                )}
+
+                {!orderMessage && (
+                  <button
+                    onClick={handleConfirmOrder}
+                    disabled={submitting}
+                    className="w-full py-4 bg-white text-black text-sm uppercase tracking-wider font-medium hover:bg-gold transition-colors disabled:opacity-50"
+                  >
+                    {submitting ? "Traitement..." : "Procéder au paiement"}
+                  </button>
+                )}
               </div>
             )}
           </div>

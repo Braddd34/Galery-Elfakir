@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/lib/toast-context"
+import { CompareButton } from "@/components/artwork/CompareDrawer"
 
 interface ArtworkCardProps {
   artwork: {
@@ -113,6 +114,23 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
 
   return (
     <div className="group relative card-hover">
+      {/* Compare Button — en haut à gauche */}
+      <div className="absolute top-4 left-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+        <CompareButton artwork={{
+          id: artwork.id,
+          title: artwork.title,
+          slug: artwork.slug,
+          price: Number(artwork.price),
+          year: artwork.year,
+          width: Number(artwork.width),
+          height: Number(artwork.height),
+          medium: "",
+          category: artwork.category,
+          image: getImageUrl(artwork.images),
+          artistName: artwork.artist.user.name || "Artiste",
+        }} />
+      </div>
+
       {/* Favorite Button */}
       <button
         onClick={handleFavoriteClick}

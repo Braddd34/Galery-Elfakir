@@ -1,4 +1,5 @@
 import { resend, FROM_EMAIL, FROM_NAME } from './resend'
+import { CONTACT_EMAIL } from './constants'
 
 // Types pour les données d'email
 interface OrderData {
@@ -425,7 +426,7 @@ export async function sendContactEmail(
     // Envoyer à l'admin de la galerie
     await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
-      to: 'contact@elfakir.art', // Remplacer par votre email
+      to: CONTACT_EMAIL,
       reply_to: email,
       subject: `[Contact] ${subject}`,
       html: baseTemplate(content)
