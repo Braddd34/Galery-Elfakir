@@ -4,13 +4,25 @@ import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcrypt"
 import { changePasswordSchema } from "@/lib/validations"
+import { authLimiter, getClientIP } from "@/lib/rate-limit"
 
 /**
  * POST /api/user/change-password
- * Permet à un utilisateur connecté de changer son mot de passe
+ * Permet à un utilisateur connecté de changer son mot de passe.
+ * Protégé par rate limiting pour éviter le brute force sur le mot de passe actuel.
  */
 export async function POST(req: Request) {
   try {
+    // Rate limiting — max 5 tentatives par minute
+    const ip = getClientIP(req)
+    const rateLimitResult = await authLimiter.check(ip, 5)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+        { status: 429 }
+      )
+    }
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.email) {

@@ -180,12 +180,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "🎉 Base de données initialisée avec succès !",
+      message: "Base de données initialisée avec succès.",
       accounts: {
-        admin: "admin@elfakir.art / Admin123!",
-        artist: "artiste@test.com / Artiste123!",
-        buyer: "acheteur@test.com / Acheteur123!",
+        admin: admin.email,
+        artist: artist.email,
+        buyer: buyer.email,
       },
+      note: "Les mots de passe par défaut ont été créés. Changez-les immédiatement depuis l'interface.",
       artworks: 3,
     })
 

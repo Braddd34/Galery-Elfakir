@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { artistProfileSchema } from "@/lib/validations"
+import { sanitize } from "@/lib/sanitize"
 
 // GET: Récupérer le profil artiste
 export async function GET() {
@@ -32,16 +34,28 @@ export async function PUT(request: Request) {
     }
 
     const data = await request.json()
+
+    // Validation Zod — vérifie les types et formats (URL, téléphone, longueurs)
+    const validation = artistProfileSchema.safeParse(data)
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error.errors[0]?.message || "Données invalides" },
+        { status: 400 }
+      )
+    }
+
+    const valid = validation.data
     
+    // Sanitize — nettoie les entrées texte contre le XSS
     const profile = await prisma.artistProfile.update({
       where: { userId: session.user.id },
       data: {
-        bio: data.bio,
-        country: data.country,
-        city: data.city,
-        website: data.website,
-        instagram: data.instagram,
-        phone: data.phone
+        bio: valid.bio ? sanitize(valid.bio) : valid.bio,
+        country: valid.country ? sanitize(valid.country) : valid.country,
+        city: valid.city ? sanitize(valid.city) : valid.city,
+        website: valid.website || null,
+        instagram: valid.instagram || null,
+        phone: valid.phone || null
       }
     })
 

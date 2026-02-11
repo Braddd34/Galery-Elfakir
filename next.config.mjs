@@ -75,6 +75,24 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          {
+            // HSTS — force les navigateurs à utiliser HTTPS pendant 1 an
+            // includeSubDomains protège les sous-domaines aussi
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
+          {
+            // CSP — Content-Security-Policy
+            // Politique qui contrôle d'où le navigateur peut charger des ressources.
+            // - default-src 'self' : par défaut, seulement notre domaine
+            // - script-src 'self' 'unsafe-inline' 'unsafe-eval' : scripts locaux + inline (requis par Next.js)
+            // - style-src 'self' 'unsafe-inline' : styles locaux + inline (requis par Tailwind)
+            // - img-src : nos domaines d'images autorisés + data: pour les placeholders
+            // - font-src 'self' : fonts locales
+            // - connect-src 'self' : requêtes API vers notre domaine
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com https://*.public.blob.vercel-storage.com https://s3.eu-west-3.amazonaws.com https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://utfs.io https://*.utfs.io; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+          },
         ],
       },
       {

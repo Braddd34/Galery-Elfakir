@@ -1,24 +1,41 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcrypt"
+import { authLimiter, getClientIP } from "@/lib/rate-limit"
+import { resetPasswordSchema } from "@/lib/validations"
 
 export async function POST(req: Request) {
   try {
-    const { token, password } = await req.json()
-
-    if (!token || !password) {
+    // Rate limiting — empêche le spam de reset
+    const ip = getClientIP(req)
+    const rateLimitResult = await authLimiter.check(ip, 5)
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "Token et mot de passe requis" },
+        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+        { status: 429 }
+      )
+    }
+
+    const body = await req.json()
+    const { token } = body
+
+    if (!token) {
+      return NextResponse.json(
+        { error: "Token requis" },
         { status: 400 }
       )
     }
 
-    if (password.length < 8) {
+    // Validation Zod sur le mot de passe (min 8 chars, majuscule, chiffre)
+    const validation = resetPasswordSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Le mot de passe doit contenir au moins 8 caractères" },
+        { error: validation.error.errors[0]?.message || "Données invalides" },
         { status: 400 }
       )
     }
+
+    const { password } = validation.data
 
     // Trouver le token
     const resetToken = await prisma.passwordResetToken.findUnique({

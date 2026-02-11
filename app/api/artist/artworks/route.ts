@@ -73,19 +73,36 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { title, description, category, year, width, height, depth, medium, price, images } = body
-
-    // Validation
-    if (!title || !description || !category || !year || !width || !height || !medium || !price) {
-      return NextResponse.json({ error: "Tous les champs obligatoires doivent être remplis" }, { status: 400 })
-    }
+    const { images, ...fields } = body
 
     if (!images || images.length === 0) {
       return NextResponse.json({ error: "Au moins une image est requise" }, { status: 400 })
     }
 
+    // Validation Zod — vérifie les types, longueurs, catégorie, dimensions, prix
+    const { artworkSchema } = await import("@/lib/validations")
+    const { sanitize } = await import("@/lib/sanitize")
+    
+    const parsed = artworkSchema.safeParse({
+      ...fields,
+      year: Number(fields.year),
+      width: Number(fields.width),
+      height: Number(fields.height),
+      depth: fields.depth ? Number(fields.depth) : undefined,
+      price: Number(fields.price)
+    })
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.errors[0]?.message || "Données invalides" },
+        { status: 400 }
+      )
+    }
+
+    const valid = parsed.data
+
     // Générer le slug
-    const slug = generateSlug(title)
+    const slug = generateSlug(valid.title)
 
     // Formater les images
     const imagesData = images.map((img: any, index: number) => ({
@@ -97,16 +114,16 @@ export async function POST(request: Request) {
     // Créer l'œuvre avec le statut "PENDING" (en attente de validation)
     const artwork = await prisma.artwork.create({
       data: {
-        title,
+        title: sanitize(valid.title),
         slug,
-        description,
-        category: category,
-        year: parseInt(year),
-        width: parseFloat(width),
-        height: parseFloat(height),
-        depth: depth ? parseFloat(depth) : null,
-        medium,
-        price: parseFloat(price),
+        description: sanitize(valid.description),
+        category: valid.category,
+        year: valid.year,
+        width: valid.width,
+        height: valid.height,
+        depth: valid.depth ?? null,
+        medium: sanitize(valid.medium),
+        price: valid.price,
         images: JSON.stringify(imagesData),
         status: "PENDING", // L'œuvre doit être validée par un admin
         artistId: artistProfile.id
