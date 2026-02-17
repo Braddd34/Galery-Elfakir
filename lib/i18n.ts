@@ -28,20 +28,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.about": "À propos",
     "nav.catalogue": "Catalogue",
 
-    // Page d'accueil
-    "home.hero.subtitle": "Galerie d'Art Contemporain",
-    "home.hero.cta": "Découvrir la collection",
-    "home.featured": "Sélection",
-    "home.featuredTitle": "Œuvres à la une",
-    "home.viewAll": "Voir tout",
-    "home.artists": "Artistes",
-    "home.artistsTitle": "Artistes en vedette",
-    "home.newsletter": "Newsletter",
-    "home.newsletterTitle": "Restez informé",
-    "home.newsletterDesc": "Recevez nos dernières nouveautés et actualités artistiques.",
-    "home.newsletterPlaceholder": "Votre adresse email",
-    "home.newsletterBtn": "S'inscrire",
-
     // Catalogue
     "catalogue.title": "Collection",
     "catalogue.filters": "Filtres",
@@ -696,20 +682,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.search": "Search an artwork, an artist...",
     "nav.about": "About",
     "nav.catalogue": "Catalogue",
-
-    // Homepage
-    "home.hero.subtitle": "Contemporary Art Gallery",
-    "home.hero.cta": "Discover the collection",
-    "home.featured": "Selection",
-    "home.featuredTitle": "Featured works",
-    "home.viewAll": "View all",
-    "home.artists": "Artists",
-    "home.artistsTitle": "Featured artists",
-    "home.newsletter": "Newsletter",
-    "home.newsletterTitle": "Stay informed",
-    "home.newsletterDesc": "Receive our latest news and artistic updates.",
-    "home.newsletterPlaceholder": "Your email address",
-    "home.newsletterBtn": "Subscribe",
 
     // Catalogue
     "catalogue.title": "Collection",
