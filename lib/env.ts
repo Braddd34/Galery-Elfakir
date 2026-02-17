@@ -1,20 +1,18 @@
 /**
  * Validation des variables d'environnement au démarrage.
  * 
- * Vérifie que les variables essentielles sont définies.
- * Si une variable critique manque, affiche un avertissement en console.
- * 
- * Ce fichier est importé au démarrage de l'application.
+ * - Variables CRITIQUES : l'app ne peut pas fonctionner sans elles → erreur bloquante en production.
+ * - Variables RECOMMANDÉES : certaines fonctionnalités seront désactivées sans elles → warning.
  */
 
 const requiredEnvVars = [
   "DATABASE_URL",
   "NEXTAUTH_SECRET",
-  "NEXTAUTH_URL",
 ] as const
 
 const recommendedEnvVars = [
   "RESEND_API_KEY",
+  "NEXTAUTH_URL",
   "NEXT_PUBLIC_SITE_URL",
 ] as const
 
@@ -35,14 +33,16 @@ export function validateEnv() {
   }
 
   if (missing.length > 0) {
-    console.error(
-      `⚠️ Variables d'environnement REQUISES manquantes: ${missing.join(", ")}. L'application pourrait ne pas fonctionner correctement.`
-    )
+    const message = `ERREUR CRITIQUE — Variables d'environnement manquantes: ${missing.join(", ")}. L'application ne peut pas démarrer.`
+    console.error(`❌ ${message}`)
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(message)
+    }
   }
 
-  if (missingRecommended.length > 0 && process.env.NODE_ENV === "development") {
+  if (missingRecommended.length > 0) {
     console.warn(
-      `💡 Variables d'environnement recommandées manquantes: ${missingRecommended.join(", ")}`
+      `⚠️ Variables d'environnement recommandées manquantes: ${missingRecommended.join(", ")}. Certaines fonctionnalités (emails, etc.) seront désactivées.`
     )
   }
 }
