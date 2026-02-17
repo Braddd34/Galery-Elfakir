@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface ArtworkSuggestion {
   id: string
@@ -39,9 +40,11 @@ export default function SearchAutocomplete({
   onSearch,
   className = "",
   inputClassName = "",
-  placeholder = "Rechercher une œuvre, un artiste...",
+  placeholder,
 }: SearchAutocompleteProps) {
   const router = useRouter()
+  const { t } = useLanguage()
+  const actualPlaceholder = placeholder || t("search.placeholder")
   const [query, setQuery] = useState("")
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -154,9 +157,9 @@ export default function SearchAutocomplete({
 
   return (
     <div ref={wrapperRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} role="search" aria-label="Rechercher sur le site">
+      <form onSubmit={handleSubmit} role="search" aria-label={t("search.ariaLabel")}>
         <label htmlFor="search-autocomplete" className="sr-only">
-          Rechercher une œuvre ou un artiste
+          {t("search.srLabel")}
         </label>
         <div className="relative">
           <input
@@ -170,7 +173,7 @@ export default function SearchAutocomplete({
             }}
             onFocus={() => query.length >= 2 && setIsOpen(true)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={actualPlaceholder}
             className={inputClassName}
             autoComplete="off"
             aria-expanded={isOpen}
@@ -207,7 +210,7 @@ export default function SearchAutocomplete({
           {suggestions.artworks.length > 0 && (
             <div>
               <div className="px-4 py-2 text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800">
-                Œuvres
+                {t("search.artworks")}
               </div>
               {suggestions.artworks.map((artwork, index) => (
                 <Link
@@ -256,7 +259,7 @@ export default function SearchAutocomplete({
           {suggestions.artists.length > 0 && (
             <div>
               <div className="px-4 py-2 text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800">
-                Artistes
+                {t("search.artists")}
               </div>
               {suggestions.artists.map((artist, index) => {
                 const adjustedIndex = suggestions.artworks.length + index
@@ -297,7 +300,7 @@ export default function SearchAutocomplete({
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-light truncate">{artist.name}</p>
                       <p className="text-neutral-500 text-sm">
-                        {artist.artworksCount} œuvre{artist.artworksCount > 1 ? "s" : ""}
+                        {t("search.artworksCount").replace("{count}", String(artist.artworksCount)).replace("{plural}", artist.artworksCount > 1 ? "s" : "")}
                       </p>
                     </div>
                   </Link>
@@ -316,7 +319,7 @@ export default function SearchAutocomplete({
             }}
             className="block px-4 py-3 text-center text-sm text-gold hover:bg-neutral-800/50 border-t border-neutral-800 transition-colors"
           >
-            Voir tous les résultats pour "{query}"
+            {t("search.viewAll")} "{query}"
           </Link>
         </div>
       )}

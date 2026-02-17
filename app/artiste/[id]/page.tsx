@@ -7,10 +7,12 @@ import SocialLinks from "@/components/artist/SocialLinks"
 import ExhibitionsGallery from "@/components/artist/ExhibitionsGallery"
 import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import prisma from "@/lib/prisma"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
+  const t = getServerTranslation()
   const artist = await getArtist(params.id)
-  if (!artist) return { title: "Artiste non trouvé" }
+  if (!artist) return { title: t("artistProfile.notFound") }
   
   const artistName = artist.user.name || "Artiste"
   const description = artist.bio 
@@ -81,6 +83,7 @@ async function getArtist(id: string) {
 }
 
 export default async function ArtistePage({ params }: { params: { id: string } }) {
+  const t = getServerTranslation()
   const artist = await getArtist(params.id)
 
   if (!artist) {
@@ -136,13 +139,13 @@ export default async function ArtistePage({ params }: { params: { id: string } }
       {
         "@type": "ListItem",
         position: 1,
-        name: "Accueil",
+        name: t("breadcrumbs.home"),
         item: baseUrl
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: "Artistes",
+        name: t("nav.artists"),
         item: `${baseUrl}/artistes`
       },
       {
@@ -171,9 +174,9 @@ export default async function ArtistePage({ params }: { params: { id: string } }
         <div className="border-b border-neutral-800/50">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <nav className="flex items-center gap-3 text-sm text-neutral-500">
-              <Link href="/" className="hover:text-white transition-colors">Accueil</Link>
+              <Link href="/" className="hover:text-white transition-colors">{t("breadcrumbs.home")}</Link>
               <span>/</span>
-              <Link href="/artistes" className="hover:text-white transition-colors">Artistes</Link>
+              <Link href="/artistes" className="hover:text-white transition-colors">{t("nav.artists")}</Link>
               <span>/</span>
               <span className="text-white">{artist.user.name}</span>
             </nav>
@@ -198,7 +201,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
               {/* Info */}
               <div className="lg:col-span-2 flex flex-col justify-center">
                 <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-4">
-                  Artiste
+                  {t("artistProfile.artist")}
                 </p>
                 <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-4">
                   {artist.user.name}
@@ -234,7 +237,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
                   <div>
                     <p className="text-3xl font-light">{artist.artworks.length}</p>
                     <p className="text-neutral-500 text-sm">
-                      Œuvre{artist.artworks.length > 1 ? 's' : ''} disponible{artist.artworks.length > 1 ? 's' : ''}
+                      {t("artists.artworksAvailable").replace("{count}", String(artist.artworks.length)).replace("{plural}", artist.artworks.length > 1 ? "s" : "")}
                     </p>
                   </div>
                   
@@ -259,7 +262,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
         <section className="border-t border-neutral-800 py-16 md:py-24 px-6">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-light mb-12">
-              Œuvres de {artist.user.name}
+              {t("artistProfile.worksBy") + " " + (artist.user.name || t("artistProfile.artist"))}
             </h2>
 
             {artist.artworks.length > 0 ? (
@@ -292,7 +295,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
             ) : (
               <div className="text-center py-16">
                 <p className="text-neutral-500">
-                  Aucune œuvre disponible pour le moment.
+                  {t("artistProfile.noWorks")}
                 </p>
               </div>
             )}
@@ -303,17 +306,16 @@ export default async function ArtistePage({ params }: { params: { id: string } }
         <section className="border-t border-neutral-800 py-16 px-6">
           <div className="max-w-7xl mx-auto text-center">
             <h2 className="text-2xl font-light mb-4">
-              Intéressé par cet artiste ?
+              {t("artistProfile.interested")}
             </h2>
             <p className="text-neutral-400 mb-8 max-w-lg mx-auto">
-              Contactez-nous pour plus d'informations sur les œuvres disponibles 
-              ou pour organiser une visite privée.
+              {t("artistProfile.interestedDesc")}
             </p>
             <Link
               href="/contact"
               className="inline-block border border-white px-8 py-4 text-sm tracking-wider hover:bg-white hover:text-black transition-all"
             >
-              NOUS CONTACTER
+              {t("about.contactUs").toUpperCase()}
             </Link>
           </div>
         </section>

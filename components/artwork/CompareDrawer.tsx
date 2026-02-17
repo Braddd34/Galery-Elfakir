@@ -3,6 +3,7 @@
 import { useState, useEffect, createContext, useContext } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 // Types
 interface CompareArtwork {
@@ -70,6 +71,7 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
 // Barre flottante de comparaison
 function CompareBar() {
   const { items, removeItem, clearAll } = useCompare()
+  const { t } = useLanguage()
   const [showCompare, setShowCompare] = useState(false)
   
   return (
@@ -79,7 +81,7 @@ function CompareBar() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="text-sm text-neutral-400">
-              {items.length}/3 œuvre{items.length > 1 ? "s" : ""} sélectionnée{items.length > 1 ? "s" : ""}
+              {items.length}/3 {t("compare.selected").replace("{count}", "").replace("{plural}", items.length > 1 ? "s" : "").trim()}
             </span>
             <div className="flex gap-2">
               {items.map((item) => (
@@ -115,14 +117,14 @@ function CompareBar() {
               onClick={clearAll}
               className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition-colors"
             >
-              Vider
+              {t("compare.clear")}
             </button>
             <button
               onClick={() => setShowCompare(true)}
               disabled={items.length < 2}
               className="px-6 py-2 bg-white text-black text-sm font-medium hover:bg-neutral-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Comparer ({items.length})
+              {t("compare.compare")} ({items.length})
             </button>
           </div>
         </div>
@@ -137,26 +139,27 @@ function CompareBar() {
 // Modal de comparaison
 function CompareModal({ onClose }: { onClose: () => void }) {
   const { items } = useCompare()
+  const { t } = useLanguage()
   
   // Labels catégories
   const categoryLabels: Record<string, string> = {
-    PAINTING: "Peinture",
-    SCULPTURE: "Sculpture",
-    PHOTOGRAPHY: "Photographie",
-    DRAWING: "Dessin",
-    PRINT: "Estampe",
-    DIGITAL: "Art numérique",
-    MIXED_MEDIA: "Technique mixte",
-    OTHER: "Autre"
+    PAINTING: t("catalogue.category.painting"),
+    SCULPTURE: t("catalogue.category.sculpture"),
+    PHOTOGRAPHY: t("catalogue.category.photography"),
+    DRAWING: t("catalogue.category.drawing"),
+    PRINT: t("catalogue.category.print"),
+    DIGITAL: t("catalogue.category.digital"),
+    MIXED_MEDIA: t("catalogue.category.mixedMedia"),
+    OTHER: t("catalogue.category.other")
   }
   
   const compareFields: { label: string; key: string; format?: (v: any) => string }[] = [
-    { label: "Artiste", key: "artistName" },
-    { label: "Prix", key: "price", format: (v: any) => `€${Number(v).toLocaleString("fr-FR")}` },
-    { label: "Année", key: "year" },
-    { label: "Catégorie", key: "category", format: (v: any) => categoryLabels[v] || v },
-    { label: "Technique", key: "medium" },
-    { label: "Dimensions", key: "dimensions" },
+    { label: t("compare.artist"), key: "artistName" },
+    { label: t("compare.price"), key: "price", format: (v: any) => `€${Number(v).toLocaleString("fr-FR")}` },
+    { label: t("compare.year"), key: "year" },
+    { label: t("compare.category"), key: "category", format: (v: any) => categoryLabels[v] || v },
+    { label: t("compare.technique"), key: "medium" },
+    { label: t("compare.dimensions"), key: "dimensions" },
   ]
   
   return (
@@ -164,7 +167,7 @@ function CompareModal({ onClose }: { onClose: () => void }) {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-light">Comparaison d'œuvres</h2>
+          <h2 className="text-2xl font-light">{t("compare.title")}</h2>
           <button
             onClick={onClose}
             className="p-2 text-neutral-400 hover:text-white transition-colors"
@@ -234,7 +237,7 @@ function CompareModal({ onClose }: { onClose: () => void }) {
               onClick={onClose}
               className="block text-center py-3 bg-white text-black font-medium hover:bg-neutral-200 transition-colors"
             >
-              Voir l'œuvre
+              {t("compare.viewArtwork")}
             </Link>
           ))}
         </div>
@@ -246,6 +249,7 @@ function CompareModal({ onClose }: { onClose: () => void }) {
 // Bouton "Ajouter à la comparaison" pour les cartes
 export function CompareButton({ artwork }: { artwork: CompareArtwork }) {
   const { addItem, removeItem, isInCompare, items } = useCompare()
+  const { t } = useLanguage()
   const inCompare = isInCompare(artwork.id)
   
   return (
@@ -265,7 +269,7 @@ export function CompareButton({ artwork }: { artwork: CompareArtwork }) {
           ? "text-white bg-white/20" 
           : "text-neutral-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
       }`}
-      title={inCompare ? "Retirer de la comparaison" : "Comparer"}
+      title={inCompare ? t("compare.remove") : t("compare.compare")}
     >
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

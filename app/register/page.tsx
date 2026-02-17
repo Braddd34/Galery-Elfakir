@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { registerSchema } from "@/lib/validations"
 import FormField, { Input } from "@/components/ui/FormField"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const defaultRole = searchParams.get("role") === "artist" ? "ARTIST" : "BUYER"
+  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -87,7 +89,7 @@ function RegisterForm() {
         }, 2000)
       }
     } catch {
-      setServerError("Une erreur est survenue")
+      setServerError(t("common.error"))
     } finally {
       setLoading(false)
     }
@@ -103,10 +105,10 @@ function RegisterForm() {
     if (/[0-9]/.test(pwd)) score++
     if (/[^A-Za-z0-9]/.test(pwd)) score++
     
-    if (score <= 1) return { level: 1, text: "Faible", color: "bg-red-500" }
-    if (score === 2) return { level: 2, text: "Moyen", color: "bg-yellow-500" }
-    if (score === 3) return { level: 3, text: "Fort", color: "bg-green-500" }
-    return { level: 4, text: "Très fort", color: "bg-green-400" }
+    if (score <= 1) return { level: 1, text: t("register.strengthWeak"), color: "bg-red-500" }
+    if (score === 2) return { level: 2, text: t("register.strengthMedium"), color: "bg-yellow-500" }
+    if (score === 3) return { level: 3, text: t("register.strengthStrong"), color: "bg-green-500" }
+    return { level: 4, text: t("register.strengthVeryStrong"), color: "bg-green-400" }
   }
 
   const passwordStrength = getPasswordStrength()
@@ -121,9 +123,9 @@ function RegisterForm() {
 
         {/* Form Card */}
         <div className="bg-neutral-900 border border-neutral-800 p-8 md:p-12">
-          <h1 className="text-2xl font-light mb-2">Créer un compte</h1>
+          <h1 className="text-2xl font-light mb-2">{t("register.title")}</h1>
           <p className="text-neutral-500 text-sm mb-8">
-            Rejoignez notre communauté
+            {t("register.desc")}
           </p>
 
           {serverError && (
@@ -148,7 +150,7 @@ function RegisterForm() {
             {/* Role Selection */}
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-3">
-                Je suis
+                {t("register.iAm")}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -160,7 +162,7 @@ function RegisterForm() {
                       : "border-neutral-700 text-neutral-400 hover:border-neutral-500"
                   }`}
                 >
-                  Acheteur
+                  {t("register.buyer")}
                 </button>
                 <button
                   type="button"
@@ -171,12 +173,12 @@ function RegisterForm() {
                       : "border-neutral-700 text-neutral-400 hover:border-neutral-500"
                   }`}
                 >
-                  Artiste
+                  {t("register.artist")}
                 </button>
               </div>
             </div>
 
-            <FormField label="Nom complet" error={errors.name} required>
+            <FormField label={t("register.fullName")} error={errors.name} required>
               <Input
                 type="text"
                 value={formData.name}
@@ -186,7 +188,7 @@ function RegisterForm() {
                 }}
                 onBlur={() => validateField("name", formData.name)}
                 error={!!errors.name}
-                placeholder="Votre nom"
+                placeholder={t("register.namePlaceholder")}
                 autoComplete="name"
               />
             </FormField>
@@ -210,7 +212,7 @@ function RegisterForm() {
               label="Mot de passe" 
               error={errors.password} 
               required
-              hint="Minimum 8 caractères, 1 majuscule, 1 chiffre"
+              hint={t("register.passwordHint")}
             >
               <Input
                 type="password"
@@ -241,7 +243,7 @@ function RegisterForm() {
               )}
             </FormField>
 
-            <FormField label="Confirmer le mot de passe" error={errors.confirmPassword} required>
+            <FormField label={t("register.confirmPassword")} error={errors.confirmPassword} required>
               <Input
                 type="password"
                 value={formData.confirmPassword}
@@ -261,7 +263,7 @@ function RegisterForm() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Les comptes artistes sont soumis à validation avant activation.
+                {t("register.artistNote")}
               </p>
             )}
 
@@ -270,15 +272,15 @@ function RegisterForm() {
               disabled={loading}
               className="w-full bg-white text-black py-4 font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Création..." : "Créer mon compte"}
+              {loading ? t("register.creating") : t("register.create")}
             </button>
           </form>
 
           <div className="mt-8 pt-8 border-t border-neutral-800 text-center">
             <p className="text-neutral-500 text-sm">
-              Déjà un compte ?{" "}
+              {t("register.hasAccount")}{" "}
               <Link href="/login" className="text-white hover:underline">
-                Se connecter
+                {t("register.login")}
               </Link>
             </p>
           </div>
@@ -287,7 +289,7 @@ function RegisterForm() {
         {/* Back link */}
         <div className="text-center mt-8">
           <Link href="/" className="text-neutral-500 text-sm hover:text-white transition-colors">
-            ← Retour à l'accueil
+            {t("register.backHome")}
           </Link>
         </div>
       </div>
@@ -297,11 +299,12 @@ function RegisterForm() {
 
 // Loading fallback pendant que useSearchParams charge
 function RegisterLoading() {
+  const { t } = useLanguage()
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
         <span className="text-2xl tracking-[0.3em] font-light">ELFAKIR</span>
-        <p className="text-neutral-500 mt-8">Chargement...</p>
+        <p className="text-neutral-500 mt-8">{t("common.loading")}</p>
       </div>
     </main>
   )

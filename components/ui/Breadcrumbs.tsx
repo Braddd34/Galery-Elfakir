@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface BreadcrumbItem {
   label: string
@@ -10,12 +13,14 @@ interface BreadcrumbsProps {
 }
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
+  const { t } = useLanguage()
+
   return (
     <div className="border-b border-neutral-800/50">
       <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-4">
         <nav aria-label="Fil d'Ariane" className="flex items-center gap-2 text-sm text-neutral-500">
           <Link href="/" className="hover:text-white transition-colors">
-            Accueil
+            {t("breadcrumbs.home")}
           </Link>
           {items.map((item, index) => (
             <span key={index} className="flex items-center gap-2">

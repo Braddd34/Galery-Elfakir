@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface RecommendedArtwork {
   id: string
@@ -28,6 +29,7 @@ export default function Recommendations({
   artworkId?: string
   limit?: number 
 }) {
+  const { t } = useLanguage()
   const [artworks, setArtworks] = useState<RecommendedArtwork[]>([])
   const [isPersonalized, setIsPersonalized] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -77,14 +79,14 @@ export default function Recommendations({
       <div className="flex justify-between items-end mb-16">
         <div>
           <p className="label text-gold mb-4">
-            {isPersonalized ? "Pour vous" : "Explorer"}
+            {isPersonalized ? t("reco.forYou") : t("reco.explore")}
           </p>
           <h2 className="heading-sm">
-            {isPersonalized ? "Vous aimerez aussi" : "Œuvres populaires"}
+            {isPersonalized ? t("reco.youWillLike") : t("reco.popular")}
           </h2>
           {isPersonalized && (
             <p className="text-neutral-500 text-sm mt-2">
-              Basé sur vos favoris et vos goûts
+              {t("reco.basedOnFavorites")}
             </p>
           )}
         </div>
@@ -92,7 +94,7 @@ export default function Recommendations({
           href="/catalogue"
           className="text-sm tracking-[0.15em] uppercase text-neutral-500 hover:text-white transition-colors"
         >
-          Voir tout
+          {t("reco.viewAll")}
         </Link>
       </div>
 

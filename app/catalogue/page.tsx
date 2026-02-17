@@ -54,18 +54,6 @@ export async function generateMetadata({ searchParams }: { searchParams: { categ
   }
 }
 
-// Mapping des catégories pour l'affichage
-const categoryLabels: Record<ArtworkCategory, string> = {
-  PAINTING: "Peinture",
-  SCULPTURE: "Sculpture",
-  PHOTOGRAPHY: "Photographie",
-  DRAWING: "Dessin",
-  PRINT: "Estampe",
-  DIGITAL: "Art numérique",
-  MIXED_MEDIA: "Technique mixte",
-  OTHER: "Autre"
-}
-
 // Types pour les filtres
 interface FilterParams {
   category?: string
@@ -262,6 +250,19 @@ interface PageProps {
 
 export default async function CataloguePage({ searchParams }: PageProps) {
   const t = getServerTranslation()
+
+  // Mapping des catégories pour l'affichage
+  const categoryLabels: Record<ArtworkCategory, string> = {
+    PAINTING: t("catalogue.category.painting"),
+    SCULPTURE: t("catalogue.category.sculpture"),
+    PHOTOGRAPHY: t("catalogue.category.photography"),
+    DRAWING: t("catalogue.category.drawing"),
+    PRINT: t("catalogue.category.print"),
+    DIGITAL: t("catalogue.category.digital"),
+    MIXED_MEDIA: t("catalogue.category.mixedMedia"),
+    OTHER: t("catalogue.category.other"),
+  }
+
   const currentCategory = searchParams.category || "all"
   const currentView = searchParams.view || "grid"
   const { artworks, totalCount: filteredCount } = await getArtworks(searchParams)
@@ -316,10 +317,10 @@ export default async function CataloguePage({ searchParams }: PageProps) {
         <header className="py-16 text-center">
           <div className="max-w-[1800px] mx-auto px-6 md:px-12">
             <h1 className="text-3xl md:text-4xl font-light tracking-wide mb-4">
-              Œuvres d'Art Originales à Vendre
+              {t("catalogue.heroTitle")}
             </h1>
             <p className="text-neutral-400 max-w-2xl mx-auto">
-              Découvrez notre sélection d'œuvres d'art originales d'artistes contemporains.
+              {t("catalogue.heroDesc")}
             </p>
           </div>
         </header>

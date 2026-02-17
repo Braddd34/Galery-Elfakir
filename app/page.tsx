@@ -4,6 +4,7 @@ import HomeHeader from "@/components/layout/HomeHeader"
 import prisma from "@/lib/prisma"
 import Recommendations from "@/components/artwork/Recommendations"
 import { Metadata } from "next"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 // Métadonnées SEO pour la page d'accueil
 export const metadata: Metadata = {
@@ -80,6 +81,7 @@ async function getFeaturedArtworks() {
 
 export default async function HomePage() {
   const featuredArtworks = await getFeaturedArtworks()
+  const t = getServerTranslation()
   
   // Image de fond : première œuvre ou fallback
   const heroImage = featuredArtworks[0] 
@@ -169,24 +171,22 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-[1800px] mx-auto px-8 md:px-16 pb-24 w-full">
           <div className="grid md:grid-cols-2 gap-12 items-end">
             <div className="animate-fade-up">
-              <p className="label mb-6 text-gold">Galerie d'art contemporain</p>
+              <p className="label mb-6 text-gold">{t("home.heroLabel")}</p>
               <h1 className="heading-xl mb-8">
-                L'Art<br />
-                <span className="italic">Réinventé</span>
+                {t("home.heroTitle1")}<br />
+                <span className="italic">{t("home.heroTitle2")}</span>
               </h1>
             </div>
             
             <div className="animate-fade-up-delay">
               <p className="text-lg text-neutral-400 max-w-md mb-8 leading-relaxed">
-                Une collection exclusive d'œuvres originales, 
-                sélectionnées avec passion auprès d'artistes 
-                du monde entier.
+                {t("home.heroDesc")}
               </p>
               <Link 
                 href="/catalogue" 
                 className="group inline-flex items-center gap-4"
               >
-                <span className="text-sm tracking-[0.15em] uppercase">Découvrir</span>
+                <span className="text-sm tracking-[0.15em] uppercase">{t("home.discover")}</span>
                 <span className="w-12 h-[1px] bg-white group-hover:w-20 transition-all duration-500" />
               </Link>
             </div>
@@ -206,15 +206,15 @@ export default async function HomePage() {
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-20">
             <div>
-              <p className="label mb-4">Sélection</p>
-              <h2 className="heading-lg">Œuvres à la une</h2>
+              <p className="label mb-4">{t("home.selectionLabel")}</p>
+              <h2 className="heading-lg">{t("home.featuredTitle")}</h2>
             </div>
             <Link 
               href="/catalogue" 
               className="group inline-flex items-center gap-4 mt-8 md:mt-0"
             >
               <span className="text-sm tracking-[0.15em] uppercase text-neutral-400 group-hover:text-white transition-colors">
-                Voir la collection
+                {t("home.viewCollection")}
               </span>
               <svg className="w-5 h-5 text-neutral-400 group-hover:text-white group-hover:translate-x-2 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -281,10 +281,10 @@ export default async function HomePage() {
             // Message si pas d'œuvres
             <div className="text-center py-24 border border-neutral-800">
               <p className="text-neutral-500 text-lg mb-4">
-                Aucune œuvre disponible pour le moment.
+                {t("home.noArtworks")}
               </p>
               <p className="text-neutral-600">
-                Revenez bientôt pour découvrir notre collection.
+                {t("home.noArtworksDesc")}
               </p>
             </div>
           )}
@@ -302,16 +302,13 @@ export default async function HomePage() {
       <section className="py-32 md:py-48 border-t border-neutral-800">
         <div className="max-w-[1800px] mx-auto px-8 md:px-16">
           <div className="max-w-4xl">
-            <p className="label mb-8 text-gold">Notre philosophie</p>
+            <p className="label mb-8 text-gold">{t("home.philosophyLabel")}</p>
             <h2 className="text-elegant text-3xl md:text-5xl leading-relaxed text-neutral-300">
-              "Nous croyons que l'art doit être accessible, 
-              authentique et capable de transformer 
-              n'importe quel espace en un lieu d'émotion 
-              et de contemplation."
+              {t("home.philosophyQuote")}
             </h2>
             <div className="mt-12 flex items-center gap-6">
               <div className="w-16 h-[1px] bg-gold" />
-              <p className="text-neutral-500">Mehdi Elfakir, Fondateur</p>
+              <p className="text-neutral-500">{t("home.philosophyAuthor")}</p>
             </div>
           </div>
         </div>
@@ -324,18 +321,18 @@ export default async function HomePage() {
             {[
               {
                 number: "01",
-                title: "Authenticité",
-                description: "Chaque œuvre est accompagnée d'un certificat d'authenticité signé, garantissant son origine et sa valeur."
+                title: t("home.service1Title"),
+                description: t("home.service1Desc")
               },
               {
                 number: "02",
-                title: "Sécurité",
-                description: "Transactions cryptées et paiements sécurisés via Stripe. Votre investissement est protégé."
+                title: t("home.service2Title"),
+                description: t("home.service2Desc")
               },
               {
                 number: "03",
-                title: "Livraison",
-                description: "Expédition mondiale avec emballage professionnel et assurance complète incluse."
+                title: t("home.service3Title"),
+                description: t("home.service3Desc")
               }
             ].map((service) => (
               <div key={service.number} className="bg-neutral-950 p-12 md:p-16">
@@ -360,20 +357,19 @@ export default async function HomePage() {
           />
         </div>
         <div className="relative max-w-[1800px] mx-auto px-8 md:px-16 text-center">
-          <p className="label mb-6 text-gold">Pour les artistes</p>
+          <p className="label mb-6 text-gold">{t("home.artistsLabel")}</p>
           <h2 className="heading-lg mb-8 max-w-3xl mx-auto">
-            Rejoignez notre<br />
-            <span className="italic">communauté d'artistes</span>
+            {t("home.artistsTitle1")}<br />
+            <span className="italic">{t("home.artistsTitle2")}</span>
           </h2>
           <p className="text-neutral-400 max-w-xl mx-auto mb-12 text-lg">
-            Exposez vos œuvres à des collectionneurs du monde entier. 
-            Commission transparente, paiements directs.
+            {t("home.artistsDesc")}
           </p>
           <Link 
             href="/register" 
             className="inline-block border border-white px-12 py-5 text-sm tracking-[0.15em] uppercase hover:bg-white hover:text-black transition-all duration-300"
           >
-            Devenir partenaire
+            {t("home.becomePartner")}
           </Link>
         </div>
       </section>
@@ -386,33 +382,32 @@ export default async function HomePage() {
             <div className="md:col-span-2">
               <h2 className="text-3xl tracking-[0.3em] font-light mb-6">ELFAKIR</h2>
               <p className="text-neutral-500 max-w-sm leading-relaxed">
-                Galerie d'art contemporain en ligne, dédiée à la promotion 
-                d'artistes émergents et établis du monde entier.
+                {t("home.footerDesc")}
               </p>
             </div>
             
             {/* Navigation */}
             <div>
-              <p className="label mb-6">Navigation</p>
+              <p className="label mb-6">{t("home.footerNav")}</p>
               <ul className="space-y-4">
                 <li>
                   <Link href="/catalogue" className="text-neutral-400 hover:text-white transition-colors">
-                    Collection
+                    {t("home.footerCollection")}
                   </Link>
                 </li>
                 <li>
                   <Link href="/artistes" className="text-neutral-400 hover:text-white transition-colors">
-                    Artistes
+                    {t("home.footerArtists")}
                   </Link>
                 </li>
                 <li>
                   <Link href="/a-propos" className="text-neutral-400 hover:text-white transition-colors">
-                    À propos
+                    {t("home.footerAbout")}
                   </Link>
                 </li>
                 <li>
                   <Link href="/contact" className="text-neutral-400 hover:text-white transition-colors">
-                    Contact
+                    {t("home.footerContact")}
                   </Link>
                 </li>
               </ul>
@@ -420,14 +415,14 @@ export default async function HomePage() {
             
             {/* Contact */}
             <div>
-              <p className="label mb-6">Contact</p>
+              <p className="label mb-6">{t("home.footerContactLabel")}</p>
               <ul className="space-y-4 text-neutral-400">
                 <li>contact@elfakir.art</li>
                 <li>+33 1 23 45 67 89</li>
                 <li className="pt-4">
                   <div className="flex gap-6">
-                    <a href="#" className="hover:text-white transition-colors">Instagram</a>
-                    <a href="#" className="hover:text-white transition-colors">Twitter</a>
+                    <a href="https://instagram.com/elfakir.gallery" className="hover:text-white transition-colors">Instagram</a>
+                    <a href="https://twitter.com/elfakirgallery" className="hover:text-white transition-colors">Twitter</a>
                   </div>
                 </li>
               </ul>
@@ -437,12 +432,12 @@ export default async function HomePage() {
           {/* Bottom */}
           <div className="mt-20 pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-neutral-600 text-sm">
-              © {new Date().getFullYear()} Galerie ELFAKIR. Tous droits réservés.
+              © {new Date().getFullYear()} Galerie ELFAKIR. {t("home.footerRights")}
             </p>
             <div className="flex gap-8 text-sm text-neutral-600">
-              <Link href="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
-              <Link href="/cgv" className="hover:text-white transition-colors">CGV</Link>
-              <Link href="/confidentialite" className="hover:text-white transition-colors">Confidentialité</Link>
+              <Link href="/mentions-legales" className="hover:text-white transition-colors">{t("home.footerLegal")}</Link>
+              <Link href="/cgv" className="hover:text-white transition-colors">{t("home.footerTerms")}</Link>
+              <Link href="/confidentialite" className="hover:text-white transition-colors">{t("home.footerPrivacy")}</Link>
             </div>
           </div>
         </div>

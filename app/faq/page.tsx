@@ -1,6 +1,7 @@
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { Metadata } from "next"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 export const metadata: Metadata = {
   title: "FAQ — Questions fréquentes",
@@ -121,6 +122,7 @@ const faqs = [
 ]
 
 export default function FAQPage() {
+  const t = getServerTranslation()
   // Données structurées FAQPage pour Google (rich snippets dans les résultats de recherche)
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -148,13 +150,12 @@ export default function FAQPage() {
         {/* Hero */}
         <section className="py-16 px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <p className="label text-gold mb-4">Aide</p>
+            <p className="label text-gold mb-4">{t("faq.label")}</p>
             <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-6">
-              Questions fréquentes
+              {t("faq.title")}
             </h1>
             <p className="text-lg text-neutral-400 max-w-2xl mx-auto">
-              Trouvez rapidement les réponses à vos questions sur l'achat d'œuvres, 
-              la livraison, l'authenticité et bien plus.
+              {t("faq.desc")}
             </p>
           </div>
         </section>
@@ -197,15 +198,15 @@ export default function FAQPage() {
         {/* CTA Contact */}
         <section className="border-t border-neutral-800 py-20 px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl font-light mb-4">Vous n'avez pas trouvé votre réponse ?</h2>
+            <h2 className="text-2xl font-light mb-4">{t("faq.noAnswer")}</h2>
             <p className="text-neutral-500 mb-8">
-              Notre équipe est disponible pour répondre à toutes vos questions.
+              {t("faq.noAnswerDesc")}
             </p>
             <a 
               href="/contact" 
               className="inline-block px-8 py-4 border border-white text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors"
             >
-              Nous contacter
+              {t("about.contactUs")}
             </a>
           </div>
         </section>

@@ -5,19 +5,24 @@ import { useSession, signOut } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import CartButton from "@/components/cart/CartButton"
-
-const categories = [
-  { href: "/catalogue?category=painting", label: "Peinture" },
-  { href: "/catalogue?category=sculpture", label: "Sculpture" },
-  { href: "/catalogue?category=photography", label: "Photographie" },
-  { href: "/catalogue?category=drawing", label: "Dessin" },
-  { href: "/catalogue?category=digital", label: "Art numérique" },
-  { href: "/artistes", label: "Artistes" },
-]
+import { useLanguage } from "@/components/providers/LanguageProvider"
+import LanguageToggle from "@/components/ui/LanguageToggle"
+import ThemeToggle from "@/components/ui/ThemeToggle"
+import NotificationBell from "@/components/ui/NotificationBell"
 
 export default function HomeHeader() {
   const { data: session } = useSession()
   const router = useRouter()
+  const { t } = useLanguage()
+
+  const categories = [
+    { href: "/catalogue?category=painting", labelKey: "nav.painting" },
+    { href: "/catalogue?category=sculpture", labelKey: "nav.sculpture" },
+    { href: "/catalogue?category=photography", labelKey: "nav.photography" },
+    { href: "/catalogue?category=drawing", labelKey: "nav.drawing" },
+    { href: "/catalogue?category=digital", labelKey: "nav.digitalArt" },
+    { href: "/artistes", labelKey: "nav.artists" },
+  ]
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchFocused, setSearchFocused] = useState(false)
@@ -69,7 +74,7 @@ export default function HomeHeader() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
-              placeholder="Rechercher une œuvre, un artiste..."
+              placeholder={t("search.placeholder")}
               className="flex-1 bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-neutral-400 focus:outline-none"
             />
             <button 
@@ -86,10 +91,13 @@ export default function HomeHeader() {
           <div className="hidden md:flex items-center gap-2">
             {session ? (
               <>
+                <LanguageToggle />
+                <ThemeToggle />
+                <NotificationBell />
                 <Link 
                   href="/dashboard/favoris" 
                   className="p-2.5 text-white/70 hover:text-white transition-colors"
-                  title="Mes favoris"
+                  title={t("nav.myFavorites")}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -99,7 +107,7 @@ export default function HomeHeader() {
                 <Link 
                   href="/dashboard" 
                   className="p-2.5 text-white/70 hover:text-white transition-colors"
-                  title="Mon compte"
+                  title={t("nav.myAccount")}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -108,6 +116,8 @@ export default function HomeHeader() {
               </>
             ) : (
               <>
+                <LanguageToggle />
+                <ThemeToggle />
                 <CartButton />
                 <Link 
                   href="/login" 
@@ -117,7 +127,7 @@ export default function HomeHeader() {
                       : "border-white/30 hover:border-white"
                   }`}
                 >
-                  Connexion
+                  {t("nav.login")}
                 </Link>
               </>
             )}
@@ -148,7 +158,7 @@ export default function HomeHeader() {
               href="/catalogue"
               className="px-5 py-3 text-sm text-neutral-300 hover:text-white transition-colors"
             >
-              Toutes les œuvres
+              {t("nav.allArtworks")}
             </Link>
             {categories.map((cat) => (
               <Link
@@ -156,14 +166,14 @@ export default function HomeHeader() {
                 href={cat.href}
                 className="px-5 py-3 text-sm text-neutral-300 hover:text-white transition-colors"
               >
-                {cat.label}
+                {t(cat.labelKey)}
               </Link>
             ))}
             <Link 
               href="/contact"
               className="px-5 py-3 text-sm text-gold hover:opacity-80 transition-opacity"
             >
-              Contact
+              {t("nav.contact")}
             </Link>
           </div>
         </div>
@@ -182,7 +192,7 @@ export default function HomeHeader() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher..."
+                placeholder={t("search.placeholder")}
                 className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:outline-none"
               />
               <button 
@@ -202,7 +212,7 @@ export default function HomeHeader() {
                 className="block py-2 text-sm text-white"
                 onClick={() => setMenuOpen(false)}
               >
-                Toutes les œuvres
+                {t("nav.allArtworks")}
               </Link>
               {categories.map((cat) => (
                 <Link
@@ -211,7 +221,7 @@ export default function HomeHeader() {
                   className="block py-2 text-sm text-neutral-400 hover:text-white"
                   onClick={() => setMenuOpen(false)}
                 >
-                  {cat.label}
+                  {t(cat.labelKey)}
                 </Link>
               ))}
             </div>
@@ -225,14 +235,14 @@ export default function HomeHeader() {
                     className="block py-2 text-sm text-white"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Mon compte
+                    {t("nav.myAccount")}
                   </Link>
                   <Link 
                     href="/dashboard/favoris" 
                     className="block py-2 text-sm text-neutral-400"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Mes favoris
+                    {t("nav.myFavorites")}
                   </Link>
                   <button
                     onClick={() => {
@@ -241,7 +251,7 @@ export default function HomeHeader() {
                     }}
                     className="block py-2 text-sm text-neutral-500"
                   >
-                    Déconnexion
+                    {t("nav.logout")}
                   </button>
                 </>
               ) : (
@@ -250,7 +260,7 @@ export default function HomeHeader() {
                   className="block py-2 text-sm text-white"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Connexion
+                  {t("nav.login")}
                 </Link>
               )}
               <Link 
@@ -258,7 +268,7 @@ export default function HomeHeader() {
                 className="block py-2 text-sm text-gold"
                 onClick={() => setMenuOpen(false)}
               >
-                Contact
+                {t("nav.contact")}
               </Link>
             </div>
           </div>

@@ -3,6 +3,7 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
 import { Metadata } from "next"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 // Métadonnées pour le SEO
 export const metadata: Metadata = {
@@ -84,6 +85,7 @@ function getImageUrl(images: any): string {
 }
 
 export default async function ArtistesPage() {
+  const t = getServerTranslation()
   const artists = await getArtists()
 
   return (
@@ -95,12 +97,11 @@ export default async function ArtistesPage() {
           <div className="max-w-[1800px] mx-auto px-8 md:px-16">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
               <div>
-                <p className="label mb-4 text-gold">La galerie</p>
-                <h1 className="heading-xl">Nos Artistes</h1>
+                <p className="label mb-4 text-gold">{t("artists.label")}</p>
+                <h1 className="heading-xl">{t("artists.title")}</h1>
               </div>
               <p className="text-neutral-500 max-w-md">
-                Des talents uniques, des visions singulières. Découvrez les artistes 
-                qui font la richesse de notre collection.
+                {t("artists.desc")}
               </p>
             </div>
           </div>
@@ -154,10 +155,10 @@ export default async function ArtistesPage() {
                         )}
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-neutral-500">
-                            {artist._count.artworks} œuvre{artist._count.artworks > 1 ? 's' : ''} disponible{artist._count.artworks > 1 ? 's' : ''}
+                            {t("artists.artworksAvailable").replace("{count}", String(artist._count.artworks)).replace("{plural}", artist._count.artworks > 1 ? "s" : "")}
                           </span>
                           <span className="text-gold group-hover:underline">
-                            Voir le profil →
+                            {t("artists.viewProfile")}
                           </span>
                         </div>
                       </div>
@@ -168,13 +169,13 @@ export default async function ArtistesPage() {
             ) : (
               <div className="text-center py-24 border border-neutral-800">
                 <p className="text-neutral-500 mb-4">
-                  Aucun artiste pour le moment.
+                  {t("artists.noArtists")}
                 </p>
                 <Link 
                   href="/catalogue" 
                   className="text-white underline hover:text-neutral-300"
                 >
-                  Voir le catalogue
+                  {t("about.viewCatalogue")}
                 </Link>
               </div>
             )}
@@ -184,16 +185,15 @@ export default async function ArtistesPage() {
         {/* Call to Action */}
         <section className="py-20 border-t border-neutral-800">
           <div className="max-w-[1800px] mx-auto px-8 md:px-16 text-center">
-            <h2 className="heading-md mb-6">Vous êtes artiste ?</h2>
+            <h2 className="heading-md mb-6">{t("artists.areYouArtist")}</h2>
             <p className="text-neutral-500 max-w-xl mx-auto mb-8">
-              Rejoignez notre galerie et présentez vos œuvres à une clientèle internationale 
-              passionnée d'art contemporain.
+              {t("artists.joinDesc")}
             </p>
             <Link
               href="/contact"
               className="inline-block border border-white px-8 py-4 text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-all"
             >
-              Nous contacter
+              {t("about.contactUs")}
             </Link>
           </div>
         </section>

@@ -14,6 +14,7 @@ import ShareButtons from "@/components/artwork/ShareButtons"
 import ImageLightbox from "@/components/artwork/ImageLightbox"
 import Recommendations from "@/components/artwork/Recommendations"
 import { Metadata } from "next"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 // Générer les meta tags dynamiques pour le SEO
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -29,8 +30,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   })
 
   if (!artwork) {
+    const t = getServerTranslation()
     return {
-      title: "Œuvre non trouvée"
+      title: t("artwork.notFound")
     }
   }
 
@@ -65,18 +67,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       images: [imageUrl]
     }
   }
-}
-
-// Mapping des catégories
-const categoryLabels: Record<ArtworkCategory, string> = {
-  PAINTING: "Peinture",
-  SCULPTURE: "Sculpture",
-  PHOTOGRAPHY: "Photographie",
-  DRAWING: "Dessin",
-  PRINT: "Estampe",
-  DIGITAL: "Art numérique",
-  MIXED_MEDIA: "Technique mixte",
-  OTHER: "Autre"
 }
 
 // Helper pour extraire les images
@@ -145,6 +135,19 @@ async function getReviewStats(artworkId: string) {
 }
 
 export default async function ArtworkPage({ params }: { params: { slug: string } }) {
+  const t = getServerTranslation()
+
+  const categoryLabels: Record<ArtworkCategory, string> = {
+    PAINTING: t("catalogue.category.painting"),
+    SCULPTURE: t("catalogue.category.sculpture"),
+    PHOTOGRAPHY: t("catalogue.category.photography"),
+    DRAWING: t("catalogue.category.drawing"),
+    PRINT: t("catalogue.category.print"),
+    DIGITAL: t("catalogue.category.digital"),
+    MIXED_MEDIA: t("catalogue.category.mixedMedia"),
+    OTHER: t("catalogue.category.other")
+  }
+
   const artwork = await getArtwork(params.slug)
   
   if (!artwork) {
@@ -235,13 +238,13 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
       {
         "@type": "ListItem",
         position: 1,
-        name: "Accueil",
+        name: t("breadcrumbs.home"),
         item: baseUrl
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: "Collection",
+        name: t("artwork.collection"),
         item: `${baseUrl}/catalogue`
       },
       {
@@ -332,32 +335,32 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
 
                 {/* Description */}
                 <div>
-                  <p className="label mb-4">À propos</p>
+                  <p className="label mb-4">{t("artwork.about")}</p>
                   <p className="text-neutral-400 leading-relaxed">{artwork.description}</p>
                 </div>
 
                 {/* Details */}
                 <div className="space-y-4">
-                  <p className="label mb-4">Détails</p>
+                  <p className="label mb-4">{t("artwork.details")}</p>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="py-4 border-b border-neutral-800">
-                      <p className="text-neutral-500 mb-1">Dimensions</p>
+                      <p className="text-neutral-500 mb-1">{t("artwork.dimensions")}</p>
                       <p>
                         {Number(artwork.width)} × {Number(artwork.height)}
                         {artwork.depth ? ` × ${Number(artwork.depth)}` : ''} cm
                       </p>
                     </div>
                     <div className="py-4 border-b border-neutral-800">
-                      <p className="text-neutral-500 mb-1">Année</p>
+                      <p className="text-neutral-500 mb-1">{t("artwork.year")}</p>
                       <p>{artwork.year}</p>
                     </div>
                     <div className="py-4 border-b border-neutral-800">
-                      <p className="text-neutral-500 mb-1">Technique</p>
+                      <p className="text-neutral-500 mb-1">{t("artwork.technique")}</p>
                       <p>{artwork.medium}</p>
                     </div>
                     <div className="py-4 border-b border-neutral-800">
-                      <p className="text-neutral-500 mb-1">Édition</p>
-                      <p>Œuvre unique</p>
+                      <p className="text-neutral-500 mb-1">{t("artwork.edition")}</p>
+                      <p>{t("artwork.uniqueWork")}</p>
                     </div>
                   </div>
                 </div>
@@ -366,10 +369,10 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                 <div className="bg-neutral-900/50 p-8 space-y-6">
                   <div className="flex items-end justify-between">
                     <div>
-                      <p className="text-neutral-500 text-sm mb-1">Prix</p>
+                      <p className="text-neutral-500 text-sm mb-1">{t("artwork.price")}</p>
                       <p className="text-4xl font-light">€{Number(artwork.price).toLocaleString()}</p>
                     </div>
-                    <p className="text-neutral-500 text-sm">TVA incluse</p>
+                    <p className="text-neutral-500 text-sm">{t("artwork.vatIncluded")}</p>
                   </div>
                   
                   <AddToCartButton artwork={{
@@ -385,14 +388,14 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <span>Certificat d'authenticité inclus</span>
+                    <span>{t("artwork.certificateIncluded")}</span>
                   </div>
                   
                   <div className="flex items-center gap-3 text-neutral-500 text-sm">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
                     </svg>
-                    <span>Livraison mondiale assurée</span>
+                    <span>{t("artwork.shippingIncluded")}</span>
                   </div>
                   
                   {/* Contact artiste */}

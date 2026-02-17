@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface Artist {
   id: string
@@ -22,6 +23,7 @@ interface CatalogueFiltersProps {
 
 export default function CatalogueFilters({ artists, currentFilters }: CatalogueFiltersProps) {
   const router = useRouter()
+  const { t } = useLanguage()
   
   const [showFilters, setShowFilters] = useState(false)
   const [showPrice, setShowPrice] = useState(false)
@@ -34,11 +36,11 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
   const [sort, setSort] = useState(currentFilters.sort || "newest")
 
   const sortLabels: Record<string, string> = {
-    newest: "Date de mise en ligne",
-    oldest: "Plus ancien",
-    price_asc: "Prix croissant",
-    price_desc: "Prix décroissant",
-    title: "Titre A-Z"
+    newest: t("filters.sort.newest"),
+    oldest: t("filters.sort.oldest"),
+    price_asc: t("filters.sort.priceAsc"),
+    price_desc: t("filters.sort.priceDesc"),
+    title: t("filters.sort.titleAz")
   }
 
   // Appliquer un filtre
@@ -115,7 +117,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
-        <span className="hidden sm:inline">Filtres</span>
+        <span className="hidden sm:inline">{t("filters.filters")}</span>
         {hasActiveFilters && <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse-subtle" />}
       </button>
 
@@ -133,7 +135,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
               : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
           }`}
         >
-          Prix
+          {t("filters.price")}
           <svg className={`w-4 h-4 transition-transform duration-200 ${showPrice ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -164,7 +166,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
                 onClick={() => applyFilter("price", "")}
                 className="w-full bg-white text-black py-2.5 text-sm font-medium hover:bg-gold transition-all duration-200 rounded active:scale-[0.98]"
               >
-                Appliquer
+                {t("filters.apply")}
               </button>
             </div>
           </>
@@ -185,7 +187,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
               : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
           }`}
         >
-          Artiste
+          {t("filters.artist")}
           <svg className={`w-4 h-4 transition-transform duration-200 ${showMedium ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -204,7 +206,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
                   !currentFilters.artistId || currentFilters.artistId === "all" ? "text-white bg-neutral-800" : "text-neutral-300 hover:bg-neutral-800"
                 }`}
               >
-                Tous les artistes
+                {t("filters.allArtists")}
               </button>
               {artists.map((artist) => (
                 <button
@@ -231,7 +233,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
           onClick={resetFilters}
           className="px-3 sm:px-4 py-2 text-sm text-neutral-400 hover:text-white transition-all duration-200 hover:underline"
         >
-          <span className="hidden sm:inline">Tout effacer</span>
+          <span className="hidden sm:inline">{t("filters.clearAll")}</span>
           <span className="sm:hidden">×</span>
         </button>
       )}
@@ -249,7 +251,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
           }}
           className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-all duration-200"
         >
-          <span className="hidden sm:inline">Trier par</span>
+          <span className="hidden sm:inline">{t("filters.sortBy")}</span>
           <span className="text-white text-xs sm:text-sm">{sortLabels[currentFilters.sort || "newest"]}</span>
           <svg className={`w-4 h-4 transition-transform duration-200 ${showSort ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

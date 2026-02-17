@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import AdminDashboard from "@/components/admin/AdminDashboard"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 // Statistiques pour l'admin
 async function getAdminStats() {
@@ -84,6 +85,7 @@ async function getBuyerStats(userId: string) {
 }
 
 export default async function DashboardPage() {
+  const t = getServerTranslation()
   const session = await getServerSession(authOptions)
 
   if (!session) {
@@ -113,7 +115,7 @@ export default async function DashboardPage() {
               href="/api/auth/signout"
               className="text-sm text-neutral-400 hover:text-white transition-colors"
             >
-              Déconnexion
+              {t("dashboard.logout")}
             </Link>
           </div>
         </div>
@@ -121,8 +123,8 @@ export default async function DashboardPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-light mb-2">Tableau de bord</h1>
-        <p className="text-neutral-500 mb-12">Bienvenue, {user.name}</p>
+        <h1 className="text-3xl font-light mb-2">{t("dashboard.title")}</h1>
+        <p className="text-neutral-500 mb-12">{t("dashboard.welcome")} {user.name}</p>
 
         {/* Role-based content */}
         <div className="grid md:grid-cols-3 gap-6">
@@ -133,54 +135,54 @@ export default async function DashboardPage() {
                 href="/admin/oeuvres"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Gérer les œuvres</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.manageArtworks")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Valider, modifier ou supprimer les œuvres
+                  {t("dashboard.manageArtworksDesc")}
                 </p>
               </Link>
               <Link
                 href="/admin/artistes"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Gérer les artistes</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.manageArtists")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Valider les nouveaux artistes
+                  {t("dashboard.manageArtistsDesc")}
                 </p>
               </Link>
               <Link
                 href="/admin/commandes"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Commandes</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.orders")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Voir et gérer les commandes
+                  {t("dashboard.ordersDesc")}
                 </p>
               </Link>
               <Link
                 href="/admin/users"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Utilisateurs</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.users")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Bloquer, promouvoir, gérer les comptes
+                  {t("dashboard.usersDesc")}
                 </p>
               </Link>
               <Link
                 href="/admin/settings"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Paramètres</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.settings")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Commission, frais de port, configuration
+                  {t("dashboard.settingsDesc")}
                 </p>
               </Link>
               <Link
                 href="/dashboard/favoris"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mes favoris</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.favorites")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Œuvres sauvegardées
+                  {t("dashboard.favoritesDesc")}
                 </p>
               </Link>
             </>
@@ -193,45 +195,45 @@ export default async function DashboardPage() {
                 href="/dashboard/artiste/oeuvres"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mes œuvres</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.myArtworks")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Gérer mes œuvres en vente
+                  {t("dashboard.myArtworksDesc")}
                 </p>
               </Link>
               <Link
                 href="/dashboard/artiste/ventes"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Statistiques & Ventes</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.stats")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Graphiques, export CSV et historique
+                  {t("dashboard.statsDesc")}
                 </p>
               </Link>
               <Link
                 href="/dashboard/artiste/expositions"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mes expositions</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.exhibitions")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Gérer mes expositions passées et actuelles
+                  {t("dashboard.exhibitionsDesc")}
                 </p>
               </Link>
               <Link
                 href="/dashboard/artiste/profil"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mon profil</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.profile")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Modifier mes informations
+                  {t("dashboard.profileDesc")}
                 </p>
               </Link>
               <Link
                 href="/dashboard/favoris"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mes favoris</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.favorites")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Œuvres sauvegardées
+                  {t("dashboard.favoritesDesc")}
                 </p>
               </Link>
             </>
@@ -244,27 +246,27 @@ export default async function DashboardPage() {
                 href="/dashboard/commandes"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mes commandes</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.myOrders")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Historique de mes achats
+                  {t("dashboard.myOrdersDesc")}
                 </p>
               </Link>
               <Link
                 href="/dashboard/favoris"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mes favoris</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.favorites")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Œuvres sauvegardées
+                  {t("dashboard.favoritesDesc")}
                 </p>
               </Link>
               <Link
                 href="/dashboard/profil"
                 className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
               >
-                <h3 className="text-lg font-light mb-2">Mon profil</h3>
+                <h3 className="text-lg font-light mb-2">{t("dashboard.profile")}</h3>
                 <p className="text-neutral-500 text-sm">
-                  Modifier mes informations
+                  {t("dashboard.profileDesc")}
                 </p>
               </Link>
             </>
@@ -279,10 +281,10 @@ export default async function DashboardPage() {
               <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <h3 className="text-lg font-light">Mes messages</h3>
+              <h3 className="text-lg font-light">{t("dashboard.myMessages")}</h3>
             </div>
             <p className="text-neutral-500 text-sm">
-              Communiquer avec les artistes / acheteurs
+              {t("dashboard.myMessagesDesc")}
             </p>
           </Link>
         </div>
@@ -290,7 +292,7 @@ export default async function DashboardPage() {
         {/* Admin Dashboard avec graphiques et alertes */}
         {user.role === "ADMIN" && (
           <div className="mt-12">
-            <h2 className="text-xl font-light mb-6">Statistiques & Alertes</h2>
+            <h2 className="text-xl font-light mb-6">{t("dashboard.statsAlerts")}</h2>
             <AdminDashboard />
           </div>
         )}
@@ -298,23 +300,23 @@ export default async function DashboardPage() {
         {/* Quick Stats for Artist */}
         {user.role === "ARTIST" && artistStats && (
           <div className="mt-12">
-            <h2 className="text-xl font-light mb-6">Mes statistiques</h2>
+            <h2 className="text-xl font-light mb-6">{t("dashboard.myStats")}</h2>
             <div className="grid md:grid-cols-4 gap-6">
               <div className="bg-neutral-900 border border-neutral-800 p-6">
                 <p className="text-3xl font-light">{artistStats.artworks}</p>
-                <p className="text-neutral-500 text-sm mt-1">Œuvres totales</p>
+                <p className="text-neutral-500 text-sm mt-1">{t("dashboard.totalArtworks")}</p>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 p-6">
                 <p className="text-3xl font-light text-green-500">{artistStats.available}</p>
-                <p className="text-neutral-500 text-sm mt-1">Disponibles</p>
+                <p className="text-neutral-500 text-sm mt-1">{t("dashboard.available")}</p>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 p-6">
                 <p className="text-3xl font-light text-purple-500">{artistStats.sold}</p>
-                <p className="text-neutral-500 text-sm mt-1">Vendues</p>
+                <p className="text-neutral-500 text-sm mt-1">{t("dashboard.sold")}</p>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 p-6">
                 <p className="text-3xl font-light text-gold">€{Number(artistStats.revenue).toLocaleString('fr-FR')}</p>
-                <p className="text-neutral-500 text-sm mt-1">Revenus</p>
+                <p className="text-neutral-500 text-sm mt-1">{t("dashboard.revenue")}</p>
               </div>
             </div>
           </div>
@@ -323,19 +325,19 @@ export default async function DashboardPage() {
         {/* Quick Stats for Buyer */}
         {user.role === "BUYER" && buyerStats && (
           <div className="mt-12">
-            <h2 className="text-xl font-light mb-6">Mon activité</h2>
+            <h2 className="text-xl font-light mb-6">{t("dashboard.myActivity")}</h2>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-neutral-900 border border-neutral-800 p-6">
                 <p className="text-3xl font-light">{buyerStats.orders}</p>
-                <p className="text-neutral-500 text-sm mt-1">Commandes</p>
+                <p className="text-neutral-500 text-sm mt-1">{t("dashboard.orders")}</p>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 p-6">
                 <p className="text-3xl font-light text-red-500">{buyerStats.favorites}</p>
-                <p className="text-neutral-500 text-sm mt-1">Favoris</p>
+                <p className="text-neutral-500 text-sm mt-1">{t("dashboard.favorites")}</p>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 p-6">
                 <p className="text-3xl font-light">€{Number(buyerStats.totalSpent).toLocaleString('fr-FR')}</p>
-                <p className="text-neutral-500 text-sm mt-1">Total dépensé</p>
+                <p className="text-neutral-500 text-sm mt-1">{t("dashboard.totalSpent")}</p>
               </div>
             </div>
           </div>

@@ -5,8 +5,10 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { contactSchema } from "@/lib/validations"
 import FormField, { Input, Textarea, Select } from "@/components/ui/FormField"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 export default function ContactPage() {
+  const { t } = useLanguage()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -71,11 +73,11 @@ export default function ContactPage() {
         setErrors({})
       } else {
         setStatus("error")
-        setServerError(data.error || "Une erreur est survenue")
+        setServerError(data.error || t("common.error"))
       }
     } catch {
       setStatus("error")
-      setServerError("Une erreur est survenue")
+      setServerError(t("common.error"))
     }
   }
 
@@ -87,11 +89,10 @@ export default function ContactPage() {
         <section className="py-24 px-6">
           <div className="max-w-7xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-light tracking-tight mb-6">
-              Contact
+              {t("contact.title")}
             </h1>
             <p className="text-xl text-neutral-400 max-w-2xl">
-              Une question, une demande particulière ? 
-              N'hésitez pas à nous contacter.
+              {t("contact.desc")}
             </p>
           </div>
         </section>
@@ -103,7 +104,7 @@ export default function ContactPage() {
               {/* Form */}
               <div>
                 <h2 className="text-2xl font-light mb-8">
-                  Envoyez-nous un message
+                  {t("contact.sendMessage")}
                 </h2>
 
                 {status === "success" ? (
@@ -114,16 +115,16 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <p className="text-green-400 text-lg">
-                      Votre message a été envoyé avec succès !
+                      {t("contact.successTitle")}
                     </p>
                     <p className="text-neutral-500 text-sm mt-2">
-                      Nous vous répondrons dans les plus brefs délais.
+                      {t("contact.successDesc")}
                     </p>
                     <button
                       onClick={() => setStatus("idle")}
                       className="mt-6 text-sm text-neutral-400 hover:text-white transition-colors"
                     >
-                      Envoyer un autre message
+                      {t("contact.sendAnother")}
                     </button>
                   </div>
                 ) : (
@@ -137,7 +138,7 @@ export default function ContactPage() {
                       </div>
                     )}
 
-                    <FormField label="Nom complet" error={errors.name} required>
+                    <FormField label={t("contact.fullName")} error={errors.name} required>
                       <Input
                         type="text"
                         value={formData.name}
@@ -147,7 +148,7 @@ export default function ContactPage() {
                         }}
                         onBlur={() => validateField("name", formData.name)}
                         error={!!errors.name}
-                        placeholder="Votre nom"
+                        placeholder={t("contact.fullNamePlaceholder")}
                       />
                     </FormField>
 
@@ -165,7 +166,7 @@ export default function ContactPage() {
                       />
                     </FormField>
 
-                    <FormField label="Sujet" error={errors.subject} required>
+                    <FormField label={t("contact.subject")} error={errors.subject} required>
                       <Select
                         value={formData.subject}
                         onChange={(e) => {
@@ -174,12 +175,12 @@ export default function ContactPage() {
                         }}
                         error={!!errors.subject}
                       >
-                        <option value="">Sélectionnez un sujet</option>
-                        <option value="Question sur une œuvre">Question sur une œuvre</option>
-                        <option value="Question sur une commande">Question sur une commande</option>
-                        <option value="Devenir artiste">Devenir artiste</option>
-                        <option value="Partenariat">Partenariat</option>
-                        <option value="Autre">Autre</option>
+                        <option value="">{t("contact.selectSubject")}</option>
+                        <option value="Question sur une œuvre">{t("contact.subjectArtwork")}</option>
+                        <option value="Question sur une commande">{t("contact.subjectOrder")}</option>
+                        <option value="Devenir artiste">{t("contact.subjectArtist")}</option>
+                        <option value="Partenariat">{t("contact.subjectPartnership")}</option>
+                        <option value="Autre">{t("contact.subjectOther")}</option>
                       </Select>
                     </FormField>
 
@@ -187,7 +188,7 @@ export default function ContactPage() {
                       label="Message" 
                       error={errors.message} 
                       required
-                      hint="Minimum 20 caractères"
+                      hint={t("contact.minChars")}
                     >
                       <Textarea
                         value={formData.message}
@@ -198,11 +199,11 @@ export default function ContactPage() {
                         onBlur={() => validateField("message", formData.message)}
                         error={!!errors.message}
                         rows={6}
-                        placeholder="Votre message..."
+                        placeholder={t("contact.messagePlaceholder")}
                       />
                       {formData.message && (
                         <p className="text-neutral-600 text-xs mt-1">
-                          {formData.message.length}/2000 caractères
+                          {formData.message.length}/2000 {t("contact.characters")}
                         </p>
                       )}
                     </FormField>
@@ -218,9 +219,9 @@ export default function ContactPage() {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
-                          Envoi en cours...
+                          {t("contact.sending")}
                         </span>
-                      ) : "Envoyer le message"}
+                      ) : t("contact.send")}
                     </button>
                   </form>
                 )}
@@ -229,13 +230,13 @@ export default function ContactPage() {
               {/* Info */}
               <div className="lg:pl-16">
                 <h2 className="text-2xl font-light mb-8">
-                  Informations
+                  {t("contact.info")}
                 </h2>
 
                 <div className="space-y-8">
                   <div>
                     <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                      Email
+                      {t("contact.email")}
                     </h3>
                     <a 
                       href="mailto:contact@elfakir.art" 
@@ -247,18 +248,18 @@ export default function ContactPage() {
 
                   <div>
                     <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                      Horaires
+                      {t("contact.hours")}
                     </h3>
                     <p className="text-neutral-400">
-                      Lundi - Vendredi : 9h - 18h<br />
-                      Samedi : 10h - 16h<br />
-                      Dimanche : Fermé
+                      {t("contact.hoursMF")}<br />
+                      {t("contact.hoursSat")}<br />
+                      {t("contact.hoursSun")}
                     </p>
                   </div>
 
                   <div>
                     <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                      Réseaux sociaux
+                      {t("contact.social")}
                     </h3>
                     <div className="flex gap-4">
                       <a href="#" className="text-neutral-400 hover:text-white transition-colors">
@@ -272,8 +273,7 @@ export default function ContactPage() {
 
                   <div className="pt-8 border-t border-neutral-800">
                     <p className="text-neutral-500 text-sm">
-                      Nous nous engageons à répondre à toutes les demandes 
-                      dans un délai de 24 à 48 heures ouvrées.
+                      {t("contact.responseTime")}
                     </p>
                   </div>
                 </div>

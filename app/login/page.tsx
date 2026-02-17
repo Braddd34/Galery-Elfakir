@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { loginSchema } from "@/lib/validations"
 import FormField, { Input } from "@/components/ui/FormField"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -66,7 +68,7 @@ export default function LoginPage() {
         router.refresh()
       }
     } catch {
-      setServerError("Une erreur est survenue")
+      setServerError(t("common.error"))
     } finally {
       setLoading(false)
     }
@@ -82,9 +84,9 @@ export default function LoginPage() {
 
         {/* Form Card */}
         <div className="bg-neutral-900 border border-neutral-800 p-8 md:p-12">
-          <h1 className="text-2xl font-light mb-2">Connexion</h1>
+          <h1 className="text-2xl font-light mb-2">{t("login.title")}</h1>
           <p className="text-neutral-500 text-sm mb-8">
-            Accédez à votre espace personnel
+            {t("login.desc")}
           </p>
 
           {serverError && (
@@ -107,7 +109,7 @@ export default function LoginPage() {
                 }}
                 onBlur={() => validateField("email", email)}
                 error={!!errors.email}
-                placeholder="votre@email.com"
+                placeholder={t("login.emailPlaceholder")}
                 autoComplete="email"
               />
             </FormField>
@@ -115,13 +117,13 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs uppercase tracking-wider text-neutral-500">
-                  Mot de passe <span className="text-red-400">*</span>
+                  {t("login.password")} <span className="text-red-400">*</span>
                 </label>
                 <Link 
                   href="/forgot-password" 
                   className="text-xs text-neutral-500 hover:text-white transition-colors"
                 >
-                  Mot de passe oublié ?
+                  {t("login.forgotPassword")}
                 </Link>
               </div>
               <Input
@@ -151,15 +153,15 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-white text-black py-4 font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Connexion..." : "Se connecter"}
+              {loading ? t("login.logging") : t("login.submit")}
             </button>
           </form>
 
           <div className="mt-8 pt-8 border-t border-neutral-800 text-center">
             <p className="text-neutral-500 text-sm">
-              Pas encore de compte ?{" "}
+              {t("login.noAccount")}{" "}
               <Link href="/register" className="text-white hover:underline">
-                S'inscrire
+                {t("login.register")}
               </Link>
             </p>
           </div>
@@ -168,7 +170,7 @@ export default function LoginPage() {
         {/* Back link */}
         <div className="text-center mt-8">
           <Link href="/" className="text-neutral-500 text-sm hover:text-white transition-colors">
-            ← Retour à l'accueil
+            {t("login.backHome")}
           </Link>
         </div>
       </div>
