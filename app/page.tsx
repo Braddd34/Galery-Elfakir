@@ -353,7 +353,7 @@ export default async function HomePage() {
         <div className="absolute inset-0">
           <Image 
             src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1920&h=800&fit=crop" 
-            alt=""
+            alt="Arrière-plan artistique décoratif"
             fill
             className="object-cover opacity-20"
             sizes="100vw"

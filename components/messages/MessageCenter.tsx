@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
+import { useToast } from "@/lib/toast-context"
 
 interface Message {
   id: string
@@ -32,6 +33,7 @@ interface MessageCenterProps {
 
 export default function MessageCenter({ onUnreadCountChange }: MessageCenterProps) {
   const { data: session } = useSession()
+  const { showToast } = useToast()
   const [messages, setMessages] = useState<Message[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -54,6 +56,16 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
   useEffect(() => {
     onUnreadCountChange?.(unreadCount)
   }, [unreadCount, onUnreadCountChange])
+
+  // Fermer la modale de composition avec Escape
+  useEffect(() => {
+    if (!showCompose) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowCompose(false)
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [showCompose])
   
   const fetchMessages = async () => {
     try {
@@ -91,9 +103,12 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
         if (selectedMessage?.id === id) {
           setSelectedMessage(null)
         }
+        showToast("Message supprimé", "info")
+      } else {
+        showToast("Erreur lors de la suppression", "error")
       }
     } catch (err) {
-      console.error("Erreur suppression:", err)
+      showToast("Erreur réseau", "error")
     }
   }
   
@@ -116,12 +131,16 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
       if (res.ok) {
         setShowCompose(false)
         setNewMessage({ receiverId: "", subject: "", content: "" })
+        showToast("Message envoyé avec succès", "success")
         if (activeTab === "sent") {
           fetchMessages()
         }
+      } else {
+        const data = await res.json()
+        showToast(data.error || "Erreur lors de l'envoi", "error")
       }
     } catch (err) {
-      console.error("Erreur envoi:", err)
+      showToast("Erreur réseau", "error")
     } finally {
       setSending(false)
     }
@@ -224,7 +243,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
                     {otherUser.image ? (
                       <Image
                         src={otherUser.image}
-                        alt=""
+                        alt={`Photo de ${otherUser.name || "l'utilisateur"}`}
                         width={40}
                         height={40}
                         className="rounded-full"
@@ -265,7 +284,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
                   {(activeTab === "received" ? selectedMessage.sender : selectedMessage.receiver).image ? (
                     <Image
                       src={(activeTab === "received" ? selectedMessage.sender : selectedMessage.receiver).image!}
-                      alt=""
+                      alt={`Photo de ${(activeTab === "received" ? selectedMessage.sender : selectedMessage.receiver).name || "l'utilisateur"}`}
                       width={48}
                       height={48}
                       className="rounded-full"
@@ -330,13 +349,14 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
       
       {/* Modal nouveau message */}
       {showCompose && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setShowCompose(false)}>
+          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full" role="dialog" aria-modal="true" aria-label="Nouveau message" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Nouveau message</h3>
               <button
                 onClick={() => setShowCompose(false)}
                 className="p-2 hover:bg-neutral-800 rounded"
+                aria-label="Fermer"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

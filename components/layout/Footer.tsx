@@ -3,6 +3,7 @@
 import Link from "next/link"
 import NewsletterForm from "@/components/ui/NewsletterForm"
 import { useLanguage } from "@/components/providers/LanguageProvider"
+import { SOCIAL_LINKS } from "@/lib/constants"
 
 /**
  * Footer du site — composant client pour accéder aux traductions dynamiques.
@@ -93,12 +94,21 @@ export default function Footer() {
               © {new Date().getFullYear()} ELFAKIR. {t("footer.rights")}.
             </p>
           <div className="flex gap-6">
-            <a href="#" className="text-neutral-500 hover:text-white transition-colors text-sm">
-              Instagram
-            </a>
-            <a href="#" className="text-neutral-500 hover:text-white transition-colors text-sm">
-              LinkedIn
-            </a>
+            {SOCIAL_LINKS.instagram && (
+              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-white transition-colors text-sm">
+                Instagram
+              </a>
+            )}
+            {SOCIAL_LINKS.twitter && (
+              <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-white transition-colors text-sm">
+                Twitter
+              </a>
+            )}
+            {SOCIAL_LINKS.linkedin && (
+              <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-white transition-colors text-sm">
+                LinkedIn
+              </a>
+            )}
           </div>
         </div>
       </div>

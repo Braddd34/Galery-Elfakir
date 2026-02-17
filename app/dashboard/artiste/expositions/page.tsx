@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useToast } from "@/lib/toast-context"
 
 interface Exhibition {
   id: string
@@ -25,6 +26,7 @@ interface Exhibition {
 export default function ExpositionsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { showToast } = useToast()
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -80,12 +82,13 @@ export default function ExpositionsPage() {
         setExhibitions([newExhibition, ...exhibitions])
         setShowForm(false)
         setForm({ title: "", description: "", location: "", city: "", country: "", startDate: "", endDate: "", imageUrl: "", link: "" })
+        showToast("Exposition ajoutée avec succès", "success")
       } else {
         const data = await res.json()
-        alert(data.error || "Erreur lors de l'ajout")
+        showToast(data.error || "Erreur lors de l'ajout", "error")
       }
     } catch {
-      alert("Erreur réseau")
+      showToast("Erreur réseau", "error")
     } finally {
       setSaving(false)
     }
@@ -98,9 +101,12 @@ export default function ExpositionsPage() {
       const res = await fetch(`/api/artist/exhibitions?id=${id}`, { method: "DELETE" })
       if (res.ok) {
         setExhibitions(exhibitions.filter(e => e.id !== id))
+        showToast("Exposition supprimée", "info")
+      } else {
+        showToast("Erreur lors de la suppression", "error")
       }
     } catch {
-      alert("Erreur lors de la suppression")
+      showToast("Erreur réseau", "error")
     }
   }
 

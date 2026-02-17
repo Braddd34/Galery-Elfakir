@@ -199,7 +199,7 @@ export default function AdminUsersPage() {
                             {user.image ? (
                               <Image
                                 src={user.image}
-                                alt=""
+                                alt={`Photo de ${user.name || "l'utilisateur"}`}
                                 width={36}
                                 height={36}
                                 className="rounded-full"

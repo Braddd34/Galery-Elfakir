@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
@@ -29,6 +29,22 @@ export default function ContactArtistButton({
     content: ""
   })
   
+  // Fermer la modale avec Escape
+  const closeModal = useCallback(() => {
+    setShowModal(false)
+    setSent(false)
+    setError("")
+  }, [])
+
+  useEffect(() => {
+    if (!showModal) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal()
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [showModal, closeModal])
+
   const handleClick = () => {
     if (!session) {
       router.push("/login?redirect=" + encodeURIComponent(window.location.pathname))
@@ -91,15 +107,16 @@ export default function ContactArtistButton({
       </button>
       
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full" role="dialog" aria-modal="true" aria-label={`Contacter ${artistName}`} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">
                 Contacter {artistName}
               </h3>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={closeModal}
                 className="p-2 hover:bg-neutral-800 rounded"
+                aria-label="Fermer"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -156,7 +173,7 @@ export default function ContactArtistButton({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={closeModal}
                     className="px-4 py-2 border border-neutral-700 hover:border-white transition-colors"
                   >
                     Annuler
