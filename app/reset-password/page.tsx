@@ -5,8 +5,10 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { resetPasswordSchema } from "@/lib/validations"
 import FormField, { Input } from "@/components/ui/FormField"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 function ResetPasswordForm() {
+  const { t } = useLanguage()
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get("token")
@@ -22,7 +24,7 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     if (!token) {
-      setServerError("Lien de réinitialisation invalide")
+      setServerError(t("resetPwd.invalidLink"))
     }
   }, [token])
 
@@ -57,10 +59,10 @@ function ResetPasswordForm() {
     if (/[0-9]/.test(pwd)) score++
     if (/[^A-Za-z0-9]/.test(pwd)) score++
     
-    if (score <= 1) return { level: 1, text: "Faible", color: "bg-red-500" }
-    if (score === 2) return { level: 2, text: "Moyen", color: "bg-yellow-500" }
-    if (score === 3) return { level: 3, text: "Fort", color: "bg-green-500" }
-    return { level: 4, text: "Très fort", color: "bg-green-400" }
+    if (score <= 1) return { level: 1, text: t("register.strengthWeak"), color: "bg-red-500" }
+    if (score === 2) return { level: 2, text: t("register.strengthMedium"), color: "bg-yellow-500" }
+    if (score === 3) return { level: 3, text: t("register.strengthStrong"), color: "bg-green-500" }
+    return { level: 4, text: t("register.strengthVeryStrong"), color: "bg-green-400" }
   }
 
   const passwordStrength = getPasswordStrength()
@@ -96,10 +98,10 @@ function ResetPasswordForm() {
           router.push("/login")
         }, 3000)
       } else {
-        setServerError(data.error || "Une erreur est survenue")
+        setServerError(data.error || t("common.error"))
       }
     } catch {
-      setServerError("Une erreur est survenue")
+      setServerError(t("common.error"))
     } finally {
       setLoading(false)
     }
@@ -113,15 +115,15 @@ function ResetPasswordForm() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
-        <h2 className="text-2xl font-light mb-4">Lien invalide</h2>
+        <h2 className="text-2xl font-light mb-4">{t("resetPwd.invalidLink")}</h2>
         <p className="text-neutral-400 mb-8">
-          Ce lien de réinitialisation est invalide ou a expiré.
+          {t("resetPwd.invalidDesc")}
         </p>
         <Link
           href="/forgot-password"
           className="inline-block bg-white text-black px-8 py-3 text-sm tracking-wider uppercase hover:bg-neutral-200 transition-colors"
         >
-          Demander un nouveau lien
+          {t("resetPwd.requestNew")}
         </Link>
       </div>
     )
@@ -135,18 +137,18 @@ function ResetPasswordForm() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-2xl font-light mb-4">Mot de passe réinitialisé</h2>
+        <h2 className="text-2xl font-light mb-4">{t("resetPwd.success")}</h2>
         <p className="text-neutral-400 mb-4">
-          Votre mot de passe a été modifié avec succès.
+          {t("resetPwd.successDesc")}
         </p>
         <p className="text-neutral-500 text-sm mb-8">
-          Redirection vers la page de connexion...
+          {t("resetPwd.redirecting")}
         </p>
         <Link
           href="/login"
           className="inline-block text-sm text-gold hover:underline"
         >
-          Se connecter maintenant
+          {t("resetPwd.loginNow")}
         </Link>
       </div>
     )
@@ -154,9 +156,9 @@ function ResetPasswordForm() {
 
   return (
     <>
-      <h2 className="text-2xl font-light text-center mb-2">Nouveau mot de passe</h2>
+      <h2 className="text-2xl font-light text-center mb-2">{t("resetPwd.title")}</h2>
       <p className="text-neutral-500 text-center mb-8">
-        Choisissez un nouveau mot de passe sécurisé
+        {t("resetPwd.desc")}
       </p>
 
       {serverError && (
@@ -170,10 +172,10 @@ function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <FormField 
-          label="Nouveau mot de passe" 
+          label={t("resetPwd.title")} 
           error={errors.password} 
           required
-          hint="Minimum 8 caractères, 1 majuscule, 1 chiffre"
+          hint={t("resetPwd.hint")}
         >
           <Input
             type="password"
@@ -204,7 +206,7 @@ function ResetPasswordForm() {
           )}
         </FormField>
 
-        <FormField label="Confirmer le mot de passe" error={errors.confirmPassword} required>
+        <FormField label={t("resetPwd.confirm")} error={errors.confirmPassword} required>
           <Input
             type="password"
             value={formData.confirmPassword}
@@ -230,10 +232,10 @@ function ResetPasswordForm() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
-              Réinitialisation...
+              {t("resetPwd.resetting")}
             </span>
           ) : (
-            "Réinitialiser le mot de passe"
+            t("resetPwd.reset")
           )}
         </button>
       </form>
@@ -242,6 +244,7 @@ function ResetPasswordForm() {
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage()
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
       <div className="w-full max-w-md">

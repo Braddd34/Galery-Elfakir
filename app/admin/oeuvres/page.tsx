@@ -1,6 +1,7 @@
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import ArtworksTable from "@/components/admin/ArtworksTable"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 async function getArtworks() {
   const artworks = await prisma.artwork.findMany({
@@ -23,6 +24,7 @@ async function getArtworks() {
 }
 
 export default async function AdminOeuvresPage() {
+  const t = getServerTranslation()
   const artworks = await getArtworks()
 
   return (
@@ -30,16 +32,16 @@ export default async function AdminOeuvresPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-light">Œuvres</h1>
+          <h1 className="text-3xl font-light">{t("adminArtworks.title")}</h1>
           <p className="text-neutral-500 mt-1">
-            Gérez les œuvres de la galerie
+            {t("adminArtworks.desc")}
           </p>
         </div>
         <Link
           href="/admin/oeuvres/new"
           className="bg-white text-black px-6 py-3 text-sm font-medium hover:bg-neutral-200 transition-colors"
         >
-          + Ajouter une œuvre
+          {t("adminArtworks.add")}
         </Link>
       </div>
 
@@ -47,31 +49,31 @@ export default async function AdminOeuvresPage() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         <div className="bg-neutral-900 border border-neutral-800 p-4">
           <p className="text-2xl font-light">{artworks.length}</p>
-          <p className="text-neutral-500 text-sm">Total</p>
+          <p className="text-neutral-500 text-sm">{t("adminArtworks.total")}</p>
         </div>
         <div className="bg-neutral-900 border border-neutral-800 p-4">
           <p className="text-2xl font-light text-green-500">
             {artworks.filter(a => a.status === "AVAILABLE").length}
           </p>
-          <p className="text-neutral-500 text-sm">Disponibles</p>
+          <p className="text-neutral-500 text-sm">{t("adminArtworks.available")}</p>
         </div>
         <div className="bg-neutral-900 border border-neutral-800 p-4">
           <p className="text-2xl font-light text-yellow-500">
             {artworks.filter(a => a.status === "PENDING").length}
           </p>
-          <p className="text-neutral-500 text-sm">En attente</p>
+          <p className="text-neutral-500 text-sm">{t("adminArtworks.pending")}</p>
         </div>
         <div className="bg-neutral-900 border border-neutral-800 p-4">
           <p className="text-2xl font-light text-purple-500">
             {artworks.filter(a => a.status === "SOLD").length}
           </p>
-          <p className="text-neutral-500 text-sm">Vendues</p>
+          <p className="text-neutral-500 text-sm">{t("adminArtworks.sold")}</p>
         </div>
         <div className="bg-neutral-900 border border-neutral-800 p-4">
           <p className="text-2xl font-light text-neutral-500">
             {artworks.filter(a => a.status === "DRAFT").length}
           </p>
-          <p className="text-neutral-500 text-sm">Brouillons</p>
+          <p className="text-neutral-500 text-sm">{t("adminArtworks.drafts")}</p>
         </div>
       </div>
 

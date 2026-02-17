@@ -228,6 +228,10 @@ export default function HomeHeader() {
 
             {/* Mobile Account */}
             <div className="pt-6 border-t border-neutral-800 space-y-3">
+              <div className="flex items-center gap-4 mb-4">
+                <LanguageToggle />
+                <ThemeToggle />
+              </div>
               {session ? (
                 <>
                   <Link 

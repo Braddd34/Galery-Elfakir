@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 /**
  * Page de paramètres globaux pour l'administrateur.
@@ -34,6 +35,7 @@ const DEFAULT_SETTINGS: Settings = {
 export default function AdminSettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t } = useLanguage()
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -75,10 +77,10 @@ export default function AdminSettingsPage() {
         setSaved(true)
         setTimeout(() => setSaved(false), 3000)
       } else {
-        alert("Erreur lors de la sauvegarde")
+        alert(t("adminSettings.saveError"))
       }
     } catch {
-      alert("Erreur réseau")
+      alert(t("adminSettings.networkError"))
     } finally {
       setSaving(false)
     }
@@ -104,20 +106,20 @@ export default function AdminSettingsPage() {
       <header className="border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
           <Link href="/" className="text-xl tracking-[0.3em] font-light">ELFAKIR</Link>
-          <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">← Retour au tableau de bord</Link>
+          <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">{t("adminSettings.backToDashboard")}</Link>
         </div>
       </header>
 
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-light mb-2">Paramètres</h1>
-        <p className="text-neutral-500 mb-12">Configuration globale de la galerie</p>
+        <h1 className="text-3xl font-light mb-2">{t("adminSettings.title")}</h1>
+        <p className="text-neutral-500 mb-12">{t("adminSettings.desc")}</p>
 
         <div className="space-y-8">
           {/* Commission */}
           <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <h2 className="text-lg font-light mb-4">Commission</h2>
+            <h2 className="text-lg font-light mb-4">{t("adminSettings.commission")}</h2>
             <p className="text-neutral-500 text-sm mb-4">
-              Pourcentage prélevé sur chaque vente. Le reste est reversé à l'artiste.
+              {t("adminSettings.commissionDesc")}
             </p>
             <div className="flex items-center gap-4">
               <input
@@ -129,20 +131,20 @@ export default function AdminSettingsPage() {
               />
               <span className="text-neutral-400">%</span>
               <span className="text-neutral-600 text-sm ml-4">
-                → L'artiste reçoit {(100 - settings.commissionRate).toFixed(1)}%
+                {t("adminSettings.artistReceives")} {(100 - settings.commissionRate).toFixed(1)}%
               </span>
             </div>
           </div>
 
           {/* Frais de port */}
           <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <h2 className="text-lg font-light mb-4">Frais de livraison</h2>
+            <h2 className="text-lg font-light mb-4">{t("adminSettings.shippingTitle")}</h2>
             <p className="text-neutral-500 text-sm mb-6">
-              Tarifs de base pour l'expédition des œuvres selon la destination.
+              {t("adminSettings.shippingDesc")}
             </p>
             <div className="grid md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">France (€)</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("adminSettings.france")}</label>
                 <input
                   type="number" min="0" step="1"
                   value={settings.shippingFR}
@@ -151,7 +153,7 @@ export default function AdminSettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Europe (€)</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("adminSettings.europe")}</label>
                 <input
                   type="number" min="0" step="1"
                   value={settings.shippingEU}
@@ -160,7 +162,7 @@ export default function AdminSettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">International (€)</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("adminSettings.international")}</label>
                 <input
                   type="number" min="0" step="1"
                   value={settings.shippingWorld}
@@ -170,22 +172,22 @@ export default function AdminSettingsPage() {
               </div>
             </div>
             <div className="mt-4">
-              <label className="block text-sm text-neutral-400 mb-2">Livraison gratuite à partir de (€)</label>
+              <label className="block text-sm text-neutral-400 mb-2">{t("adminSettings.freeShipping")}</label>
               <input
                 type="number" min="0" step="100"
                 value={settings.freeShippingThreshold}
                 onChange={e => setSettings({ ...settings, freeShippingThreshold: parseFloat(e.target.value) || 0 })}
                 className="w-48 bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
               />
-              <p className="text-neutral-600 text-xs mt-1">0 = pas de livraison gratuite</p>
+              <p className="text-neutral-600 text-xs mt-1">{t("adminSettings.freeShippingHint")}</p>
             </div>
           </div>
 
           {/* Contact */}
           <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <h2 className="text-lg font-light mb-4">Contact</h2>
+            <h2 className="text-lg font-light mb-4">{t("adminSettings.contact")}</h2>
             <div>
-              <label className="block text-sm text-neutral-400 mb-2">Email de contact</label>
+              <label className="block text-sm text-neutral-400 mb-2">{t("adminSettings.contactEmail")}</label>
               <input
                 type="email"
                 value={settings.contactEmail}
@@ -197,9 +199,9 @@ export default function AdminSettingsPage() {
 
           {/* Upload */}
           <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <h2 className="text-lg font-light mb-4">Upload</h2>
+            <h2 className="text-lg font-light mb-4">{t("adminSettings.upload")}</h2>
             <div className="flex items-center gap-4">
-              <label className="text-sm text-neutral-400">Taille max par image</label>
+              <label className="text-sm text-neutral-400">{t("adminSettings.maxSize")}</label>
               <input
                 type="number" min="1" max="50"
                 value={settings.maxUploadSize}
@@ -217,11 +219,11 @@ export default function AdminSettingsPage() {
               disabled={saving}
               className="px-8 py-4 bg-white text-black text-sm uppercase tracking-wider font-medium hover:bg-gold transition-colors disabled:opacity-50"
             >
-              {saving ? "Enregistrement..." : "Enregistrer les paramètres"}
+              {saving ? t("adminSettings.saving") : t("adminSettings.save")}
             </button>
             {saved && (
               <span className="text-green-500 text-sm animate-fade-in">
-                ✓ Paramètres enregistrés
+                {"✓ " + t("adminSettings.saved")}
               </span>
             )}
           </div>

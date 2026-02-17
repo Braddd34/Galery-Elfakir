@@ -7,6 +7,7 @@ import Link from "next/link"
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm"
 import ProfilePhotoUpload from "@/components/profile/ProfilePhotoUpload"
 import NotificationPreferences from "@/components/profile/NotificationPreferences"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface BuyerProfile {
   firstName: string
@@ -21,6 +22,7 @@ interface BuyerProfile {
 export default function ProfilPage() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
+  const { t } = useLanguage()
   
   const [profile, setProfile] = useState<BuyerProfile>({
     firstName: "",
@@ -35,6 +37,7 @@ export default function ProfilPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("")
 
   useEffect(() => {
     if (status === "loading") return
@@ -85,12 +88,15 @@ export default function ProfilPage() {
       })
 
       if (res.ok) {
-        setMessage("Profil mis à jour avec succès")
+        setMessage(t("profile.success"))
+        setMessageType("success")
       } else {
-        setMessage("Erreur lors de la mise à jour")
+        setMessage(t("profile.error"))
+        setMessageType("error")
       }
     } catch {
-      setMessage("Erreur lors de la mise à jour")
+      setMessage(t("profile.error"))
+      setMessageType("error")
     } finally {
       setSaving(false)
     }
@@ -99,7 +105,7 @@ export default function ProfilPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-neutral-500">Chargement...</p>
+        <p className="text-neutral-500">{t("common.loading")}</p>
       </main>
     )
   }
@@ -113,7 +119,7 @@ export default function ProfilPage() {
             ELFAKIR
           </Link>
           <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">
-            ← Retour au tableau de bord
+            {t("profile.backToDashboard")}
           </Link>
         </div>
       </header>
@@ -128,13 +134,13 @@ export default function ProfilPage() {
             onPhotoChange={handlePhotoChange}
           />
           <div className="text-center sm:text-left">
-            <h1 className="text-3xl font-light mb-1">{session?.user?.name || "Mon profil"}</h1>
+            <h1 className="text-3xl font-light mb-1">{session?.user?.name || t("profile.myProfile")}</h1>
             <p className="text-neutral-500">{session?.user?.email}</p>
           </div>
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 border ${message.includes("succès") ? "border-green-500 text-green-400" : "border-red-500 text-red-400"}`}>
+          <div className={`mb-6 p-4 border ${messageType === "success" ? "border-green-500 text-green-400" : "border-red-500 text-red-400"}`}>
             {message}
           </div>
         )}
@@ -143,7 +149,7 @@ export default function ProfilPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Prénom
+                {t("profile.firstName")}
               </label>
               <input
                 type="text"
@@ -154,7 +160,7 @@ export default function ProfilPage() {
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Nom
+                {t("profile.lastName")}
               </label>
               <input
                 type="text"
@@ -167,7 +173,7 @@ export default function ProfilPage() {
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-              Adresse
+              {t("profile.address")}
             </label>
             <input
               type="text"
@@ -180,7 +186,7 @@ export default function ProfilPage() {
           <div className="grid md:grid-cols-3 gap-6">
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Code postal
+                {t("profile.postalCode")}
               </label>
               <input
                 type="text"
@@ -191,7 +197,7 @@ export default function ProfilPage() {
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Ville
+                {t("profile.city")}
               </label>
               <input
                 type="text"
@@ -202,7 +208,7 @@ export default function ProfilPage() {
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Pays
+                {t("profile.country")}
               </label>
               <input
                 type="text"
@@ -215,7 +221,7 @@ export default function ProfilPage() {
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-              Téléphone
+              {t("profile.phone")}
             </label>
             <input
               type="tel"
@@ -230,19 +236,19 @@ export default function ProfilPage() {
             disabled={saving}
             className="w-full bg-white text-black py-4 font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50"
           >
-            {saving ? "Enregistrement..." : "Enregistrer les modifications"}
+            {saving ? t("profile.saving") : t("profile.save")}
           </button>
         </form>
 
         {/* Section sécurité */}
         <div className="mt-12 pt-12 border-t border-neutral-800">
-          <h2 className="text-xl font-light mb-6">Sécurité</h2>
+          <h2 className="text-xl font-light mb-6">{t("profile.security")}</h2>
           <ChangePasswordForm />
         </div>
 
         {/* Section notifications */}
         <div className="mt-12 pt-12 border-t border-neutral-800">
-          <h2 className="text-xl font-light mb-6">Notifications</h2>
+          <h2 className="text-xl font-light mb-6">{t("profile.notifications")}</h2>
           <NotificationPreferences />
         </div>
       </div>

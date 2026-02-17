@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface Review {
   id: string
@@ -79,6 +80,7 @@ function StarRating({
 
 export default function ReviewSection({ artworkId }: ReviewSectionProps) {
   const { data: session } = useSession()
+  const { t } = useLanguage()
   const [reviews, setReviews] = useState<Review[]>([])
   const [stats, setStats] = useState<ReviewStats>({ count: 0, avgRating: 0 })
   const [loading, setLoading] = useState(true)
@@ -117,7 +119,7 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
     e.preventDefault()
     
     if (rating === 0) {
-      setError("Veuillez donner une note")
+      setError(t("reviews.ratingRequired"))
       return
     }
     
@@ -149,10 +151,10 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
         setComment("")
       } else {
         const data = await res.json()
-        setError(data.error || "Erreur lors de l'envoi")
+        setError(data.error || t("common.error"))
       }
     } catch (err) {
-      setError("Erreur réseau")
+      setError(t("common.error"))
     } finally {
       setSubmitting(false)
     }
@@ -179,11 +181,11 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
       {/* En-tête avec stats */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold mb-1">Avis clients</h3>
+          <h3 className="text-xl font-semibold mb-1">{t("reviews.title")}</h3>
           <div className="flex items-center gap-3">
             <StarRating rating={Math.round(stats.avgRating)} />
             <span className="text-neutral-400">
-              {stats.avgRating.toFixed(1)} ({stats.count} avis)
+              {stats.avgRating.toFixed(1)} ({stats.count} {stats.count > 1 ? t("reviews.reviews") : t("reviews.review")})
             </span>
           </div>
         </div>
@@ -193,7 +195,7 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
             onClick={() => setShowForm(true)}
             className="px-4 py-2 bg-white text-black text-sm font-medium hover:bg-neutral-200 transition-colors"
           >
-            Donner mon avis
+            {t("reviews.writeReview")}
           </button>
         )}
       </div>
@@ -202,28 +204,28 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-neutral-900 p-6 rounded-lg space-y-4">
           <div>
-            <label className="block text-sm text-neutral-400 mb-2">Votre note *</label>
+            <label className="block text-sm text-neutral-400 mb-2">{t("reviews.yourRating")} *</label>
             <StarRating rating={rating} onRate={setRating} interactive size="lg" />
           </div>
           
           <div>
-            <label className="block text-sm text-neutral-400 mb-2">Titre (optionnel)</label>
+            <label className="block text-sm text-neutral-400 mb-2">{t("reviews.titleOptional")}</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Résumez votre avis..."
+              placeholder={t("reviews.titlePlaceholder")}
               className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
               maxLength={100}
             />
           </div>
           
           <div>
-            <label className="block text-sm text-neutral-400 mb-2">Commentaire (optionnel)</label>
+            <label className="block text-sm text-neutral-400 mb-2">{t("reviews.commentOptional")}</label>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Décrivez votre expérience..."
+              placeholder={t("reviews.commentPlaceholder")}
               rows={4}
               className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none resize-none"
               maxLength={1000}
@@ -240,14 +242,14 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
               disabled={submitting}
               className="px-6 py-2 bg-white text-black font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50"
             >
-              {submitting ? "Envoi..." : "Publier mon avis"}
+              {submitting ? t("reviews.sending") : t("reviews.submit")}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
               className="px-6 py-2 border border-neutral-700 hover:border-white transition-colors"
             >
-              Annuler
+              {t("common.cancel")}
             </button>
           </div>
         </form>
@@ -256,7 +258,7 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
       {/* Liste des avis */}
       {reviews.length === 0 ? (
         <p className="text-neutral-500 text-center py-8">
-          Aucun avis pour le moment. Soyez le premier à donner votre avis !
+          {t("reviews.noReviews")}
         </p>
       ) : (
         <div className="space-y-4">
@@ -284,7 +286,7 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
                       <span className="font-medium">{review.user.name || "Anonyme"}</span>
                       {review.verified && (
                         <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded">
-                          Achat vérifié
+                          {t("reviews.verifiedPurchase")}
                         </span>
                       )}
                     </div>

@@ -4,8 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { forgotPasswordSchema } from "@/lib/validations"
 import FormField, { Input } from "@/components/ui/FormField"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage()
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -46,10 +48,10 @@ export default function ForgotPasswordPage() {
       if (res.ok) {
         setSent(true)
       } else {
-        setServerError(data.error || "Une erreur est survenue")
+        setServerError(data.error || t("common.error"))
       }
     } catch {
-      setServerError("Une erreur est survenue")
+      setServerError(t("common.error"))
     } finally {
       setLoading(false)
     }
@@ -71,27 +73,27 @@ export default function ForgotPasswordPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-light mb-4">Email envoyé</h2>
+            <h2 className="text-2xl font-light mb-4">{t("forgotPwd.emailSent")}</h2>
             <p className="text-neutral-400 mb-8">
-              Si un compte existe avec l'adresse <span className="text-white">{email}</span>, 
-              vous recevrez un lien de réinitialisation dans quelques instants.
+              {t("forgotPwd.emailSentDesc")} <span className="text-white">{email}</span>, 
+              {t("forgotPwd.emailSentDesc2")}
             </p>
             <p className="text-neutral-500 text-sm mb-8">
-              Pensez à vérifier vos spams si vous ne trouvez pas l'email.
+              {t("forgotPwd.checkSpam")}
             </p>
             <Link
               href="/login"
               className="inline-block text-sm text-neutral-400 hover:text-white transition-colors"
             >
-              ← Retour à la connexion
+              {t("forgotPwd.backToLogin")}
             </Link>
           </div>
         ) : (
           // Formulaire
           <>
-            <h2 className="text-2xl font-light text-center mb-2">Mot de passe oublié ?</h2>
+            <h2 className="text-2xl font-light text-center mb-2">{t("forgotPwd.title")}</h2>
             <p className="text-neutral-500 text-center mb-8">
-              Entrez votre email pour recevoir un lien de réinitialisation
+              {t("forgotPwd.desc")}
             </p>
 
             {serverError && (
@@ -104,7 +106,7 @@ export default function ForgotPasswordPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <FormField label="Adresse email" error={emailError} required>
+              <FormField label={t("contact.email")} error={emailError} required>
                 <Input
                   type="email"
                   value={email}
@@ -129,10 +131,10 @@ export default function ForgotPasswordPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Envoi en cours...
+                    {t("forgotPwd.sending")}
                   </span>
                 ) : (
-                  "Envoyer le lien"
+                  t("forgotPwd.send")
                 )}
               </button>
             </form>
@@ -142,7 +144,7 @@ export default function ForgotPasswordPage() {
                 href="/login"
                 className="text-sm text-neutral-400 hover:text-white transition-colors"
               >
-                ← Retour à la connexion
+                {t("forgotPwd.backToLogin")}
               </Link>
             </div>
           </>

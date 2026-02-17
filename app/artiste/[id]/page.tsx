@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
@@ -189,11 +190,13 @@ export default async function ArtistePage({ params }: { params: { id: string } }
             <div className="grid lg:grid-cols-3 gap-12">
               {/* Photo */}
               <div className="lg:col-span-1">
-                <div className="aspect-square bg-neutral-900 overflow-hidden">
-                  <img
+                <div className="relative aspect-square bg-neutral-900 overflow-hidden">
+                  <Image
                     src={artist.user.image || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600"}
                     alt={artist.user.name || "Artiste"}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 33vw"
                   />
                 </div>
               </div>
@@ -273,11 +276,13 @@ export default async function ArtistePage({ params }: { params: { id: string } }
                     href={`/oeuvre/${artwork.slug || artwork.id}`}
                     className="group"
                   >
-                    <div className="aspect-[3/4] bg-neutral-900 overflow-hidden mb-4">
-                      <img
+                    <div className="relative aspect-[3/4] bg-neutral-900 overflow-hidden mb-4">
+                      <Image
                         src={getImageUrl(artwork)}
                         alt={artwork.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     </div>
                     <div className="space-y-2">

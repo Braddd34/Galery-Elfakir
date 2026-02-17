@@ -4,13 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import { UserStatus } from "@prisma/client"
-
-const statusLabels: Record<UserStatus, { label: string; color: string }> = {
-  PENDING: { label: "En attente", color: "bg-yellow-500" },
-  ACTIVE: { label: "Actif", color: "bg-green-500" },
-  SUSPENDED: { label: "Suspendu", color: "bg-red-500" },
-  DELETED: { label: "Supprimé", color: "bg-neutral-500" },
-}
+import { getServerTranslation } from "@/lib/i18n-server"
 
 async function getAllArtists() {
   const artists = await prisma.user.findMany({
@@ -45,6 +39,15 @@ export default async function AdminArtistesPage() {
     redirect("/dashboard")
   }
 
+  const t = getServerTranslation()
+
+  const statusLabels: Record<UserStatus, { label: string; color: string }> = {
+    PENDING: { label: t("adminArtists.statusPending"), color: "bg-yellow-500" },
+    ACTIVE: { label: t("adminArtists.statusActive"), color: "bg-green-500" },
+    SUSPENDED: { label: t("adminArtists.statusSuspended"), color: "bg-red-500" },
+    DELETED: { label: t("adminArtists.statusDeleted"), color: "bg-neutral-500" },
+  }
+
   const [artists, stats] = await Promise.all([
     getAllArtists(),
     getArtistStats()
@@ -59,28 +62,28 @@ export default async function AdminArtistesPage() {
             ELFAKIR
           </Link>
           <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">
-            ← Retour au tableau de bord
+            {t("adminArtists.backToDashboard")}
           </Link>
         </div>
       </header>
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-light mb-8">Gestion des artistes</h1>
+        <h1 className="text-3xl font-light mb-8">{t("adminArtists.title")}</h1>
 
         {/* Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <div className="bg-neutral-900 border border-neutral-800 p-6">
             <p className="text-3xl font-light">{stats.total}</p>
-            <p className="text-neutral-500 text-sm mt-1">Total artistes</p>
+            <p className="text-neutral-500 text-sm mt-1">{t("adminArtists.totalArtists")}</p>
           </div>
           <div className="bg-neutral-900 border border-neutral-800 p-6">
             <p className="text-3xl font-light text-yellow-500">{stats.pending}</p>
-            <p className="text-neutral-500 text-sm mt-1">En attente de validation</p>
+            <p className="text-neutral-500 text-sm mt-1">{t("adminArtists.pendingValidation")}</p>
           </div>
           <div className="bg-neutral-900 border border-neutral-800 p-6">
             <p className="text-3xl font-light text-green-500">{stats.active}</p>
-            <p className="text-neutral-500 text-sm mt-1">Actifs</p>
+            <p className="text-neutral-500 text-sm mt-1">{t("adminArtists.active")}</p>
           </div>
         </div>
 
@@ -99,15 +102,15 @@ export default async function AdminArtistesPage() {
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-lg font-light">{artist.name || "Sans nom"}</h3>
+                    <h3 className="text-lg font-light">{artist.name || t("adminArtists.noName")}</h3>
                     <span className={`px-2 py-1 text-xs ${statusLabels[artist.status].color}`}>
                       {statusLabels[artist.status].label}
                     </span>
                   </div>
                   <p className="text-neutral-500 text-sm">{artist.email}</p>
                   <p className="text-neutral-600 text-sm">
-                    {artist.artistProfile?._count.artworks || 0} œuvres • 
-                    Inscrit le {artist.createdAt.toLocaleDateString('fr-FR')}
+                    {artist.artistProfile?._count.artworks || 0} {t("adminArtists.artworksCount")} • 
+                    {t("adminArtists.registeredOn")} {artist.createdAt.toLocaleDateString('fr-FR')}
                   </p>
                 </div>
                 <div className="flex gap-3">
@@ -118,7 +121,7 @@ export default async function AdminArtistesPage() {
                           type="submit"
                           className="px-4 py-2 bg-green-600 text-sm hover:bg-green-700 transition-colors"
                         >
-                          Approuver
+                          {t("adminArtists.approve")}
                         </button>
                       </form>
                       <form action={`/api/admin/artists/${artist.id}/reject`} method="POST">
@@ -126,14 +129,14 @@ export default async function AdminArtistesPage() {
                           type="submit"
                           className="px-4 py-2 bg-red-600 text-sm hover:bg-red-700 transition-colors"
                         >
-                          Refuser
+                          {t("adminArtists.reject")}
                         </button>
                       </form>
                     </>
                   )}
                   {artist.status === "ACTIVE" && (
                     <button className="px-4 py-2 border border-neutral-700 text-sm hover:border-white transition-colors">
-                      Voir profil
+                      {t("adminArtists.viewProfile")}
                     </button>
                   )}
                 </div>
@@ -142,7 +145,7 @@ export default async function AdminArtistesPage() {
           </div>
         ) : (
           <div className="text-center py-16 border border-neutral-800">
-            <p className="text-neutral-500">Aucun artiste pour le moment</p>
+            <p className="text-neutral-500">{t("adminArtists.noArtists")}</p>
           </div>
         )}
       </div>

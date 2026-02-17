@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
@@ -125,12 +126,14 @@ export default async function ArtistesPage() {
                         {artist.artworks.slice(0, 4).map((artwork, i) => (
                           <div 
                             key={artwork.id} 
-                            className="aspect-square bg-neutral-900 overflow-hidden"
+                            className="relative aspect-square bg-neutral-900 overflow-hidden"
                           >
-                            <img
+                            <Image
                               src={getImageUrl(artwork.images)}
                               alt={artwork.title}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              sizes="(max-width: 768px) 50vw, 200px"
                             />
                           </div>
                         ))}

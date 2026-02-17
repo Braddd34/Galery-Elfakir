@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import OrdersList from "@/components/admin/OrdersList"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 async function getAllOrders() {
   const orders = await prisma.order.findMany({
@@ -43,6 +44,8 @@ export default async function AdminCommandesPage() {
     redirect("/dashboard")
   }
 
+  const t = getServerTranslation()
+
   const [orders, stats] = await Promise.all([
     getAllOrders(),
     getOrderStats()
@@ -57,32 +60,32 @@ export default async function AdminCommandesPage() {
             ELFAKIR
           </Link>
           <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">
-            ← Retour au tableau de bord
+            {t("adminOrders.backToDashboard")}
           </Link>
         </div>
       </header>
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-light mb-8">Gestion des commandes</h1>
+        <h1 className="text-3xl font-light mb-8">{t("adminOrders.title")}</h1>
 
         {/* Stats */}
         <div className="grid md:grid-cols-4 gap-6 mb-12">
           <div className="bg-neutral-900 border border-neutral-800 p-6">
             <p className="text-3xl font-light">{stats.total}</p>
-            <p className="text-neutral-500 text-sm mt-1">Total commandes</p>
+            <p className="text-neutral-500 text-sm mt-1">{t("adminOrders.totalOrders")}</p>
           </div>
           <div className="bg-neutral-900 border border-neutral-800 p-6">
             <p className="text-3xl font-light text-yellow-500">{stats.pending}</p>
-            <p className="text-neutral-500 text-sm mt-1">En attente</p>
+            <p className="text-neutral-500 text-sm mt-1">{t("adminOrders.pending")}</p>
           </div>
           <div className="bg-neutral-900 border border-neutral-800 p-6">
             <p className="text-3xl font-light text-purple-500">{stats.shipped}</p>
-            <p className="text-neutral-500 text-sm mt-1">Expédiées</p>
+            <p className="text-neutral-500 text-sm mt-1">{t("adminOrders.shipped")}</p>
           </div>
           <div className="bg-neutral-900 border border-neutral-800 p-6">
             <p className="text-3xl font-light text-green-500">€{Number(stats.revenue).toLocaleString()}</p>
-            <p className="text-neutral-500 text-sm mt-1">Revenus</p>
+            <p className="text-neutral-500 text-sm mt-1">{t("adminOrders.revenue")}</p>
           </div>
         </div>
 
