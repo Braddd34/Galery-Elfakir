@@ -8,6 +8,7 @@ import CatalogueFilters from "@/components/catalogue/CatalogueFilters"
 import InfiniteScrollLoader from "@/components/catalogue/InfiniteScrollLoader"
 import CatalogueViewToggle from "@/components/catalogue/CatalogueViewToggle"
 import { Metadata } from "next"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 // Métadonnées dynamiques pour le SEO
 export async function generateMetadata({ searchParams }: { searchParams: { category?: string; search?: string } }): Promise<Metadata> {
@@ -260,6 +261,7 @@ interface PageProps {
 }
 
 export default async function CataloguePage({ searchParams }: PageProps) {
+  const t = getServerTranslation()
   const currentCategory = searchParams.category || "all"
   const currentView = searchParams.view || "grid"
   const { artworks, totalCount: filteredCount } = await getArtworks(searchParams)
@@ -391,13 +393,13 @@ export default async function CataloguePage({ searchParams }: PageProps) {
             ) : (
               <div className="text-center py-24">
                 <p className="text-neutral-500 text-lg mb-4">
-                  Aucune œuvre disponible avec ces critères.
+                  {t("catalogue.emptyWithFilters")}
                 </p>
                 <Link 
                   href="/catalogue" 
                   className="text-white underline hover:text-neutral-300"
                 >
-                  Voir toutes les œuvres
+                  {t("catalogue.viewAll")}
                 </Link>
               </div>
             )}

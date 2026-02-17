@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/lib/toast-context"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface Exhibition {
   id: string
@@ -27,6 +28,7 @@ export default function ExpositionsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
+  const { t } = useLanguage()
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -82,7 +84,7 @@ export default function ExpositionsPage() {
         setExhibitions([newExhibition, ...exhibitions])
         setShowForm(false)
         setForm({ title: "", description: "", location: "", city: "", country: "", startDate: "", endDate: "", imageUrl: "", link: "" })
-        showToast("Exposition ajoutée avec succès", "success")
+        showToast(t("exhibitions.addedSuccess"), "success")
       } else {
         const data = await res.json()
         showToast(data.error || "Erreur lors de l'ajout", "error")
@@ -101,7 +103,7 @@ export default function ExpositionsPage() {
       const res = await fetch(`/api/artist/exhibitions?id=${id}`, { method: "DELETE" })
       if (res.ok) {
         setExhibitions(exhibitions.filter(e => e.id !== id))
-        showToast("Exposition supprimée", "info")
+        showToast(t("exhibitions.deletedSuccess"), "info")
       } else {
         showToast("Erreur lors de la suppression", "error")
       }
@@ -133,80 +135,80 @@ export default function ExpositionsPage() {
       <header className="border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
           <Link href="/" className="text-xl tracking-[0.3em] font-light">ELFAKIR</Link>
-          <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">← Retour au tableau de bord</Link>
+          <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">{t("exhibitions.backToDashboard")}</Link>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-light">Mes expositions</h1>
-            <p className="text-neutral-500 mt-1">Gérez vos expositions passées et actuelles</p>
+            <h1 className="text-3xl font-light">{t("exhibitions.title")}</h1>
+            <p className="text-neutral-500 mt-1">{t("exhibitions.manage")}</p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
             className="px-6 py-3 bg-white text-black text-sm uppercase tracking-wider hover:bg-gold transition-colors"
           >
-            {showForm ? "Annuler" : "+ Ajouter"}
+            {showForm ? t("exhibitions.cancel") : `+ ${t("exhibitions.add")}`}
           </button>
         </div>
 
         {/* Formulaire d'ajout */}
         {showForm && (
           <form onSubmit={handleSubmit} className="bg-neutral-900 border border-neutral-800 p-8 mb-8 space-y-6">
-            <h2 className="text-lg font-light mb-4">Nouvelle exposition</h2>
+            <h2 className="text-lg font-light mb-4">{t("exhibitions.new")}</h2>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Titre *</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.titleLabel")}</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
                   required
                   className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
-                  placeholder="Nom de l'exposition"
+                  placeholder={t("exhibitions.titlePlaceholder")}
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Lieu *</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.locationLabel")}</label>
                 <input
                   type="text"
                   value={form.location}
                   onChange={e => setForm({ ...form, location: e.target.value })}
                   required
                   className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
-                  placeholder="Galerie, musée..."
+                  placeholder={t("exhibitions.locationPlaceholder")}
                 />
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Ville</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.cityLabel")}</label>
                 <input
                   type="text"
                   value={form.city}
                   onChange={e => setForm({ ...form, city: e.target.value })}
                   className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
-                  placeholder="Paris"
+                  placeholder={t("exhibitions.cityPlaceholder")}
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Pays</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.countryLabel")}</label>
                 <input
                   type="text"
                   value={form.country}
                   onChange={e => setForm({ ...form, country: e.target.value })}
                   className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
-                  placeholder="France"
+                  placeholder={t("exhibitions.countryPlaceholder")}
                 />
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Date de début *</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.startDateLabel")}</label>
                 <input
                   type="date"
                   value={form.startDate}
@@ -216,7 +218,7 @@ export default function ExpositionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Date de fin</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.endDateLabel")}</label>
                 <input
                   type="date"
                   value={form.endDate}
@@ -227,19 +229,19 @@ export default function ExpositionsPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-neutral-400 mb-2">Description</label>
+              <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.descriptionLabel")}</label>
               <textarea
                 value={form.description}
                 onChange={e => setForm({ ...form, description: e.target.value })}
                 rows={3}
                 className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none resize-none"
-                placeholder="Description de l'exposition..."
+                placeholder={t("exhibitions.descriptionPlaceholder")}
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">URL de l'image</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.imageUrlLabel")}</label>
                 <input
                   type="url"
                   value={form.imageUrl}
@@ -249,7 +251,7 @@ export default function ExpositionsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-2">Lien externe</label>
+                <label className="block text-sm text-neutral-400 mb-2">{t("exhibitions.linkLabel")}</label>
                 <input
                   type="url"
                   value={form.link}
@@ -265,7 +267,7 @@ export default function ExpositionsPage() {
               disabled={saving}
               className="px-8 py-3 bg-white text-black text-sm uppercase tracking-wider hover:bg-gold transition-colors disabled:opacity-50"
             >
-              {saving ? "Enregistrement..." : "Ajouter l'exposition"}
+              {saving ? t("exhibitions.saving") : t("exhibitions.addExhibition")}
             </button>
           </form>
         )}
@@ -296,14 +298,14 @@ export default function ExpositionsPage() {
                 <div className="flex flex-col gap-2">
                   {expo.link && (
                     <a href={expo.link} target="_blank" rel="noopener noreferrer" className="text-gold text-sm hover:underline">
-                      Voir →
+                      {t("exhibitions.view")}
                     </a>
                   )}
                   <button
                     onClick={() => handleDelete(expo.id)}
                     className="text-red-500 text-sm hover:text-red-400"
                   >
-                    Supprimer
+                    {t("exhibitions.delete")}
                   </button>
                 </div>
               </div>
@@ -311,8 +313,8 @@ export default function ExpositionsPage() {
           </div>
         ) : (
           <div className="text-center py-16 border border-neutral-800">
-            <p className="text-neutral-500 mb-2">Aucune exposition enregistrée</p>
-            <p className="text-neutral-600 text-sm">Ajoutez vos expositions pour les afficher sur votre profil</p>
+            <p className="text-neutral-500 mb-2">{t("exhibitions.none")}</p>
+            <p className="text-neutral-600 text-sm">{t("exhibitions.emptyDesc")}</p>
           </div>
         )}
       </div>

@@ -5,6 +5,7 @@ import { useState } from "react"
 import FavoriteButton from "@/components/ui/FavoriteButton"
 import { useToast } from "@/lib/toast-context"
 import { trackAddToCart } from "@/lib/analytics"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface AddToCartButtonProps {
   artwork: CartItem
@@ -13,6 +14,7 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
   const { addItem, removeItem, isInCart } = useCart()
   const { showToast } = useToast()
+  const { t } = useLanguage()
   const [isAdding, setIsAdding] = useState(false)
   
   const inCart = isInCart(artwork.id)
@@ -20,11 +22,11 @@ export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
   const handleClick = () => {
     if (inCart) {
       removeItem(artwork.id)
-      showToast("Œuvre retirée du panier", "info")
+      showToast(t("cart.removedToast"), "info")
     } else {
       setIsAdding(true)
       addItem(artwork)
-      showToast("Œuvre ajoutée au panier", "success")
+      showToast(t("cart.addedToast"), "success")
       trackAddToCart({ id: artwork.id, title: artwork.title, price: artwork.price })
       setTimeout(() => setIsAdding(false), 500)
     }
@@ -42,16 +44,16 @@ export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
         } disabled:opacity-50`}
       >
         {isAdding ? (
-          "Ajout en cours..."
+          t("cart.adding")
         ) : inCart ? (
           <span className="flex items-center justify-center gap-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            Dans le panier — Retirer
+            {t("cart.inCart")}
           </span>
         ) : (
-          "Ajouter au panier"
+          t("cart.add")
         )}
       </button>
       

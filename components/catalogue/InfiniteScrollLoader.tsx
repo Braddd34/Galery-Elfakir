@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import ArtworkCard from "./ArtworkCard"
 import ArtworkListItem from "./ArtworkListItem"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface InfiniteScrollLoaderProps {
   initialArtworks: any[]
@@ -17,6 +18,7 @@ export default function InfiniteScrollLoader({
   currentView,
   searchParams
 }: InfiniteScrollLoaderProps) {
+  const { t } = useLanguage()
   const [artworks, setArtworks] = useState<any[]>(initialArtworks)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -105,13 +107,13 @@ export default function InfiniteScrollLoader({
         {loading && (
           <div className="flex items-center justify-center gap-3">
             <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span className="text-neutral-400 text-sm">Chargement...</span>
+            <span className="text-neutral-400 text-sm">{t("common.loading")}</span>
           </div>
         )}
         
         {!hasMore && artworks.length > 0 && (
           <p className="text-center text-neutral-500 text-sm">
-            {artworks.length} œuvre{artworks.length > 1 ? "s" : ""} affichée{artworks.length > 1 ? "s" : ""} sur {totalCount}
+            {t("catalogue.displayed").replace("{count}", String(artworks.length)).replace("{plural}", artworks.length > 1 ? "s" : "").replace("{total}", String(totalCount))}
           </p>
         )}
       </div>

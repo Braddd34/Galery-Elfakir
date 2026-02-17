@@ -3,6 +3,7 @@
 import { useCart } from "@/lib/cart-context"
 import Link from "next/link"
 import { useEffect, useState, useRef, useCallback } from "react"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -11,6 +12,7 @@ interface CartDrawerProps {
 
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { items, removeItem, total, clearCart } = useCart()
+  const { t } = useLanguage()
   const [removingId, setRemovingId] = useState<string | null>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -125,13 +127,13 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
-              <p className="text-neutral-400 mb-2 text-lg">Votre panier est vide</p>
-              <p className="text-neutral-600 text-sm mb-6">Découvrez nos œuvres d'art uniques</p>
+              <p className="text-neutral-400 mb-2 text-lg">{t("cart.empty")}</p>
+              <p className="text-neutral-600 text-sm mb-6">{t("cart.emptyDesc")}</p>
               <button
                 onClick={onClose}
                 className="px-6 py-3 bg-white text-black text-sm tracking-wider uppercase font-medium hover:bg-neutral-200 transition-all duration-200 hover:-translate-y-0.5"
               >
-                Explorer le catalogue
+                {t("cart.exploreCatalogue")}
               </button>
             </div>
           ) : (

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface ContactArtistButtonProps {
   artistUserId: string
@@ -19,6 +20,7 @@ export default function ContactArtistButton({
 }: ContactArtistButtonProps) {
   const { data: session } = useSession()
   const router = useRouter()
+  const { t } = useLanguage()
   const [showModal, setShowModal] = useState(false)
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
@@ -57,7 +59,7 @@ export default function ContactArtistButton({
     e.preventDefault()
     
     if (!message.content.trim()) {
-      setError("Veuillez écrire un message")
+      setError(t("contactArtist.emptyMessage"))
       return
     }
     
@@ -103,15 +105,15 @@ export default function ContactArtistButton({
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
-        Contacter l'artiste
+        {t("contactArtist.button")}
       </button>
       
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={closeModal}>
-          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full" role="dialog" aria-modal="true" aria-label={`Contacter ${artistName}`} onClick={(e) => e.stopPropagation()}>
+          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full" role="dialog" aria-modal="true" aria-label={t("contactArtist.title").replace("{name}", artistName)} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">
-                Contacter {artistName}
+                {t("contactArtist.title").replace("{name}", artistName)}
               </h3>
               <button
                 onClick={closeModal}
@@ -129,30 +131,30 @@ export default function ContactArtistButton({
                 <svg className="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <p className="text-lg">Message envoyé !</p>
+                <p className="text-lg">{t("contactArtist.messageSent")}</p>
                 <p className="text-neutral-400 text-sm mt-2">
-                  {artistName} recevra votre message dans sa boîte de réception.
+                  {t("contactArtist.messageSentDesc").replace("{name}", artistName)}
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm text-neutral-400 mb-1">Objet</label>
+                  <label className="block text-sm text-neutral-400 mb-1">{t("contactArtist.subjectLabel")}</label>
                   <input
                     type="text"
                     value={message.subject}
                     onChange={(e) => setMessage({ ...message, subject: e.target.value })}
-                    placeholder="Question, demande d'information..."
+                    placeholder={t("contactArtist.subjectPlaceholder")}
                     className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm text-neutral-400 mb-1">Message *</label>
+                  <label className="block text-sm text-neutral-400 mb-1">{t("contactArtist.messageLabel")}</label>
                   <textarea
                     value={message.content}
                     onChange={(e) => setMessage({ ...message, content: e.target.value })}
-                    placeholder="Votre message..."
+                    placeholder={t("contactArtist.messagePlaceholder")}
                     rows={5}
                     className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none resize-none"
                     required
@@ -169,14 +171,14 @@ export default function ContactArtistButton({
                     disabled={sending}
                     className="flex-1 py-2 bg-white text-black font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50"
                   >
-                    {sending ? "Envoi..." : "Envoyer"}
+                    {sending ? t("contactArtist.sending") : t("contactArtist.send")}
                   </button>
                   <button
                     type="button"
                     onClick={closeModal}
                     className="px-4 py-2 border border-neutral-700 hover:border-white transition-colors"
                   >
-                    Annuler
+                    {t("contactArtist.cancel")}
                   </button>
                 </div>
               </form>

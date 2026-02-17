@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/lib/toast-context"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface FavoriteArtwork {
   id: string
@@ -38,6 +39,7 @@ export default function MesFavorisPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
+  const { t } = useLanguage()
   const [favorites, setFavorites] = useState<FavoriteArtwork[]>([])
   const [loading, setLoading] = useState(true)
   const [removingId, setRemovingId] = useState<string | null>(null)
@@ -82,12 +84,12 @@ export default function MesFavorisPage() {
       if (res.ok) {
         // Retirer immédiatement de la liste locale
         setFavorites(prev => prev.filter(f => f.artwork.id !== artworkId))
-        showToast("Retiré des favoris", "info")
+        showToast(t("favorites.removedFromFavorites"), "info")
       } else {
-        showToast("Erreur lors de la suppression", "error")
+        showToast(t("favorites.removeError"), "error")
       }
     } catch {
-      showToast("Erreur lors de la suppression", "error")
+      showToast(t("favorites.removeError"), "error")
     } finally {
       setRemovingId(null)
     }
@@ -102,10 +104,10 @@ export default function MesFavorisPage() {
       try {
         await navigator.clipboard.writeText(url)
         setCopied(true)
-        showToast("Lien copié !", "success")
+        showToast(t("favorites.linkCopied"), "success")
         setTimeout(() => setCopied(false), 2000)
       } catch {
-        showToast("Erreur de copie", "error")
+        showToast(t("favorites.copyError"), "error")
       }
     }
     
@@ -117,7 +119,7 @@ export default function MesFavorisPage() {
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
         </svg>
-        {copied ? "Lien copié !" : "Partager ma sélection"}
+        {copied ? t("favorites.linkCopied") : t("favorites.shareSelection")}
       </button>
     )
   }
@@ -125,7 +127,7 @@ export default function MesFavorisPage() {
   if (status === "loading" || loading) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-pulse text-neutral-500">Chargement...</div>
+        <div className="animate-pulse text-neutral-500">{t("common.loading")}</div>
       </main>
     )
   }
@@ -139,7 +141,7 @@ export default function MesFavorisPage() {
             ELFAKIR
           </Link>
           <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">
-            ← Retour au tableau de bord
+            {t("dashboard.backToDashboard")}
           </Link>
         </div>
       </header>
@@ -147,7 +149,7 @@ export default function MesFavorisPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-light">Mes favoris</h1>
+          <h1 className="text-3xl font-light">{t("favorites.title")}</h1>
           <div className="flex items-center gap-4">
             <p className="text-neutral-500">
               {favorites.length} œuvre{favorites.length > 1 ? 's' : ''}
@@ -167,7 +169,7 @@ export default function MesFavorisPage() {
                   onClick={() => removeFavorite(fav.artwork.id)}
                   disabled={removingId === fav.artwork.id}
                   className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white text-red-500 hover:bg-red-500 hover:text-white transition-all hover:scale-110 disabled:opacity-50"
-                  title="Retirer des favoris"
+                  title={t("favorites.removeFromFavorites")}
                 >
                   {removingId === fav.artwork.id ? (
                     <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,9 +204,9 @@ export default function MesFavorisPage() {
             <svg className="w-16 h-16 text-neutral-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <p className="text-neutral-500 mb-4">Vous n'avez pas encore de favoris</p>
+            <p className="text-neutral-500 mb-4">{t("favorites.empty")}</p>
             <Link href="/catalogue" className="text-white underline hover:text-neutral-300">
-              Découvrir le catalogue
+              {t("favorites.discoverCatalogue")}
             </Link>
           </div>
         )}

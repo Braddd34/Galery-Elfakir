@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useToast } from "@/lib/toast-context"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface Message {
   id: string
@@ -34,6 +35,7 @@ interface MessageCenterProps {
 export default function MessageCenter({ onUnreadCountChange }: MessageCenterProps) {
   const { data: session } = useSession()
   const { showToast } = useToast()
+  const { t } = useLanguage()
   const [messages, setMessages] = useState<Message[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -103,7 +105,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
         if (selectedMessage?.id === id) {
           setSelectedMessage(null)
         }
-        showToast("Message supprimé", "info")
+        showToast(t("messages.deleted"), "info")
       } else {
         showToast("Erreur lors de la suppression", "error")
       }
@@ -131,7 +133,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
       if (res.ok) {
         setShowCompose(false)
         setNewMessage({ receiverId: "", subject: "", content: "" })
-        showToast("Message envoyé avec succès", "success")
+        showToast(t("messages.sentSuccess"), "success")
         if (activeTab === "sent") {
           fetchMessages()
         }
@@ -186,7 +188,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
                 : "bg-neutral-800 text-white hover:bg-neutral-700"
             }`}
           >
-            Reçus
+            {t("messages.received")}
             {unreadCount > 0 && (
               <span className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                 {unreadCount}
@@ -201,7 +203,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
                 : "bg-neutral-800 text-white hover:bg-neutral-700"
             }`}
           >
-            Envoyés
+            {t("messages.sent")}
           </button>
         </div>
         
@@ -212,7 +214,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Nouveau
+          {t("messages.new")}
         </button>
       </div>
       
@@ -222,7 +224,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
         <div className="space-y-2 max-h-[600px] overflow-y-auto">
           {messages.length === 0 ? (
             <p className="text-neutral-500 text-center py-8">
-              Aucun message
+              {t("messages.noMessages")}
             </p>
           ) : (
             messages.map((message) => {
@@ -258,7 +260,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className={`font-medium truncate ${!message.read && activeTab === "received" ? "text-white" : ""}`}>
-                          {otherUser.name || "Utilisateur"}
+                          {otherUser.name || t("messages.user")}
                         </span>
                         <span className="text-xs text-neutral-500">
                           {formatDate(message.createdAt)}
@@ -341,7 +343,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
             </div>
           ) : (
             <div className="h-full flex items-center justify-center text-neutral-500">
-              Sélectionnez un message
+              {t("messages.selectMessage")}
             </div>
           )}
         </div>
@@ -350,9 +352,9 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
       {/* Modal nouveau message */}
       {showCompose && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setShowCompose(false)}>
-          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full" role="dialog" aria-modal="true" aria-label="Nouveau message" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-neutral-900 rounded-lg p-6 max-w-lg w-full" role="dialog" aria-modal="true" aria-label={t("messages.newMessage")} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Nouveau message</h3>
+              <h3 className="text-lg font-medium">{t("messages.newMessage")}</h3>
               <button
                 onClick={() => setShowCompose(false)}
                 className="p-2 hover:bg-neutral-800 rounded"
@@ -366,37 +368,37 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
             
             <form onSubmit={sendMessage} className="space-y-4">
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Destinataire (ID)</label>
+                <label className="block text-sm text-neutral-400 mb-1">{t("messages.recipientId")}</label>
                 <input
                   type="text"
                   value={newMessage.receiverId}
                   onChange={(e) => setNewMessage({ ...newMessage, receiverId: e.target.value })}
-                  placeholder="ID de l'utilisateur"
+                  placeholder={t("messages.recipientPlaceholder")}
                   className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
                   required
                 />
                 <p className="text-xs text-neutral-500 mt-1">
-                  Copiez l'ID depuis la page de l'artiste ou de l'œuvre
+                  {t("messages.recipientHelp")}
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Sujet (optionnel)</label>
+                <label className="block text-sm text-neutral-400 mb-1">{t("messages.subjectOptional")}</label>
                 <input
                   type="text"
                   value={newMessage.subject}
                   onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })}
-                  placeholder="Objet du message"
+                  placeholder={t("messages.subjectPlaceholder")}
                   className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
                 />
               </div>
               
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Message</label>
+                <label className="block text-sm text-neutral-400 mb-1">{t("messages.message")}</label>
                 <textarea
                   value={newMessage.content}
                   onChange={(e) => setNewMessage({ ...newMessage, content: e.target.value })}
-                  placeholder="Votre message..."
+                  placeholder={t("messages.messagePlaceholder")}
                   rows={5}
                   className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none resize-none"
                   required
@@ -409,14 +411,14 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
                   disabled={sending}
                   className="flex-1 py-2 bg-white text-black font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50"
                 >
-                  {sending ? "Envoi..." : "Envoyer"}
+                  {sending ? t("messages.sending") : t("messages.send")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCompose(false)}
                   className="px-4 py-2 border border-neutral-700 hover:border-white transition-colors"
                 >
-                  Annuler
+                  {t("messages.cancel")}
                 </button>
               </div>
             </form>

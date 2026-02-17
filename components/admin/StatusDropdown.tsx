@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useToast } from "@/lib/toast-context"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 /**
  * Dropdown pour changer le statut d'une œuvre côté admin.
@@ -34,6 +35,7 @@ export default function StatusDropdown({ artworkId, currentStatus }: StatusDropd
   const [pendingStatus, setPendingStatus] = useState("")
   const { showToast } = useToast()
   const router = useRouter()
+  const { t } = useLanguage()
 
   const displayStatuses = [
     { value: "DRAFT", label: "Brouillon", color: "bg-neutral-500" },
@@ -141,7 +143,7 @@ export default function StatusDropdown({ artworkId, currentStatus }: StatusDropd
             <textarea
               value={rejectComment}
               onChange={(e) => setRejectComment(e.target.value)}
-              placeholder="Ex: La qualité des images est insuffisante, veuillez refaire les photos..."
+              placeholder={t("admin.rejectPlaceholder")}
               rows={4}
               className="w-full bg-black border border-neutral-700 px-4 py-3 text-white text-sm focus:border-white focus:outline-none resize-none mb-4"
               autoFocus

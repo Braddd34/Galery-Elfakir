@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import MessageCenter from "@/components/messages/MessageCenter"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 export const metadata = {
   title: "Mes messages",
@@ -15,6 +16,8 @@ export default async function MessagesPage() {
     redirect("/login")
   }
 
+  const t = getServerTranslation()
+
   return (
     <main className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -24,14 +27,14 @@ export default async function MessagesPage() {
             ELFAKIR
           </Link>
           <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm">
-            ← Retour au tableau de bord
+            {t("dashboard.backToDashboard")}
           </Link>
         </div>
       </header>
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-light mb-8">Mes messages</h1>
+        <h1 className="text-3xl font-light mb-8">{t("messages.title")}</h1>
         
         <MessageCenter />
       </div>

@@ -39,9 +39,7 @@ export default function Footer() {
               ELFAKIR
             </Link>
             <p className="mt-4 text-neutral-500 text-sm leading-relaxed max-w-md">
-              Galerie d&apos;art contemporain dédiée à la promotion d&apos;artistes 
-              émergents et établis. Chaque œuvre est unique et accompagnée 
-              d&apos;un certificat d&apos;authenticité.
+              {t("footer.description")}
             </p>
           </div>
 
