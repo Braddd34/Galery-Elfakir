@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { ArtworkCategory, Prisma } from "@prisma/client"
 
@@ -25,10 +27,29 @@ export async function GET(req: NextRequest) {
     const sort = searchParams.get("sort")
     
     const skip = (page - 1) * limit
+
+    // Vérifier si l'utilisateur est VIP pour l'accès anticipé
+    let isVIP = false
+    const session = await getServerSession(authOptions)
+    if (session?.user?.id) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { isVIP: true }
+      })
+      isVIP = dbUser?.isVIP ?? false
+    }
     
     // Construire les filtres
     const where: Prisma.ArtworkWhereInput = {
       status: "AVAILABLE"
+    }
+
+    // Les non-VIP ne voient pas les oeuvres en accès anticipé
+    if (!isVIP) {
+      where.OR = [
+        { earlyAccessUntil: null },
+        { earlyAccessUntil: { lte: new Date() } }
+      ]
     }
     
     if (category && category !== "all") {
@@ -36,10 +57,15 @@ export async function GET(req: NextRequest) {
     }
     
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { medium: { contains: search, mode: "insensitive" } }
+      where.AND = [
+        ...(where.AND as Prisma.ArtworkWhereInput[] || []),
+        {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+            { medium: { contains: search, mode: "insensitive" } }
+          ]
+        }
       ]
     }
     

@@ -5,6 +5,7 @@ import { useState } from "react"
 import FavoriteButton from "@/components/ui/FavoriteButton"
 import { useToast } from "@/lib/toast-context"
 import { trackAddToCart } from "@/lib/analytics"
+import { trackCartEvent } from "@/lib/cart-tracking"
 import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface AddToCartButtonProps {
@@ -22,12 +23,14 @@ export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
   const handleClick = () => {
     if (inCart) {
       removeItem(artwork.id)
+      trackCartEvent(artwork.id, "remove")
       showToast(t("cart.removedToast"), "info")
     } else {
       setIsAdding(true)
       addItem(artwork)
       showToast(t("cart.addedToast"), "success")
       trackAddToCart({ id: artwork.id, title: artwork.title, price: artwork.price })
+      trackCartEvent(artwork.id, "add")
       setTimeout(() => setIsAdding(false), 500)
     }
   }

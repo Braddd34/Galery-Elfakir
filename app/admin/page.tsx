@@ -2,6 +2,49 @@ import prisma from "@/lib/prisma"
 import Link from "next/link"
 import { getServerTranslation } from "@/lib/i18n-server"
 
+async function getCartAbandonStats() {
+  const now = new Date()
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+  const [totalAdds, totalCheckouts] = await Promise.all([
+    prisma.cartEvent.count({
+      where: { action: "add", createdAt: { gte: thirtyDaysAgo } },
+    }),
+    prisma.cartEvent.count({
+      where: { action: "checkout", createdAt: { gte: thirtyDaysAgo } },
+    }),
+  ])
+
+  const abandonmentRate =
+    totalAdds > 0
+      ? Math.round(((totalAdds - totalCheckouts) / totalAdds) * 100)
+      : 0
+
+  // Nombre de paniers uniques abandonnés (7 jours)
+  const recentAddUsers = await prisma.cartEvent.findMany({
+    where: { action: "add", createdAt: { gte: sevenDaysAgo } },
+    select: { userId: true, sessionId: true },
+    distinct: ["userId", "sessionId"],
+  })
+
+  const recentCheckoutUsers = await prisma.cartEvent.findMany({
+    where: { action: "checkout", createdAt: { gte: sevenDaysAgo } },
+    select: { userId: true, sessionId: true },
+    distinct: ["userId", "sessionId"],
+  })
+
+  const checkoutKeys = new Set(
+    recentCheckoutUsers.map((c) => c.userId || c.sessionId)
+  )
+
+  const abandonedCount = recentAddUsers.filter(
+    (a) => !checkoutKeys.has(a.userId || a.sessionId)
+  ).length
+
+  return { abandonmentRate, abandonedCount, totalAdds }
+}
+
 async function getStats() {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -112,7 +155,7 @@ function getImageUrl(images: any): string {
 
 export default async function AdminDashboard() {
   const t = getServerTranslation()
-  const stats = await getStats()
+  const [stats, cartStats] = await Promise.all([getStats(), getCartAbandonStats()])
 
   // Calcul variation mensuelle
   const revenueChange = stats.lastMonthRevenue > 0 
@@ -203,6 +246,39 @@ export default async function AdminDashboard() {
           </Link>
         </div>
       )}
+
+      {/* Statistiques paniers abandonnés */}
+      <Link href="/admin/stats/abandons" className="block bg-neutral-900/30 border border-neutral-800 p-6 hover:border-red-500/30 transition-colors group">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-500/10 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-light">Paniers abandonnés</h2>
+          </div>
+          <span className="text-neutral-500 text-sm group-hover:text-white transition-colors">
+            Voir détails →
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <p className="text-neutral-500 text-xs uppercase tracking-wider mb-1">Taux d&apos;abandon</p>
+            <p className={`text-2xl font-light ${cartStats.abandonmentRate > 70 ? "text-red-400" : cartStats.abandonmentRate > 40 ? "text-yellow-400" : "text-green-400"}`}>
+              {cartStats.abandonmentRate}%
+            </p>
+          </div>
+          <div>
+            <p className="text-neutral-500 text-xs uppercase tracking-wider mb-1">Abandons (7j)</p>
+            <p className="text-2xl font-light">{cartStats.abandonedCount}</p>
+          </div>
+          <div>
+            <p className="text-neutral-500 text-xs uppercase tracking-wider mb-1">Ajouts (30j)</p>
+            <p className="text-2xl font-light">{cartStats.totalAdds}</p>
+          </div>
+        </div>
+      </Link>
 
       {/* Activité récente */}
       <div className="grid lg:grid-cols-2 gap-8">

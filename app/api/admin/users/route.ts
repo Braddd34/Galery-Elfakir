@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
           image: true,
           role: true,
           status: true,
+          isVIP: true,
           createdAt: true,
           lastLoginAt: true,
           _count: {

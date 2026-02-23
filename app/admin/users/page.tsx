@@ -11,6 +11,7 @@ interface User {
   image: string | null
   role: string
   status: string
+  isVIP: boolean
   createdAt: string
   lastLoginAt: string | null
   _count: {
@@ -109,6 +110,26 @@ export default function AdminUsersPage() {
     }
   }
   
+  const handleToggleVIP = async (userId: string, currentVIP: boolean) => {
+    setActionLoading(userId)
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/vip`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isVIP: !currentVIP })
+      })
+      if (res.ok) {
+        setUsers(prev =>
+          prev.map(u => u.id === userId ? { ...u, isVIP: !currentVIP } : u)
+        )
+      }
+    } catch (err) {
+      console.error("Erreur VIP:", err)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     fetchUsers()
@@ -212,7 +233,17 @@ export default function AdminUsersPage() {
                               </div>
                             )}
                             <div>
-                              <p className="font-medium">{user.name || "Sans nom"}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{user.name || "Sans nom"}</p>
+                                {user.isVIP && (
+                                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-full">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    VIP
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-xs text-neutral-500">{user.email}</p>
                             </div>
                           </div>
@@ -258,6 +289,19 @@ export default function AdminUsersPage() {
                                 Activer
                               </button>
                             ) : null}
+                            
+                            <button
+                              onClick={() => handleToggleVIP(user.id, user.isVIP)}
+                              disabled={actionLoading === user.id}
+                              className={`text-xs px-3 py-1 rounded disabled:opacity-50 ${
+                                user.isVIP
+                                  ? "bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"
+                                  : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                              }`}
+                              title={user.isVIP ? "Retirer VIP" : "Marquer VIP"}
+                            >
+                              {user.isVIP ? "★ VIP" : "☆ VIP"}
+                            </button>
                             
                             <select
                               value={user.role}

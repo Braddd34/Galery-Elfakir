@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"
 import Recommendations from "@/components/artwork/Recommendations"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
+import { SOCIAL_LINKS } from "@/lib/constants"
 
 // Métadonnées SEO pour la page d'accueil
 export const metadata: Metadata = {
@@ -116,9 +117,10 @@ export default async function HomePage() {
       availableLanguage: ["French", "English"]
     },
     sameAs: [
-      "https://instagram.com/elfakir.gallery",
-      "https://twitter.com/elfakirgallery"
-    ]
+      SOCIAL_LINKS.instagram,
+      SOCIAL_LINKS.twitter,
+      SOCIAL_LINKS.tiktok,
+    ].filter(Boolean)
   }
 
   // JSON-LD pour le site web
@@ -345,6 +347,75 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Instagram Feed Section */}
+      <section className="py-24 md:py-32 bg-neutral-950 border-t border-neutral-800">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <svg className="w-7 h-7 text-gold" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              <p className="text-xs uppercase tracking-[0.2em] text-gold">Suivez-nous sur Instagram</p>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-3">
+              @elfakir.gallery
+            </h2>
+            <p className="text-neutral-500 max-w-md mx-auto">
+              Découvrez nos dernières acquisitions, coulisses et événements
+            </p>
+          </div>
+
+          {/* Instagram Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            {[
+              { src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&h=600&fit=crop", alt: "Peinture abstraite colorée" },
+              { src: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=600&h=600&fit=crop", alt: "Sculpture contemporaine" },
+              { src: "https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=600&h=600&fit=crop", alt: "Art moderne en galerie" },
+              { src: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&h=600&fit=crop", alt: "Œuvre d'art murale" },
+              { src: "https://images.unsplash.com/photo-1549887534-1541e9326642?w=600&h=600&fit=crop", alt: "Exposition d'art contemporain" },
+              { src: "https://images.unsplash.com/photo-1482160549825-59d1b23cb208?w=600&h=600&fit=crop", alt: "Atelier d'artiste" },
+            ].map((img, i) => (
+              <a
+                key={i}
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-square overflow-hidden bg-neutral-900"
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center mt-12">
+            <a
+              href={SOCIAL_LINKS.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-700 to-yellow-600 text-black px-10 py-4 text-sm tracking-[0.15em] uppercase font-medium hover:from-amber-600 hover:to-yellow-500 transition-all duration-300"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              Voir plus sur Instagram
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Artists CTA */}
       <section className="py-32 md:py-48 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -421,8 +492,14 @@ export default async function HomePage() {
                 <li>+33 1 23 45 67 89</li>
                 <li className="pt-4">
                   <div className="flex gap-6">
-                    <a href="https://instagram.com/elfakir.gallery" className="hover:text-white transition-colors">Instagram</a>
-                    <a href="https://twitter.com/elfakirgallery" className="hover:text-white transition-colors">Twitter</a>
+                    <a href={SOCIAL_LINKS.instagram} className="hover:text-white transition-colors">Instagram</a>
+                    <a href={SOCIAL_LINKS.twitter} className="hover:text-white transition-colors">Twitter</a>
+                    <a href={SOCIAL_LINKS.tiktok} className="hover:text-white transition-colors flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.49a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.51a8.27 8.27 0 004.76 1.5v-3.45a4.83 4.83 0 01-1-.13z"/>
+                      </svg>
+                      TikTok
+                    </a>
                   </div>
                 </li>
               </ul>

@@ -170,6 +170,12 @@ export default function HomeHeader() {
               </Link>
             ))}
             <Link 
+              href="/blog"
+              className="px-5 py-3 text-sm text-neutral-300 hover:text-white transition-colors"
+            >
+              Blog
+            </Link>
+            <Link 
               href="/contact"
               className="px-5 py-3 text-sm text-gold hover:opacity-80 transition-opacity"
             >
@@ -267,6 +273,13 @@ export default function HomeHeader() {
                   {t("nav.login")}
                 </Link>
               )}
+              <Link 
+                href="/blog"
+                className="block py-2 text-sm text-neutral-400 hover:text-white"
+                onClick={() => setMenuOpen(false)}
+              >
+                Blog
+              </Link>
               <Link 
                 href="/contact"
                 className="block py-2 text-sm text-gold"

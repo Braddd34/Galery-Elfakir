@@ -24,6 +24,7 @@ export const CONTACT_PHONE = process.env.NEXT_PUBLIC_CONTACT_PHONE || "+33 1 23 
 export const SOCIAL_LINKS = {
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/elfakir.gallery",
   twitter: process.env.NEXT_PUBLIC_TWITTER_URL || "https://twitter.com/elfakirgallery",
+  tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "https://tiktok.com/@elfakirgallery",
   linkedin: "",
 }
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useCart } from "@/lib/cart-context"
 import { useLanguage } from "@/components/providers/LanguageProvider"
+import { trackCartEvent } from "@/lib/cart-tracking"
 
 /**
  * Page de checkout (récapitulatif de commande).
@@ -39,6 +40,17 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [step, setStep] = useState<"address" | "summary">("address")
   
+  const [promoCode, setPromoCode] = useState("")
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoError, setPromoError] = useState("")
+  const [promoDiscount, setPromoDiscount] = useState<{
+    code: string
+    type: "percent" | "fixed"
+    discountPercent?: number
+    discountAmount?: number
+    discount: number
+  } | null>(null)
+
   const [address, setAddress] = useState({
     firstName: "",
     lastName: "",
@@ -64,10 +76,51 @@ export default function CheckoutPage() {
     setLoading(false)
   }, [session, status, router])
 
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoError("")
+
+    try {
+      const res = await fetch("/api/promo-codes/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCode.trim(), subtotal })
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setPromoError(data.error || "Code invalide")
+        setPromoDiscount(null)
+        return
+      }
+
+      setPromoDiscount({
+        code: data.code,
+        type: data.type,
+        discountPercent: data.discountPercent,
+        discountAmount: data.discountAmount,
+        discount: data.discount
+      })
+      setPromoError("")
+    } catch {
+      setPromoError("Erreur réseau")
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
+  const handleRemovePromo = () => {
+    setPromoDiscount(null)
+    setPromoCode("")
+    setPromoError("")
+  }
+
   // Calculer les totaux
   const shippingRate = SHIPPING_RATES[address.country] || SHIPPING_RATES.OTHER
   const shipping = cartItems.length > 0 ? shippingRate.price : 0
-  const total = subtotal + shipping
+  const discount = promoDiscount?.discount || 0
+  const total = Math.max(0, subtotal - discount) + shipping
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setAddress({ ...address, [e.target.name]: e.target.value })
@@ -82,6 +135,10 @@ export default function CheckoutPage() {
 
   const handleConfirmOrder = async () => {
     setSubmitting(true)
+    
+    for (const item of cartItems) {
+      trackCartEvent(item.id, "checkout")
+    }
     
     // Quand Stripe sera intégré, on créera une session de paiement ici.
     // En attendant, on affiche un message clair à l'utilisateur.
@@ -327,11 +384,65 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* Code promo */}
+              <div className="border-t border-neutral-800 pt-4 pb-4">
+                {promoDiscount ? (
+                  <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 px-4 py-3">
+                    <div>
+                      <p className="text-green-400 text-sm font-medium">
+                        Code {promoDiscount.code} appliqué
+                      </p>
+                      <p className="text-green-400/70 text-xs">
+                        {promoDiscount.type === "percent"
+                          ? `-${promoDiscount.discountPercent}%`
+                          : `-€${promoDiscount.discountAmount}`
+                        }
+                        {" "}(−€{promoDiscount.discount.toLocaleString()})
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleRemovePromo}
+                      className="text-neutral-400 hover:text-white text-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                        placeholder="Code promo"
+                        className="flex-1 bg-black border border-neutral-700 px-4 py-2 text-white text-sm focus:border-white focus:outline-none"
+                      />
+                      <button
+                        onClick={handleApplyPromo}
+                        disabled={promoLoading || !promoCode.trim()}
+                        className="px-4 py-2 bg-neutral-800 text-white text-sm hover:bg-neutral-700 transition-colors disabled:opacity-50"
+                      >
+                        {promoLoading ? "..." : "Appliquer"}
+                      </button>
+                    </div>
+                    {promoError && (
+                      <p className="text-red-400 text-xs mt-2">{promoError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="border-t border-neutral-800 pt-4 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-neutral-400">{t("checkout.subtotal")}</span>
                   <span>€{subtotal.toLocaleString()}</span>
                 </div>
+                {promoDiscount && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-400">Réduction</span>
+                    <span className="text-green-400">−€{discount.toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-neutral-400">
                     {t("checkout.shipping")} ({shippingRate.label})

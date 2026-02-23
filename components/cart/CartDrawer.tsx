@@ -4,6 +4,7 @@ import { useCart } from "@/lib/cart-context"
 import Link from "next/link"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { useLanguage } from "@/components/providers/LanguageProvider"
+import { trackCartEvent } from "@/lib/cart-tracking"
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -70,6 +71,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
   const handleRemove = (id: string) => {
     setRemovingId(id)
+    trackCartEvent(id, "remove")
     setTimeout(() => {
       removeItem(id)
       setRemovingId(null)

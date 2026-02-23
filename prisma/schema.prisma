@@ -46,6 +46,8 @@ model User {
   sessions      Session[]
   artistProfile ArtistProfile?
   buyerProfile  BuyerProfile?
+  isVIP         Boolean   @default(false)
+  
   orders        Order[]
   favorites     Favorite[]
   reviews       Review[]
@@ -54,6 +56,8 @@ model User {
   follows       Follow[]
   artworkViews  ArtworkView[]
   notifications Notification[]
+  blogPosts     BlogPost[]
+  cartEvents    CartEvent[]
   
   @@map("users")
 }
@@ -250,9 +254,12 @@ model Artwork {
   updatedAt   DateTime @updatedAt
   publishedAt DateTime?
   
+  earlyAccessUntil DateTime?
+  
   favorites   Favorite[]
   reviews     Review[]
   artworkViews ArtworkView[]
+  cartEvents  CartEvent[]
   
   @@index([artistId])
   @@index([status])
@@ -530,4 +537,74 @@ model Exhibition {
   
   @@index([artistId])
   @@map("exhibitions")
+}
+
+// ==========================================
+// CODES PROMO
+// ==========================================
+
+model PromoCode {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountPercent Float?
+  discountAmount  Float?
+  minPurchase     Float?
+  maxUses         Int?
+  usedCount       Int       @default(0)
+  expiresAt       DateTime?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  
+  @@map("promo_codes")
+}
+
+// ==========================================
+// BLOG
+// ==========================================
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  excerpt     String?   @db.Text
+  content     String    @db.Text
+  coverImage  String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([slug])
+  @@index([published])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
+
+// ==========================================
+// ÉVÉNEMENTS PANIER (tracking abandons)
+// ==========================================
+
+model CartEvent {
+  id        String   @id @default(cuid())
+  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  artworkId String
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  
+  action    String   // "add", "remove", "checkout"
+  sessionId String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([artworkId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("cart_events")
 }

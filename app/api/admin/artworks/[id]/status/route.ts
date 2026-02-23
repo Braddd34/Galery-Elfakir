@@ -17,7 +17,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
-    const { status, comment } = await request.json()
+    const { status, comment, earlyAccessUntil } = await request.json()
 
     // Valider le statut
     const validStatuses = ["DRAFT", "PENDING", "AVAILABLE", "RESERVED", "SOLD", "ARCHIVED"]
@@ -30,7 +30,10 @@ export async function PATCH(
       where: { id: params.id },
       data: { 
         status,
-        ...(status === "AVAILABLE" ? { publishedAt: new Date() } : {})
+        ...(status === "AVAILABLE" ? { publishedAt: new Date() } : {}),
+        ...(earlyAccessUntil !== undefined ? {
+          earlyAccessUntil: earlyAccessUntil ? new Date(earlyAccessUntil) : null
+        } : {})
       },
       include: {
         artist: {

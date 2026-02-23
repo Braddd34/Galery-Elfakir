@@ -85,6 +85,18 @@ export default async function AdminLayout({
             >
               Utilisateurs
             </Link>
+            <Link 
+              href="/admin/promo-codes" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              Codes promo
+            </Link>
+            <Link 
+              href="/admin/blog" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              Blog
+            </Link>
           </div>
         </div>
       </nav>
