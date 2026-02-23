@@ -70,8 +70,9 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12)
 
     // Déterminer le rôle et le statut
-    const userRole = role === "ARTIST" ? "ARTIST" : "BUYER"
-    const userStatus = role === "ARTIST" ? "PENDING" : "ACTIVE" // Les artistes doivent être validés
+    const validRoles = ["ARTIST", "MANAGER", "BUYER"]
+    const userRole = validRoles.includes(role) ? role : "BUYER"
+    const userStatus = (userRole === "ARTIST" || userRole === "MANAGER") ? "PENDING" : "ACTIVE"
 
     // Créer l'utilisateur (email non vérifié)
     const user = await prisma.user.create({
@@ -127,8 +128,8 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
-      message: userRole === "ARTIST" 
-        ? "Compte créé ! Vérifiez votre email et attendez la validation de votre profil artiste."
+      message: (userRole === "ARTIST" || userRole === "MANAGER")
+        ? "Compte créé ! Vérifiez votre email et attendez la validation de votre compte."
         : "Compte créé ! Vérifiez votre email pour activer votre compte.",
       user: {
         id: user.id,

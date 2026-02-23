@@ -125,7 +125,7 @@ export async function PUT(req: NextRequest) {
         updateData.status = "DELETED"
         break
       case "change_role":
-        if (!newRole || !["ADMIN", "ARTIST", "BUYER"].includes(newRole)) {
+        if (!newRole || !["ADMIN", "MANAGER", "ARTIST", "BUYER"].includes(newRole)) {
           return NextResponse.json(
             { error: "Rôle invalide" },
             { status: 400 }

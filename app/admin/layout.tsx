@@ -86,6 +86,18 @@ export default async function AdminLayout({
               Utilisateurs
             </Link>
             <Link 
+              href="/admin/assignments" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              Assignations
+            </Link>
+            <Link 
+              href="/admin/audit" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              Journal d'audit
+            </Link>
+            <Link 
               href="/admin/promo-codes" 
               className="text-sm text-neutral-400 hover:text-white transition-colors"
             >

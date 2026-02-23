@@ -13,9 +13,16 @@ export default withAuth(
       }
     }
 
-    // Routes artiste - seulement pour les artistes
+    // Routes gestionnaire - pour managers et admins
+    if (path.startsWith("/dashboard/manager")) {
+      if (token?.userRole !== "MANAGER" && token?.userRole !== "ADMIN") {
+        return NextResponse.redirect(new URL("/dashboard", req.url))
+      }
+    }
+
+    // Routes artiste - pour artistes, managers et admins
     if (path.startsWith("/dashboard/artiste")) {
-      if (token?.userRole !== "ARTIST" && token?.userRole !== "ADMIN") {
+      if (token?.userRole !== "ARTIST" && token?.userRole !== "MANAGER" && token?.userRole !== "ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url))
       }
     }
@@ -37,6 +44,9 @@ export default withAuth(
           path === "/register" ||
           path === "/a-propos" ||
           path === "/contact" ||
+          path === "/blog" ||
+          path.startsWith("/blog/") ||
+          path === "/faq" ||
           path.startsWith("/api/auth") ||
           path.startsWith("/api/setup")
         ) {

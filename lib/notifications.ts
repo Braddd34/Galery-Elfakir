@@ -18,6 +18,9 @@ type NotificationType =
   | "new_follower"      // Artiste : nouvel abonné
   | "new_message"       // Tous : nouveau message
   | "new_review"        // Artiste : nouvelle critique sur une œuvre
+  | "manager_sale"      // Manager : vente d'un artiste géré
+  | "manager_stagnant"  // Manager : œuvre invendue depuis longtemps
+  | "manager_message"   // Manager : message client pour un artiste géré
 
 /**
  * Créer une notification pour un utilisateur.
@@ -174,5 +177,48 @@ export async function notifyNewReview(artistUserId: string, artworkTitle: string
     title: "Nouvel avis",
     message: `Un avis ${stars} a été laissé sur votre œuvre "${artworkTitle}"`,
     link: "/dashboard/artiste/oeuvres"
+  })
+}
+
+// =====================================================
+// FONCTIONS HELPER POUR LES MANAGERS
+// =====================================================
+
+/**
+ * Notifier le manager qu'une œuvre de l'un de ses artistes a été vendue.
+ */
+export async function notifyManagerSale(managerId: string, artworkTitle: string, artistName: string, amount: number) {
+  return createNotification({
+    userId: managerId,
+    type: "manager_sale",
+    title: "Vente réalisée",
+    message: `L'œuvre "${artworkTitle}" de ${artistName} a été vendue pour €${amount.toLocaleString()}`,
+    link: "/dashboard/manager"
+  })
+}
+
+/**
+ * Notifier le manager qu'une œuvre d'un de ses artistes est invendue depuis longtemps.
+ */
+export async function notifyManagerStagnantArtwork(managerId: string, artworkTitle: string, artistName: string, daysSinceAdd: number) {
+  return createNotification({
+    userId: managerId,
+    type: "manager_stagnant",
+    title: "Œuvre en attente",
+    message: `"${artworkTitle}" de ${artistName} est invendue depuis ${daysSinceAdd} jours`,
+    link: "/dashboard/manager/oeuvres"
+  })
+}
+
+/**
+ * Notifier le manager qu'un client a envoyé un message à l'un de ses artistes.
+ */
+export async function notifyManagerNewMessage(managerId: string, artistName: string) {
+  return createNotification({
+    userId: managerId,
+    type: "manager_message",
+    title: "Nouveau message",
+    message: `Un client a envoyé un message à ${artistName}`,
+    link: "/dashboard/manager/artistes"
   })
 }

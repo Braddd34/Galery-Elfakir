@@ -62,6 +62,43 @@ async function getArtistStats(userId: string) {
   }
 }
 
+// Statistiques pour le gestionnaire
+async function getManagerStats(userId: string) {
+  try {
+    const assignments = await prisma.artistAssignment.findMany({
+      where: { managerId: userId },
+      select: { artistId: true }
+    })
+
+    const artistIds = assignments.map(a => a.artistId)
+
+    if (artistIds.length === 0) {
+      return { artists: 0, artworks: 0, revenue: 0 }
+    }
+
+    const [artworksCount, revenueData] = await Promise.all([
+      prisma.artwork.count({
+        where: { artistId: { in: artistIds } }
+      }),
+      prisma.order.aggregate({
+        where: {
+          status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
+          artwork: { artistId: { in: artistIds } }
+        },
+        _sum: { total: true }
+      })
+    ])
+
+    return {
+      artists: artistIds.length,
+      artworks: artworksCount,
+      revenue: revenueData._sum.total || 0
+    }
+  } catch {
+    return { artists: 0, artworks: 0, revenue: 0 }
+  }
+}
+
 // Statistiques pour l'acheteur
 async function getBuyerStats(userId: string) {
   try {
@@ -97,6 +134,7 @@ export default async function DashboardPage() {
   // Récupérer les statistiques selon le rôle
   const adminStats = user.role === "ADMIN" ? await getAdminStats() : null
   const artistStats = user.role === "ARTIST" ? await getArtistStats(user.id) : null
+  const managerStats = user.role === "MANAGER" ? await getManagerStats(user.id) : null
   const buyerStats = user.role === "BUYER" ? await getBuyerStats(user.id) : null
 
   return (
@@ -185,6 +223,15 @@ export default async function DashboardPage() {
                   {t("dashboard.favoritesDesc")}
                 </p>
               </Link>
+              <Link
+                href="/dashboard/manager"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Gestion manager</h3>
+                <p className="text-neutral-500 text-sm">
+                  Accéder au tableau de bord gestionnaire
+                </p>
+              </Link>
             </>
           )}
 
@@ -225,6 +272,57 @@ export default async function DashboardPage() {
                 <h3 className="text-lg font-light mb-2">{t("dashboard.profile")}</h3>
                 <p className="text-neutral-500 text-sm">
                   {t("dashboard.profileDesc")}
+                </p>
+              </Link>
+              <Link
+                href="/dashboard/favoris"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">{t("dashboard.favorites")}</h3>
+                <p className="text-neutral-500 text-sm">
+                  {t("dashboard.favoritesDesc")}
+                </p>
+              </Link>
+            </>
+          )}
+
+          {/* Manager Links */}
+          {user.role === "MANAGER" && (
+            <>
+              <Link
+                href="/dashboard/manager/artistes"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Mes artistes</h3>
+                <p className="text-neutral-500 text-sm">
+                  Gérer les artistes qui vous sont assignés
+                </p>
+              </Link>
+              <Link
+                href="/dashboard/manager/oeuvres"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Gestion des œuvres</h3>
+                <p className="text-neutral-500 text-sm">
+                  Superviser les œuvres de vos artistes
+                </p>
+              </Link>
+              <Link
+                href="/dashboard/manager/stats"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Statistiques</h3>
+                <p className="text-neutral-500 text-sm">
+                  Consulter les performances et revenus
+                </p>
+              </Link>
+              <Link
+                href="/dashboard/manager/export"
+                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
+              >
+                <h3 className="text-lg font-light mb-2">Export données</h3>
+                <p className="text-neutral-500 text-sm">
+                  Exporter les données de vos artistes
                 </p>
               </Link>
               <Link
@@ -322,6 +420,27 @@ export default async function DashboardPage() {
           </div>
         )}
         
+        {/* Quick Stats for Manager */}
+        {user.role === "MANAGER" && managerStats && (
+          <div className="mt-12">
+            <h2 className="text-xl font-light mb-6">Mes statistiques</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-neutral-900 border border-neutral-800 p-6">
+                <p className="text-3xl font-light">{managerStats.artists}</p>
+                <p className="text-neutral-500 text-sm mt-1">Artistes gérés</p>
+              </div>
+              <div className="bg-neutral-900 border border-neutral-800 p-6">
+                <p className="text-3xl font-light text-blue-500">{managerStats.artworks}</p>
+                <p className="text-neutral-500 text-sm mt-1">Œuvres supervisées</p>
+              </div>
+              <div className="bg-neutral-900 border border-neutral-800 p-6">
+                <p className="text-3xl font-light text-green-500">€{Number(managerStats.revenue).toLocaleString('fr-FR')}</p>
+                <p className="text-neutral-500 text-sm mt-1">Revenus générés</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Quick Stats for Buyer */}
         {user.role === "BUYER" && buyerStats && (
           <div className="mt-12">

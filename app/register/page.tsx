@@ -10,7 +10,8 @@ import { useLanguage } from "@/components/providers/LanguageProvider"
 function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const defaultRole = searchParams.get("role") === "artist" ? "ARTIST" : "BUYER"
+  const roleParam = searchParams.get("role")
+  const defaultRole = roleParam === "artist" ? "ARTIST" : roleParam === "manager" ? "MANAGER" : "BUYER"
   const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ function RegisterForm() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: defaultRole as "BUYER" | "ARTIST"
+    role: defaultRole as "BUYER" | "ARTIST" | "MANAGER"
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [serverError, setServerError] = useState("")
@@ -152,11 +153,11 @@ function RegisterForm() {
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-3">
                 {t("register.iAm")}
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <button
                   type="button"
                   onClick={() => handleChange("role", "BUYER")}
-                  className={`py-3 border transition-colors ${
+                  className={`py-3 border transition-colors text-sm ${
                     formData.role === "BUYER"
                       ? "border-white bg-white text-black"
                       : "border-neutral-700 text-neutral-400 hover:border-neutral-500"
@@ -167,13 +168,24 @@ function RegisterForm() {
                 <button
                   type="button"
                   onClick={() => handleChange("role", "ARTIST")}
-                  className={`py-3 border transition-colors ${
+                  className={`py-3 border transition-colors text-sm ${
                     formData.role === "ARTIST"
                       ? "border-white bg-white text-black"
                       : "border-neutral-700 text-neutral-400 hover:border-neutral-500"
                   }`}
                 >
                   {t("register.artist")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleChange("role", "MANAGER")}
+                  className={`py-3 border transition-colors text-sm ${
+                    formData.role === "MANAGER"
+                      ? "border-white bg-white text-black"
+                      : "border-neutral-700 text-neutral-400 hover:border-neutral-500"
+                  }`}
+                >
+                  Gestionnaire
                 </button>
               </div>
             </div>

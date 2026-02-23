@@ -17,6 +17,7 @@ datasource db {
 
 enum UserRole {
   ADMIN
+  MANAGER
   ARTIST
   BUYER
 }
@@ -58,6 +59,8 @@ model User {
   notifications Notification[]
   blogPosts     BlogPost[]
   cartEvents    CartEvent[]
+  managerAssignments ArtistAssignment[] @relation("ManagerAssignments")
+  auditLogs     AuditLog[]
   
   @@map("users")
 }
@@ -159,6 +162,7 @@ model ArtistProfile {
   artworks    Artwork[]
   exhibitions Exhibition[]
   followers   Follow[]
+  assignments ArtistAssignment[]
   
   @@map("artist_profiles")
 }
@@ -607,4 +611,48 @@ model CartEvent {
   @@index([action])
   @@index([createdAt])
   @@map("cart_events")
+}
+
+// ==========================================
+// ASSIGNATION GESTIONNAIRE ↔ ARTISTE
+// ==========================================
+
+model ArtistAssignment {
+  id         String   @id @default(cuid())
+  
+  managerId  String
+  manager    User     @relation("ManagerAssignments", fields: [managerId], references: [id], onDelete: Cascade)
+  
+  artistId   String
+  artist     ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  
+  assignedAt DateTime @default(now())
+  
+  @@unique([managerId, artistId])
+  @@index([managerId])
+  @@index([artistId])
+  @@map("artist_assignments")
+}
+
+// ==========================================
+// JOURNAL D'AUDIT
+// ==========================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  action    String
+  target    String
+  details   Json?
+  ipAddress String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
