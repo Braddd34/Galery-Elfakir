@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, Suspense } from "react"
+import { useState, useEffect, useCallback, useRef, Suspense } from "react"
 import { Canvas } from "@react-three/fiber"
 import GalleryRoom from "./GalleryRoom"
 import ArtworkFrame from "./ArtworkFrame"
@@ -52,6 +52,7 @@ export default function Gallery3D({
   const [highlightedArtworkId, setHighlightedArtworkId] = useState<string | null>(null)
   const [isLocked, setIsLocked] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
   const [playerPos, setPlayerPos] = useState({ x: 0, z: 0 })
   const [playerRot, setPlayerRot] = useState(0)
 
@@ -99,7 +100,7 @@ export default function Gallery3D({
   }, [])
 
   return (
-    <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden" }}>
+    <div ref={canvasContainerRef} style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden" }}>
       <Suspense
         fallback={
           <div
@@ -238,6 +239,10 @@ export default function Gallery3D({
 
       {!isLocked && !selectedArtwork && (
         <div
+          onClick={() => {
+            const canvas = canvasContainerRef.current?.querySelector("canvas")
+            if (canvas) canvas.requestPointerLock()
+          }}
           style={{
             position: "fixed",
             top: 0,
@@ -253,6 +258,7 @@ export default function Gallery3D({
             pointerEvents: "auto",
             textAlign: "center",
             padding: "2rem",
+            cursor: "pointer",
           }}
         >
           <p style={{ color: "white", fontSize: "1.5rem", marginBottom: "1rem" }}>

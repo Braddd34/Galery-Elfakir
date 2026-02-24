@@ -32,7 +32,7 @@ export default function PlayerController({
 
   useEffect(() => {
     camera.position.set(0, EYE_HEIGHT, roomLength / 2 - BOUNDS_MARGIN * 3)
-    camera.rotation.set(0, Math.PI, 0)
+    camera.rotation.set(0, 0, 0)
   }, [camera, roomLength])
 
   const onPointerLockChange = useCallback(() => {
