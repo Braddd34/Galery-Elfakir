@@ -159,6 +159,37 @@ export default function EditVirtualExhibitionPage() {
   const canProceedStep2 = selectedIds.size > 0
   const canProceedStep3 = placedArtworks.length > 0
 
+  const autoPlaceArtworks = useCallback(() => {
+    const allSelected = [
+      ...artworks.filter((a) => selectedIds.has(a.id)),
+      ...placedArtworks
+        .filter((p) => selectedIds.has(p.artworkId) && !artworks.some((a) => a.id === p.artworkId))
+        .map((p) => p.artwork),
+    ]
+    if (allSelected.length === 0) return
+
+    const walls: ("north" | "east" | "west")[] = ["north", "east", "west"]
+    const placed: PlacedArtwork[] = []
+
+    allSelected.forEach((artwork, index) => {
+      const wall = walls[index % walls.length]
+      const artworksOnWall = placed.filter((p) => p.wall === wall).length
+      const totalOnWall = Math.ceil(allSelected.length / walls.length)
+      const spacing = 1 / (totalOnWall + 1)
+      const posX = spacing * (artworksOnWall + 1)
+
+      placed.push({
+        artworkId: artwork.id,
+        artwork,
+        wall,
+        positionX: Math.max(0.15, Math.min(0.85, posX)),
+        positionY: 0.5,
+      })
+    })
+
+    setPlacedArtworks(placed)
+  }, [artworks, selectedIds, placedArtworks])
+
   const handleSave = async () => {
     setSaving(true)
     setError(null)
@@ -178,10 +209,7 @@ export default function EditVirtualExhibitionPage() {
         throw new Error(data.error || "Erreur mise à jour")
       }
 
-      const toAdd = placedArtworks.filter((p) => !existingArtworkIds.has(p.artworkId))
-      const toRemove = Array.from(existingArtworkIds).filter((aid) => !placedArtworks.some((p) => p.artworkId === aid))
-
-      for (const aid of toRemove) {
+      for (const aid of Array.from(existingArtworkIds)) {
         await fetch(`/api/virtual-exhibitions/${id}/artworks`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -189,7 +217,7 @@ export default function EditVirtualExhibitionPage() {
         })
       }
 
-      for (const p of toAdd) {
+      for (const p of placedArtworks) {
         const artRes = await fetch(`/api/virtual-exhibitions/${id}/artworks`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -373,6 +401,23 @@ export default function EditVirtualExhibitionPage() {
 
       {step === 3 && (
         <div className="space-y-6">
+          {placedArtworks.length < selectedIds.size && (
+            <div className="bg-amber-900/30 border border-amber-500/50 text-amber-400 px-4 py-3 text-sm">
+              {placedArtworks.length} / {selectedIds.size} œuvres placées. Les œuvres non placées n&apos;apparaîtront pas dans l&apos;exposition.
+            </div>
+          )}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={autoPlaceArtworks}
+              className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white text-sm border border-neutral-600 transition-colors"
+            >
+              Redistribuer automatiquement
+            </button>
+            <span className="text-neutral-500 text-sm flex items-center">
+              {placedArtworks.length} œuvre(s) placée(s) sur les murs
+            </span>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="relative w-full aspect-[4/3] max-w-2xl mx-auto border-2 border-amber-500/50 bg-neutral-900">
@@ -492,7 +537,15 @@ export default function EditVirtualExhibitionPage() {
         {step < 4 ? (
           <button
             type="button"
-            onClick={() => setStep((s) => s + 1)}
+            onClick={() => {
+              if (step === 2) {
+                const unplacedExist = Array.from(selectedIds).some(
+                  (sid) => !placedArtworks.some((p) => p.artworkId === sid)
+                )
+                if (unplacedExist) autoPlaceArtworks()
+              }
+              setStep((s) => s + 1)
+            }}
             disabled={
               (step === 1 && !canProceedStep1) ||
               (step === 2 && !canProceedStep2) ||

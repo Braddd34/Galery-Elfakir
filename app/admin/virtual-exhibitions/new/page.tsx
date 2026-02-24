@@ -117,6 +117,32 @@ export default function NewVirtualExhibitionPage() {
   const canProceedStep2 = selectedIds.size > 0
   const canProceedStep3 = placedArtworks.length > 0
 
+  const autoPlaceArtworks = useCallback(() => {
+    const selected = artworks.filter((a) => selectedIds.has(a.id))
+    if (selected.length === 0) return
+
+    const walls: ("north" | "east" | "west")[] = ["north", "east", "west"]
+    const placed: PlacedArtwork[] = []
+
+    selected.forEach((artwork, index) => {
+      const wall = walls[index % walls.length]
+      const artworksOnWall = placed.filter((p) => p.wall === wall).length
+      const totalOnWall = Math.ceil(selected.length / walls.length)
+      const spacing = 1 / (totalOnWall + 1)
+      const posX = spacing * (artworksOnWall + 1)
+
+      placed.push({
+        artworkId: artwork.id,
+        artwork,
+        wall,
+        positionX: Math.max(0.15, Math.min(0.85, posX)),
+        positionY: 0.5,
+      })
+    })
+
+    setPlacedArtworks(placed)
+  }, [artworks, selectedIds])
+
   const handleSubmit = async (asDraft: boolean) => {
     setLoading(true)
     setError(null)
@@ -313,6 +339,23 @@ export default function NewVirtualExhibitionPage() {
 
       {step === 3 && (
         <div className="space-y-6">
+          {placedArtworks.length < selectedIds.size && (
+            <div className="bg-amber-900/30 border border-amber-500/50 text-amber-400 px-4 py-3 text-sm">
+              {placedArtworks.length} / {selectedIds.size} œuvres placées. Les œuvres non placées n&apos;apparaîtront pas dans l&apos;exposition.
+            </div>
+          )}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={autoPlaceArtworks}
+              className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white text-sm border border-neutral-600 transition-colors"
+            >
+              Redistribuer automatiquement
+            </button>
+            <span className="text-neutral-500 text-sm flex items-center">
+              {placedArtworks.length} œuvre(s) placée(s) sur les murs
+            </span>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="relative w-full aspect-[4/3] max-w-2xl mx-auto border-2 border-amber-500/50 bg-neutral-900">
@@ -482,7 +525,12 @@ export default function NewVirtualExhibitionPage() {
         {step < 4 ? (
           <button
             type="button"
-            onClick={() => setStep((s) => s + 1)}
+            onClick={() => {
+              if (step === 2) {
+                autoPlaceArtworks()
+              }
+              setStep((s) => s + 1)
+            }}
             disabled={
               (step === 1 && !canProceedStep1) ||
               (step === 2 && !canProceedStep2) ||
