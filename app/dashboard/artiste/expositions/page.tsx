@@ -317,7 +317,191 @@ export default function ExpositionsPage() {
             <p className="text-neutral-600 text-sm">{t("exhibitions.emptyDesc")}</p>
           </div>
         )}
+        <VirtualExhibitionProposal />
       </div>
     </main>
+  )
+}
+
+function VirtualExhibitionProposal() {
+  const { showToast } = useToast()
+  const [showVirtual, setShowVirtual] = useState(false)
+  const [artworks, setArtworks] = useState<Array<{ id: string; title: string; images: unknown }>>([])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [virtTitle, setVirtTitle] = useState("")
+  const [virtDesc, setVirtDesc] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [proposals, setProposals] = useState<Array<{ id: string; title: string; status: string; createdAt: string }>>([])
+
+  useEffect(() => {
+    if (!showVirtual) return
+    fetch("/api/artist/artworks")
+      .then((r) => r.json())
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data.artworks || []
+        setArtworks(list)
+      })
+      .catch(() => {})
+
+    fetch("/api/virtual-exhibitions?mine=true")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.exhibitions) setProposals(data.exhibitions)
+      })
+      .catch(() => {})
+  }, [showVirtual])
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
+  }
+
+  const handleSubmitProposal = async () => {
+    if (!virtTitle.trim() || selectedIds.length === 0) {
+      showToast("Veuillez remplir le titre et sélectionner au moins une œuvre", "error")
+      return
+    }
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/virtual-exhibitions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: virtTitle,
+          description: virtDesc,
+          theme: "white",
+          artworkIds: selectedIds,
+        }),
+      })
+      if (res.ok) {
+        showToast("Proposition envoyée ! Un administrateur la validera.", "success")
+        setVirtTitle("")
+        setVirtDesc("")
+        setSelectedIds([])
+        const data = await res.json()
+        setProposals((prev) => [data, ...prev])
+      } else {
+        showToast("Erreur lors de la soumission", "error")
+      }
+    } catch {
+      showToast("Erreur réseau", "error")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="mt-16 pt-12 border-t border-neutral-800">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-2xl font-light">Expositions Virtuelles 3D</h2>
+          <p className="text-neutral-500 mt-1 text-sm">
+            Proposez une exposition virtuelle avec vos œuvres. Un administrateur la validera et la mettra en ligne.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowVirtual(!showVirtual)}
+          className="px-6 py-3 bg-amber-600 text-black text-sm uppercase tracking-wider hover:bg-amber-500 transition-colors"
+        >
+          {showVirtual ? "Masquer" : "Proposer une expo"}
+        </button>
+      </div>
+
+      {proposals.length > 0 && (
+        <div className="mb-8 space-y-3">
+          <h3 className="text-sm uppercase tracking-wider text-neutral-400 mb-4">Mes propositions</h3>
+          {proposals.map((p) => (
+            <div key={p.id} className="flex items-center justify-between bg-neutral-900 border border-neutral-800 px-6 py-4">
+              <div>
+                <span className="text-white">{p.title}</span>
+                <span className="text-neutral-600 text-sm ml-3">
+                  {new Date(p.createdAt).toLocaleDateString("fr-FR")}
+                </span>
+              </div>
+              <span className={`text-xs uppercase tracking-wider px-3 py-1 rounded ${
+                p.status === "PUBLISHED" ? "bg-green-500/20 text-green-400" :
+                p.status === "PENDING" ? "bg-yellow-500/20 text-yellow-400" :
+                p.status === "DRAFT" ? "bg-neutral-700 text-neutral-400" :
+                "bg-red-500/20 text-red-400"
+              }`}>
+                {p.status === "PUBLISHED" ? "Publiée" :
+                 p.status === "PENDING" ? "En attente" :
+                 p.status === "DRAFT" ? "Brouillon" : "Archivée"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showVirtual && (
+        <div className="bg-neutral-900 border border-neutral-800 p-8 space-y-6">
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">Titre de l&apos;exposition</label>
+            <input
+              type="text"
+              value={virtTitle}
+              onChange={(e) => setVirtTitle(e.target.value)}
+              className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
+              placeholder="Ex: Paysages abstraits"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">Description (optionnel)</label>
+            <textarea
+              value={virtDesc}
+              onChange={(e) => setVirtDesc(e.target.value)}
+              rows={3}
+              className="w-full bg-black border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none resize-none"
+              placeholder="Décrivez votre exposition..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-400 mb-4">
+              Sélectionnez vos œuvres ({selectedIds.length} sélectionnée{selectedIds.length > 1 ? "s" : ""})
+            </label>
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-3 max-h-80 overflow-y-auto">
+              {artworks.map((aw) => {
+                const imgs = typeof aw.images === "string" ? JSON.parse(aw.images) : aw.images
+                const imgUrl = Array.isArray(imgs) ? imgs[0]?.url : ""
+                const selected = selectedIds.includes(aw.id)
+                return (
+                  <button
+                    key={aw.id}
+                    type="button"
+                    onClick={() => toggleSelect(aw.id)}
+                    className={`relative aspect-square overflow-hidden border-2 transition-colors ${
+                      selected ? "border-amber-500" : "border-neutral-700 hover:border-neutral-500"
+                    }`}
+                  >
+                    {imgUrl && (
+                      <img src={imgUrl} alt={aw.title} className="w-full h-full object-cover" />
+                    )}
+                    {!imgUrl && (
+                      <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600 text-xs">
+                        {aw.title}
+                      </div>
+                    )}
+                    {selected && (
+                      <div className="absolute top-1 right-1 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-black text-xs font-bold">
+                        ✓
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleSubmitProposal}
+            disabled={submitting || !virtTitle.trim() || selectedIds.length === 0}
+            className="w-full py-4 bg-amber-600 text-black font-medium uppercase tracking-wider hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {submitting ? "Envoi en cours..." : "Soumettre la proposition"}
+          </button>
+        </div>
+      )}
+    </div>
   )
 }

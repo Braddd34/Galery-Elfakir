@@ -129,6 +129,12 @@ export default function Header() {
               </Link>
             ))}
             <Link 
+              href="/expositions-virtuelles"
+              className="px-5 py-3 text-sm text-neutral-300 hover:text-white transition-colors"
+            >
+              Expositions 3D
+            </Link>
+            <Link 
               href="/blog"
               className="px-5 py-3 text-sm text-neutral-300 hover:text-white transition-colors"
             >
@@ -220,6 +226,13 @@ export default function Header() {
                   {t("nav.login")}
                 </Link>
               )}
+              <Link 
+                href="/expositions-virtuelles"
+                className="block py-2 text-sm text-neutral-400 hover:text-white"
+                onClick={() => setMenuOpen(false)}
+              >
+                Expositions 3D
+              </Link>
               <Link 
                 href="/blog"
                 className="block py-2 text-sm text-neutral-400 hover:text-white"

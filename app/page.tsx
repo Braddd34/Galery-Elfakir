@@ -300,6 +300,52 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Virtual Exhibitions Section */}
+      <section className="py-24 md:py-32 border-t border-neutral-800 bg-neutral-950">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-16">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-amber-500 mb-4">{t("home.newLabel") || "Nouveau"}</p>
+              <h2 className="text-3xl md:text-5xl font-light tracking-tight">Expositions Virtuelles</h2>
+              <p className="text-neutral-400 mt-4 max-w-xl">
+                Explorez nos galeries en 3D. Naviguez librement dans des espaces immersifs et découvrez les œuvres comme dans un vrai musée.
+              </p>
+            </div>
+            <Link
+              href="/expositions-virtuelles"
+              className="mt-8 md:mt-0 inline-flex items-center gap-2 text-sm text-white hover:text-amber-500 transition-colors group"
+            >
+              Voir toutes les expositions
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </Link>
+          </div>
+          <div className="relative overflow-hidden rounded-lg border border-neutral-800 bg-black">
+            <div className="aspect-[21/9] relative flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/50 to-black/80" />
+              <div className="relative z-10 text-center px-8">
+                <div className="inline-flex items-center gap-3 mb-4">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-amber-500">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                  <span className="text-xs uppercase tracking-[0.3em] text-amber-500">Visite immersive</span>
+                </div>
+                <h3 className="text-2xl md:text-4xl font-light text-white mb-4">Entrez dans la galerie</h3>
+                <p className="text-neutral-400 text-sm md:text-base mb-8 max-w-md mx-auto">
+                  Navigation libre en 3D · Cliquez sur les œuvres · Achetez directement
+                </p>
+                <Link
+                  href="/expositions-virtuelles"
+                  className="inline-flex items-center gap-3 px-8 py-4 bg-amber-600 hover:bg-amber-500 text-black font-medium rounded transition-colors"
+                >
+                  Explorer les expositions
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Statement Section */}
       <section className="py-32 md:py-48 border-t border-neutral-800">
         <div className="max-w-[1800px] mx-auto px-8 md:px-16">

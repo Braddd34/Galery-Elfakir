@@ -47,8 +47,11 @@ export default withAuth(
           path === "/blog" ||
           path.startsWith("/blog/") ||
           path === "/faq" ||
+          path === "/expositions-virtuelles" ||
+          path.startsWith("/expositions-virtuelles/") ||
           path.startsWith("/api/auth") ||
-          path.startsWith("/api/setup")
+          path.startsWith("/api/setup") ||
+          path.startsWith("/api/virtual-exhibitions")
         ) {
           return true
         }

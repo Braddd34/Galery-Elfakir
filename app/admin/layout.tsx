@@ -109,6 +109,12 @@ export default async function AdminLayout({
             >
               Blog
             </Link>
+            <Link 
+              href="/admin/virtual-exhibitions" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              Expositions virtuelles
+            </Link>
           </div>
         </div>
       </nav>

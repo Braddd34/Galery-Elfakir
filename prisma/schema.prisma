@@ -61,6 +61,8 @@ model User {
   cartEvents    CartEvent[]
   managerAssignments ArtistAssignment[] @relation("ManagerAssignments")
   auditLogs     AuditLog[]
+  virtualExhibitions VirtualExhibition[]
+  exhibitionVisits   ExhibitionAnalytics[]
   
   @@map("users")
 }
@@ -264,6 +266,7 @@ model Artwork {
   reviews     Review[]
   artworkViews ArtworkView[]
   cartEvents  CartEvent[]
+  virtualExhibitions VirtualExhibitionArtwork[]
   
   @@index([artistId])
   @@index([status])
@@ -655,4 +658,82 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ==========================================
+// EXPOSITIONS VIRTUELLES 3D
+// ==========================================
+
+model VirtualExhibition {
+  id          String   @id @default(cuid())
+  
+  title       String
+  description String?  @db.Text
+  slug        String   @unique
+  theme       String   @default("white")
+  status      String   @default("DRAFT")
+  roomConfig  Json?
+  coverImage  String?
+  
+  startDate   DateTime?
+  endDate     DateTime?
+  views       Int      @default(0)
+  
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  
+  artworks    VirtualExhibitionArtwork[]
+  analytics   ExhibitionAnalytics[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([createdById])
+  @@index([status])
+  @@index([slug])
+  @@map("virtual_exhibitions")
+}
+
+model VirtualExhibitionArtwork {
+  id           String   @id @default(cuid())
+  
+  exhibitionId String
+  exhibition   VirtualExhibition @relation(fields: [exhibitionId], references: [id], onDelete: Cascade)
+  
+  artworkId    String
+  artwork      Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  
+  wall         String
+  positionX    Float
+  positionY    Float
+  scale        Float    @default(1.0)
+  displayOrder Int      @default(0)
+  
+  @@unique([exhibitionId, artworkId])
+  @@index([exhibitionId])
+  @@map("virtual_exhibition_artworks")
+}
+
+model ExhibitionAnalytics {
+  id             String   @id @default(cuid())
+  
+  exhibitionId   String
+  exhibition     VirtualExhibition @relation(fields: [exhibitionId], references: [id], onDelete: Cascade)
+  
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  sessionId      String
+  enteredAt      DateTime @default(now())
+  exitedAt       DateTime?
+  duration       Int?
+  artworkClicks  Json?
+  cartAdds       Json?
+  device         String?
+  source         String?
+  
+  @@index([exhibitionId])
+  @@index([userId])
+  @@index([enteredAt])
+  @@map("exhibition_analytics")
 }

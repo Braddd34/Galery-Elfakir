@@ -385,6 +385,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.footerTerms": "CGV",
     "home.footerPrivacy": "Confidentialité",
 
+    "virtualExhibitions.title": "Expositions Virtuelles",
+    "virtualExhibitions.subtitle": "Parcourez nos galeries 3D et découvrez des œuvres dans un espace immersif.",
+    "virtualExhibitions.visit": "Visiter",
+    "virtualExhibitions.artworks": "{count} œuvre{plural}",
+    "virtualExhibitions.empty": "Aucune exposition virtuelle pour le moment",
+    "virtualExhibitions.emptyDesc": "Revenez bientôt pour découvrir nos prochaines expositions immersives.",
+
     // Contact page
     "contact.title": "Contact",
     "contact.desc": "Une question, une demande particulière ? N'hésitez pas à nous contacter.",
@@ -1099,6 +1106,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.footerLegal": "Legal notice",
     "home.footerTerms": "Terms",
     "home.footerPrivacy": "Privacy",
+
+    "virtualExhibitions.title": "Virtual Exhibitions",
+    "virtualExhibitions.subtitle": "Explore our 3D galleries and discover artworks in an immersive space.",
+    "virtualExhibitions.visit": "Visit",
+    "virtualExhibitions.artworks": "{count} artwork{plural}",
+    "virtualExhibitions.empty": "No virtual exhibitions at the moment",
+    "virtualExhibitions.emptyDesc": "Come back soon to discover our upcoming immersive exhibitions.",
 
     // Contact page
     "contact.title": "Contact",
