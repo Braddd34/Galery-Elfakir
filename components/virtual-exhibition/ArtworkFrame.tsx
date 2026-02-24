@@ -1,5 +1,5 @@
-import React, { useRef, useMemo } from "react"
-import { useLoader, useFrame } from "@react-three/fiber"
+import { useRef, useState, useMemo, useEffect } from "react"
+import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 
 const FRAME_BORDER = 0.03
@@ -7,6 +7,7 @@ const MAX_DIMENSION_M = 2
 const CM_TO_M = 0.01
 
 const fallbackTexture = (() => {
+  const canvas = document.createElement ? null : null
   const data = new Uint8Array(3)
   data[0] = 136
   data[1] = 136
@@ -40,11 +41,41 @@ interface ArtworkFrameProps {
   onPointerOut?: () => void
 }
 
-interface ArtworkFrameVisualProps extends ArtworkFrameProps {
-  texture: THREE.Texture
+function useArtworkTexture(imageUrl: string): THREE.Texture {
+  const [texture, setTexture] = useState<THREE.Texture>(fallbackTexture)
+
+  useEffect(() => {
+    if (!imageUrl || !imageUrl.startsWith("http")) {
+      setTexture(fallbackTexture)
+      return
+    }
+
+    const encodedUrl = encodeURI(imageUrl)
+    const loader = new THREE.TextureLoader()
+    loader.crossOrigin = "anonymous"
+
+    loader.load(
+      encodedUrl,
+      (loadedTexture) => {
+        setTexture(loadedTexture)
+      },
+      undefined,
+      () => {
+        setTexture(fallbackTexture)
+      }
+    )
+
+    return () => {
+      if (texture && texture !== fallbackTexture) {
+        texture.dispose()
+      }
+    }
+  }, [imageUrl])
+
+  return texture
 }
 
-function ArtworkFrameVisual({
+export default function ArtworkFrame({
   artwork,
   wall,
   positionX,
@@ -57,11 +88,11 @@ function ArtworkFrameVisual({
   onClick,
   onPointerOver,
   onPointerOut,
-  texture,
-}: ArtworkFrameVisualProps) {
+}: ArtworkFrameProps) {
   const meshRef = useRef<THREE.Group>(null)
   const spotlightRef = useRef<THREE.SpotLight>(null)
-  const spotlightTarget = useMemo(() => new THREE.Object3D(), [])
+
+  const texture = useArtworkTexture(artwork.imageUrl)
 
   const { frameWidth, frameHeight, position, rotation } = useMemo(() => {
     const wCm = artwork.width * CM_TO_M
@@ -111,17 +142,7 @@ function ArtworkFrameVisual({
       position: [x, yPos, z] as [number, number, number],
       rotation: [0, rotY, 0] as [number, number, number],
     }
-  }, [
-    artwork.width,
-    artwork.height,
-    wall,
-    positionX,
-    positionY,
-    roomWidth,
-    roomLength,
-    roomHeight,
-    scale,
-  ])
+  }, [artwork.width, artwork.height, wall, positionX, positionY, roomWidth, roomLength, roomHeight, scale])
 
   const spotlightIntensity = isHighlighted ? 2.5 : 1.5
   const frameEmissive = isHighlighted ? "#4a3a20" : "#000000"
@@ -171,29 +192,7 @@ function ArtworkFrameVisual({
         penumbra={0.5}
         intensity={spotlightIntensity}
         color="#fff5e6"
-      >
-        <primitive object={spotlightTarget} attach="target" />
-      </spotLight>
+      />
     </group>
-  )
-}
-
-function ArtworkFrameWithTexture(props: ArtworkFrameProps) {
-  const url = props.artwork.imageUrl
-  const texture = useLoader(THREE.TextureLoader, url)
-  return <ArtworkFrameVisual {...props} texture={texture || fallbackTexture} />
-}
-
-export default function ArtworkFrame(props: ArtworkFrameProps) {
-  const hasValidUrl = props.artwork.imageUrl && props.artwork.imageUrl.startsWith("http")
-
-  if (!hasValidUrl) {
-    return <ArtworkFrameVisual {...props} texture={fallbackTexture} />
-  }
-
-  return (
-    <React.Suspense fallback={<ArtworkFrameVisual {...props} texture={fallbackTexture} />}>
-      <ArtworkFrameWithTexture {...props} />
-    </React.Suspense>
   )
 }
