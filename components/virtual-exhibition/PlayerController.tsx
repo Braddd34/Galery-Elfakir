@@ -31,7 +31,7 @@ export default function PlayerController({
   const movement = useRef(new THREE.Vector3())
 
   useEffect(() => {
-    camera.position.set(0, EYE_HEIGHT, roomLength / 2 - BOUNDS_MARGIN * 3)
+    camera.position.set(0, EYE_HEIGHT, roomLength * 0.25)
     camera.rotation.set(0, 0, 0)
   }, [camera, roomLength])
 

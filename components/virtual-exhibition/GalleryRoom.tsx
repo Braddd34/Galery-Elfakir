@@ -43,9 +43,9 @@ const themeColors = {
 }
 
 export default function GalleryRoom({ theme, roomConfig }: GalleryRoomProps) {
-  const width = roomConfig?.width ?? 15
-  const length = roomConfig?.length ?? 20
-  const height = roomConfig?.height ?? 4
+  const width = roomConfig?.width ?? 8
+  const length = roomConfig?.length ?? 10
+  const height = roomConfig?.height ?? 3.5
 
   const colors = themeColors[theme]
 

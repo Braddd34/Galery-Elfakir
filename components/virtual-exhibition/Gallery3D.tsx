@@ -56,9 +56,9 @@ export default function Gallery3D({
   const [playerPos, setPlayerPos] = useState({ x: 0, z: 0 })
   const [playerRot, setPlayerRot] = useState(0)
 
-  const width = roomConfig?.width ?? 15
-  const length = roomConfig?.length ?? 20
-  const height = roomConfig?.height ?? 4
+  const width = roomConfig?.width ?? 8
+  const length = roomConfig?.length ?? 10
+  const height = roomConfig?.height ?? 3.5
 
   useEffect(() => {
     const checkMobile = () => {
@@ -129,7 +129,7 @@ export default function Gallery3D({
           dpr={[1, 2]}
           style={{ width: "100vw", height: "100vh", display: "block" }}
         >
-          <GalleryLighting theme={theme} roomHeight={height} />
+          <GalleryLighting theme={theme} roomHeight={height} roomWidth={width} roomLength={length} />
           <GalleryRoom theme={theme} roomConfig={roomConfig} />
           {artworks.map((artwork) => (
             <ArtworkFrame
