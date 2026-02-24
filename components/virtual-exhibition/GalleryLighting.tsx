@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { useEffect } from "react"
 import { useThree } from "@react-three/fiber"
 import * as THREE from "three"
 
@@ -27,21 +27,6 @@ export default function GalleryLighting({
     }
   }, [scene, theme])
 
-  const ceilingLights = useMemo(() => {
-    const positions: [number, number, number][] = [
-      [-3, roomHeight, -4],
-      [3, roomHeight, -4],
-      [-3, roomHeight, 4],
-      [3, roomHeight, 4],
-    ]
-    return positions.map((pos) => {
-      const light = new THREE.RectAreaLight(0xffffff, 0.8, 5, 5)
-      light.position.set(...pos)
-      light.rotation.set(-Math.PI / 2, 0, 0)
-      return light
-    })
-  }, [roomHeight])
-
   return (
     <>
       {theme === "white" ? (
@@ -52,9 +37,10 @@ export default function GalleryLighting({
             groundColor="#e8dcc8"
             intensity={0.3}
           />
-          {ceilingLights.map((light, i) => (
-            <primitive key={i} object={light} />
-          ))}
+          <pointLight position={[-3, roomHeight - 0.1, -4]} intensity={0.6} color="#ffffff" distance={12} />
+          <pointLight position={[3, roomHeight - 0.1, -4]} intensity={0.6} color="#ffffff" distance={12} />
+          <pointLight position={[-3, roomHeight - 0.1, 4]} intensity={0.6} color="#ffffff" distance={12} />
+          <pointLight position={[3, roomHeight - 0.1, 4]} intensity={0.6} color="#ffffff" distance={12} />
         </>
       ) : (
         <>

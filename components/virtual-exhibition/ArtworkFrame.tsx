@@ -178,41 +178,22 @@ function ArtworkFrameVisual({
   )
 }
 
-function ArtworkFrameWithLoader(props: ArtworkFrameProps) {
-  let texture: THREE.Texture
-  try {
-    texture = useLoader(THREE.TextureLoader, props.artwork.imageUrl)
-  } catch (e) {
-    if (e instanceof Promise) throw e
-    texture = fallbackTexture
-  }
-  return <ArtworkFrameVisual {...props} texture={texture} />
-}
-
-class TextureErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback: React.ReactNode },
-  { hasError: boolean }
-> {
-  state = { hasError: false }
-
-  static getDerivedStateFromError() {
-    return { hasError: true }
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback
-    }
-    return this.props.children
-  }
+function ArtworkFrameWithTexture(props: ArtworkFrameProps) {
+  const url = props.artwork.imageUrl
+  const texture = useLoader(THREE.TextureLoader, url)
+  return <ArtworkFrameVisual {...props} texture={texture || fallbackTexture} />
 }
 
 export default function ArtworkFrame(props: ArtworkFrameProps) {
+  const hasValidUrl = props.artwork.imageUrl && props.artwork.imageUrl.startsWith("http")
+
+  if (!hasValidUrl) {
+    return <ArtworkFrameVisual {...props} texture={fallbackTexture} />
+  }
+
   return (
-    <TextureErrorBoundary
-      fallback={<ArtworkFrameVisual {...props} texture={fallbackTexture} />}
-    >
-      <ArtworkFrameWithLoader {...props} />
-    </TextureErrorBoundary>
+    <React.Suspense fallback={<ArtworkFrameVisual {...props} texture={fallbackTexture} />}>
+      <ArtworkFrameWithTexture {...props} />
+    </React.Suspense>
   )
 }

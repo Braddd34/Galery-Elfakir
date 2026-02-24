@@ -236,6 +236,34 @@ export default function Gallery3D({
         </div>
       )}
 
+      {!isLocked && !selectedArtwork && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.7)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 60,
+            pointerEvents: "auto",
+            textAlign: "center",
+            padding: "2rem",
+          }}
+        >
+          <p style={{ color: "white", fontSize: "1.5rem", marginBottom: "1rem" }}>
+            Cliquez pour entrer dans l&apos;exposition
+          </p>
+          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.9rem" }}>
+            WASD ou flèches : se déplacer · Souris : regarder · Shift : courir · Échap : quitter
+          </p>
+        </div>
+      )}
+
       {isLocked && (
         <div
           style={{

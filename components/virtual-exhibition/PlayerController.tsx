@@ -1,7 +1,5 @@
-import { useRef, useEffect, useCallback, useState } from "react"
-import { createPortal } from "react-dom"
+import { useRef, useEffect, useCallback } from "react"
 import { useThree, useFrame } from "@react-three/fiber"
-import { PointerLockControls } from "@react-three/drei"
 import * as THREE from "three"
 
 const WALK_SPEED = 3
@@ -21,118 +19,84 @@ interface PlayerControllerProps {
 export default function PlayerController({
   roomWidth,
   roomLength,
-  roomHeight,
   enabled = true,
   onLockChange,
 }: PlayerControllerProps) {
-  const { camera, scene, controls } = useThree()
-  const keysRef = useRef<Set<string>>(new Set())
-  const [locked, setLocked] = useState(false)
-  const raycaster = useRef(new THREE.Raycaster())
-  const rayOrigin = useRef(new THREE.Vector3())
-  const rayDirection = useRef(new THREE.Vector3())
+  const { camera, gl } = useThree()
+  const keysRef = useRef<Record<string, boolean>>({})
+  const isLockedRef = useRef(false)
+  const euler = useRef(new THREE.Euler(0, 0, 0, "YXZ"))
   const forward = useRef(new THREE.Vector3())
   const right = useRef(new THREE.Vector3())
   const movement = useRef(new THREE.Vector3())
-  const meshesRef = useRef<THREE.Object3D[]>([])
-
-  const handleLock = useCallback(() => {
-    setLocked(true)
-    onLockChange?.(true)
-  }, [onLockChange])
-
-  const handleUnlock = useCallback(() => {
-    setLocked(false)
-    onLockChange?.(false)
-  }, [onLockChange])
-
-  useEffect(() => {
-    const meshes: THREE.Object3D[] = []
-    scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        meshes.push(obj)
-      }
-    })
-    meshesRef.current = meshes
-  }, [scene])
 
   useEffect(() => {
     camera.position.set(0, EYE_HEIGHT, roomLength / 2 - BOUNDS_MARGIN * 3)
-    camera.rotation.set(0, 0, 0)
+    camera.rotation.set(0, Math.PI, 0)
   }, [camera, roomLength])
 
+  const onPointerLockChange = useCallback(() => {
+    const locked = document.pointerLockElement === gl.domElement
+    isLockedRef.current = locked
+    onLockChange?.(locked)
+  }, [gl.domElement, onLockChange])
+
+  const onMouseMove = useCallback((e: MouseEvent) => {
+    if (!isLockedRef.current) return
+    euler.current.setFromQuaternion(camera.quaternion)
+    euler.current.y -= e.movementX * 0.002
+    euler.current.x -= e.movementY * 0.002
+    euler.current.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.current.x))
+    camera.quaternion.setFromEuler(euler.current)
+  }, [camera])
+
+  const requestLock = useCallback(() => {
+    if (!isLockedRef.current) {
+      gl.domElement.requestPointerLock()
+    }
+  }, [gl.domElement])
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const codes = ["KeyW", "KeyS", "KeyA", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight"]
-      if (codes.includes(e.code)) {
-        keysRef.current.add(e.code)
-      }
-    }
+    document.addEventListener("pointerlockchange", onPointerLockChange)
+    document.addEventListener("mousemove", onMouseMove)
+    gl.domElement.addEventListener("click", requestLock)
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      keysRef.current.delete(e.code)
-    }
-
+    const handleKeyDown = (e: KeyboardEvent) => { keysRef.current[e.code] = true }
+    const handleKeyUp = (e: KeyboardEvent) => { keysRef.current[e.code] = false }
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("keyup", handleKeyUp)
+
     return () => {
+      document.removeEventListener("pointerlockchange", onPointerLockChange)
+      document.removeEventListener("mousemove", onMouseMove)
+      gl.domElement.removeEventListener("click", requestLock)
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("keyup", handleKeyUp)
     }
-  }, [])
+  }, [gl.domElement, onPointerLockChange, onMouseMove, requestLock])
 
   useFrame((_, delta) => {
-    if (!enabled || !controls) return
+    if (!enabled || !isLockedRef.current) return
 
     const keys = keysRef.current
-    const isRunning = keys.has("ShiftLeft") || keys.has("ShiftRight")
+    const isRunning = keys["ShiftLeft"] || keys["ShiftRight"]
     const speed = isRunning ? RUN_SPEED : WALK_SPEED
 
     camera.getWorldDirection(forward.current)
     forward.current.y = 0
     forward.current.normalize()
-
-    right.current.crossVectors(forward.current, new THREE.Vector3(0, 1, 0))
-    right.current.normalize()
+    right.current.crossVectors(forward.current, new THREE.Vector3(0, 1, 0)).normalize()
 
     movement.current.set(0, 0, 0)
 
-    if (keys.has("KeyW") || keys.has("ArrowUp")) {
-      movement.current.add(forward.current)
-    }
-    if (keys.has("KeyS") || keys.has("ArrowDown")) {
-      movement.current.sub(forward.current)
-    }
-    if (keys.has("KeyA") || keys.has("ArrowLeft")) {
-      movement.current.sub(right.current)
-    }
-    if (keys.has("KeyD") || keys.has("ArrowRight")) {
-      movement.current.add(right.current)
-    }
+    if (keys["KeyW"] || keys["ArrowUp"]) movement.current.add(forward.current)
+    if (keys["KeyS"] || keys["ArrowDown"]) movement.current.sub(forward.current)
+    if (keys["KeyA"] || keys["ArrowLeft"]) movement.current.sub(right.current)
+    if (keys["KeyD"] || keys["ArrowRight"]) movement.current.add(right.current)
 
     if (movement.current.lengthSq() > 0) {
       movement.current.normalize()
-      const moveLength = speed * delta
-
-      rayOrigin.current.copy(camera.position)
-      rayDirection.current.copy(movement.current)
-      raycaster.current.set(rayOrigin.current, rayDirection.current)
-      raycaster.current.far = moveLength + COLLISION_DISTANCE
-
-      const intersects = raycaster.current.intersectObjects(meshesRef.current, true)
-      const hit = intersects[0]
-
-      let allowedMove = moveLength
-      if (hit) {
-        if (hit.distance < COLLISION_DISTANCE) {
-          allowedMove = 0
-        } else if (hit.distance < moveLength + COLLISION_DISTANCE) {
-          allowedMove = Math.max(0, hit.distance - COLLISION_DISTANCE)
-        }
-      }
-      if (allowedMove > 0) {
-        camera.position.addScaledVector(movement.current, allowedMove)
-      }
+      camera.position.addScaledVector(movement.current, speed * delta)
     }
 
     const minX = -roomWidth / 2 + BOUNDS_MARGIN
@@ -145,44 +109,5 @@ export default function PlayerController({
     camera.position.z = Math.max(minZ, Math.min(maxZ, camera.position.z))
   })
 
-  if (!enabled) return null
-
-  return (
-    <>
-      <PointerLockControls
-        makeDefault
-        onLock={handleLock}
-        onUnlock={handleUnlock}
-      />
-      {createPortal(
-        <div
-          style={{
-            display: locked ? "none" : "flex",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.7)",
-            color: "white",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "system-ui, sans-serif",
-            zIndex: 1000,
-            padding: "2rem",
-            textAlign: "center",
-          }}
-        >
-          <p style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>
-            Cliquez pour entrer dans l&apos;exposition
-          </p>
-          <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
-            WASD ou flèches : se déplacer · Souris : regarder · Shift : courir · Échap : quitter
-          </p>
-        </div>,
-        document.body
-      )}
-    </>
-  )
+  return null
 }
