@@ -7,7 +7,6 @@ const MAX_DIMENSION_M = 2
 const CM_TO_M = 0.01
 
 const fallbackTexture = (() => {
-  const canvas = document.createElement ? null : null
   const data = new Uint8Array(3)
   data[0] = 136
   data[1] = 136
