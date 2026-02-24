@@ -179,7 +179,7 @@ export default function EditVirtualExhibitionPage() {
       }
 
       const toAdd = placedArtworks.filter((p) => !existingArtworkIds.has(p.artworkId))
-      const toRemove = [...existingArtworkIds].filter((aid) => !placedArtworks.some((p) => p.artworkId === aid))
+      const toRemove = Array.from(existingArtworkIds).filter((aid) => !placedArtworks.some((p) => p.artworkId === aid))
 
       for (const aid of toRemove) {
         await fetch(`/api/virtual-exhibitions/${id}/artworks`, {
