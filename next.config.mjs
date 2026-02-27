@@ -91,7 +91,7 @@ const nextConfig = {
             // - font-src 'self' : fonts locales
             // - connect-src 'self' : requêtes API vers notre domaine
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com https://*.public.blob.vercel-storage.com https://s3.eu-west-3.amazonaws.com https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://utfs.io https://*.utfs.io; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://images.unsplash.com https://*.public.blob.vercel-storage.com https://s3.eu-west-3.amazonaws.com https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://utfs.io https://*.utfs.io; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://s3.eu-west-3.amazonaws.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
           },
         ],
       },
