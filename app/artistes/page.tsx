@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import SafeImage from "@/components/ui/SafeImage"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
@@ -117,7 +118,7 @@ export default async function ArtistesPage() {
                             key={artwork.id} 
                             className="relative aspect-square bg-neutral-900 overflow-hidden"
                           >
-                            <Image
+                            <SafeImage
                               src={getArtworkImageUrl(artwork.images)}
                               alt={artwork.title}
                               fill

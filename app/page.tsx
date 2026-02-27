@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import SafeImage from "@/components/ui/SafeImage"
 import HomeHeader from "@/components/layout/HomeHeader"
 import prisma from "@/lib/prisma"
 import Recommendations from "@/components/artwork/Recommendations"
@@ -147,7 +148,7 @@ export default async function HomePage() {
       <section className="h-screen relative flex items-end">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <Image 
+          <SafeImage 
             src={heroImage}
             alt="Œuvre mise en avant"
             fill
@@ -220,7 +221,7 @@ export default async function HomePage() {
               {featuredArtworks[0] && (
                 <Link href={`/oeuvre/${featuredArtworks[0].slug}`} className="md:col-span-7 group">
                   <div className="relative img-zoom aspect-[4/5] md:aspect-[3/4] bg-neutral-900">
-                    <Image
+                    <SafeImage
                       src={getArtworkImageUrl(featuredArtworks[0].images)}
                       alt={featuredArtworks[0].title}
                       fill
@@ -246,7 +247,7 @@ export default async function HomePage() {
                 {featuredArtworks.slice(1, 3).map((artwork) => (
                   <Link key={artwork.id} href={`/oeuvre/${artwork.slug}`} className="group">
                     <div className="relative img-zoom aspect-[4/3] bg-neutral-900">
-                      <Image
+                      <SafeImage
                         src={getArtworkImageUrl(artwork.images)}
                         alt={artwork.title}
                         fill
