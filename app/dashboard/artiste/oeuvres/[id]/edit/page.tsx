@@ -49,6 +49,8 @@ export default function EditArtistArtworkPage({ params }: { params: Promise<{ id
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Charger les données de l'œuvre
   useEffect(() => {
@@ -403,6 +405,55 @@ export default function EditArtistArtworkPage({ params }: { params: Promise<{ id
             </div>
           )}
         </form>
+
+        {/* Zone de suppression */}
+        {!isSold && (
+          <div className="mt-16 pt-8 border-t border-red-900/30">
+            <h3 className="text-red-400 text-sm uppercase tracking-wider mb-2">Supprimer l'œuvre</h3>
+            <p className="text-neutral-500 text-sm mb-4">
+              L'œuvre sera archivée et ne sera plus visible sur le site.
+            </p>
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-6 py-3 border border-red-900/50 text-red-400 text-sm hover:bg-red-900/20 transition-colors"
+              >
+                Supprimer cette œuvre
+              </button>
+            ) : (
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={async () => {
+                    setDeleting(true)
+                    try {
+                      const res = await fetch(`/api/artist/artworks/${id}`, { method: "DELETE" })
+                      if (!res.ok) {
+                        const data = await res.json()
+                        throw new Error(data.error || "Erreur lors de la suppression")
+                      }
+                      showToast("Œuvre supprimée", "success")
+                      router.push("/dashboard/artiste/oeuvres")
+                    } catch (err: any) {
+                      showToast(err.message, "error")
+                      setDeleting(false)
+                      setShowDeleteConfirm(false)
+                    }
+                  }}
+                  disabled={deleting}
+                  className="px-6 py-3 bg-red-600 text-white text-sm hover:bg-red-500 transition-colors disabled:opacity-50"
+                >
+                  {deleting ? "Suppression..." : "Confirmer la suppression"}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-6 py-3 border border-neutral-700 text-sm text-neutral-400 hover:text-white transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </main>
   )
