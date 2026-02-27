@@ -125,7 +125,7 @@ export default function Gallery3D({
       >
         <Canvas
           shadows
-          camera={{ fov: 60, near: 0.1, far: 100 }}
+          camera={{ fov: 60, near: 0.1, far: 100, position: [0, 1.7, 0] }}
           dpr={[1, 2]}
           style={{ width: "100vw", height: "100vh", display: "block" }}
         >

@@ -6,6 +6,7 @@ import { encodeImageUrl } from "@/lib/image-utils"
 const FRAME_BORDER = 0.03
 const MAX_DIMENSION_M = 2
 const CM_TO_M = 0.01
+const WALL_HALF_THICKNESS = 0.1
 
 const fallbackTexture = (() => {
   const data = new Uint8Array(4)
@@ -114,24 +115,26 @@ export default function ArtworkFrame({
     const halfWidth = roomWidth / 2
     const halfLength = roomLength / 2
 
+    const wallOffset = WALL_HALF_THICKNESS + 0.01
+
     switch (wall) {
       case "north":
-        z = -halfLength + 0.02
+        z = -halfLength + wallOffset
         x = -halfWidth + roomWidth * positionX
         rotY = 0
         break
       case "south":
-        z = halfLength - 0.02
+        z = halfLength - wallOffset
         x = -halfWidth + roomWidth * positionX
         rotY = Math.PI
         break
       case "east":
-        x = halfWidth - 0.02
+        x = halfWidth - wallOffset
         z = -halfLength + roomLength * positionX
         rotY = -Math.PI / 2
         break
       case "west":
-        x = -halfWidth + 0.02
+        x = -halfWidth + wallOffset
         z = -halfLength + roomLength * positionX
         rotY = Math.PI / 2
         break
