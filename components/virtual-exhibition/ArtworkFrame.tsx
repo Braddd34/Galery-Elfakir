@@ -1,6 +1,7 @@
 import { useRef, useState, useMemo, useEffect } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
+import { encodeImageUrl } from "@/lib/image-utils"
 
 const FRAME_BORDER = 0.03
 const MAX_DIMENSION_M = 2
@@ -49,7 +50,7 @@ function useArtworkTexture(imageUrl: string): THREE.Texture {
       return
     }
 
-    const encodedUrl = encodeURI(imageUrl)
+    const encodedUrl = encodeImageUrl(imageUrl)
     const loader = new THREE.TextureLoader()
     loader.crossOrigin = "anonymous"
 

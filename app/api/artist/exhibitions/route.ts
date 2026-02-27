@@ -11,31 +11,43 @@ import prisma from "@/lib/prisma"
  */
 
 // GET : Récupérer les expositions
+// ?artistId=xxx → profil public (n'importe qui peut voir)
+// sans artistId → profil de l'artiste connecté
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: "Non authentifié" }, { status: 401 })
-    }
+    const { searchParams } = new URL(req.url)
+    const artistId = searchParams.get("artistId")
 
-    const artistProfile = await prisma.artistProfile.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true }
-    })
+    let targetArtistId: string
 
-    if (!artistProfile) {
-      return NextResponse.json({ error: "Profil artiste non trouvé" }, { status: 404 })
+    if (artistId) {
+      targetArtistId = artistId
+    } else {
+      const session = await getServerSession(authOptions)
+      if (!session) {
+        return NextResponse.json([], { status: 200 })
+      }
+
+      const artistProfile = await prisma.artistProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true }
+      })
+
+      if (!artistProfile) {
+        return NextResponse.json([], { status: 200 })
+      }
+      targetArtistId = artistProfile.id
     }
 
     const exhibitions = await prisma.exhibition.findMany({
-      where: { artistId: artistProfile.id },
+      where: { artistId: targetArtistId },
       orderBy: { startDate: "desc" }
     })
 
     return NextResponse.json(exhibitions)
   } catch (error) {
     console.error("Erreur récupération expositions:", error)
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+    return NextResponse.json([], { status: 200 })
   }
 }
 

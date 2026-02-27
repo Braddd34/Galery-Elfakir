@@ -1,11 +1,19 @@
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
 
 /**
- * Encode une URL d'image pour gérer les caractères spéciaux (°, accents, etc.)
- * Les URLs S3 peuvent contenir des caractères non-ASCII dans les noms de fichiers.
+ * Retourne l'URL telle quelle, ou le fallback si vide.
+ * Next.js Image gère l'encodage automatiquement.
  */
 export function safeImageUrl(url: string | null | undefined): string {
-  if (!url) return FALLBACK_IMAGE
+  if (!url || url.trim() === "") return FALLBACK_IMAGE
+  return url
+}
+
+/**
+ * Encode une URL pour les contextes non-navigateur (Three.js TextureLoader).
+ * Utilise encodeURI pour gérer les caractères spéciaux (°, accents, etc.)
+ */
+export function encodeImageUrl(url: string): string {
   try {
     return encodeURI(decodeURI(url))
   } catch {
@@ -19,7 +27,6 @@ export function safeImageUrl(url: string | null | undefined): string {
 
 /**
  * Extrait l'URL de la première image depuis le champ images d'une oeuvre.
- * Gère le format string JSON ou tableau d'objets.
  */
 export function getArtworkImageUrl(images: unknown): string {
   if (!images) return FALLBACK_IMAGE

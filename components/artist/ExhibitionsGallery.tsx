@@ -31,10 +31,14 @@ export default function ExhibitionsGallery({ artistId }: ExhibitionsGalleryProps
   const fetchExhibitions = async () => {
     try {
       const res = await fetch(`/api/artist/exhibitions?artistId=${artistId}`)
+      if (!res.ok) {
+        setExhibitions([])
+        return
+      }
       const data = await res.json()
-      setExhibitions(data || [])
-    } catch (err) {
-      console.error("Erreur chargement expositions:", err)
+      setExhibitions(Array.isArray(data) ? data : [])
+    } catch {
+      setExhibitions([])
     } finally {
       setLoading(false)
     }
