@@ -112,17 +112,10 @@ export async function PUT(
       )
     }
 
-    const validWalls = ["north", "south", "east", "west"]
     for (const p of placements) {
       if (!p.artworkId || !p.wall || p.positionX === undefined || p.positionY === undefined) {
         return NextResponse.json(
           { error: `Placement invalide pour ${p.artworkId}: artworkId, wall, positionX et positionY requis` },
-          { status: 400 }
-        )
-      }
-      if (!validWalls.includes(p.wall)) {
-        return NextResponse.json(
-          { error: `Mur invalide: ${p.wall}` },
           { status: 400 }
         )
       }
@@ -198,10 +191,9 @@ export async function POST(
       )
     }
 
-    const validWalls = ["north", "south", "east", "west"]
-    if (!validWalls.includes(wall)) {
+    if (typeof wall !== "string" || wall.length === 0) {
       return NextResponse.json(
-        { error: "wall doit être north, south, east ou west" },
+        { error: "wall doit être une chaîne non vide" },
         { status: 400 }
       )
     }

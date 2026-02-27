@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef, Suspense } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react"
 import { Canvas } from "@react-three/fiber"
 import GalleryRoom from "./GalleryRoom"
 import ArtworkFrame from "./ArtworkFrame"
@@ -9,6 +9,8 @@ import GalleryLighting from "./GalleryLighting"
 import MobileControls from "./MobileControls"
 import Minimap from "./Minimap"
 import Link from "next/link"
+import { generateLayout, suggestLayout } from "@/lib/virtual-exhibition/layouts"
+import type { LayoutId, ThemeId, GeneratedLayout, WallSegment } from "@/lib/virtual-exhibition/types"
 
 export interface ExhibitionArtwork {
   id: string
@@ -19,7 +21,7 @@ export interface ExhibitionArtwork {
   imageUrl: string
   width: number
   height: number
-  wall: "north" | "south" | "east" | "west"
+  wall: string
   positionX: number
   positionY: number
   scale: number
@@ -28,9 +30,9 @@ export interface ExhibitionArtwork {
 export interface Gallery3DProps {
   exhibitionId: string
   title: string
-  theme: "white" | "dark"
+  theme: string
   artworks: ExhibitionArtwork[]
-  roomConfig?: { width?: number; length?: number; height?: number }
+  roomConfig?: { width?: number; length?: number; height?: number; layout?: string }
   onArtworkClick?: (artwork: ExhibitionArtwork) => void
   onExit?: () => void
   onAddToCart?: (artwork: ExhibitionArtwork) => void
@@ -56,9 +58,21 @@ export default function Gallery3D({
   const [playerPos, setPlayerPos] = useState({ x: 0, z: 0 })
   const [playerRot, setPlayerRot] = useState(0)
 
-  const width = roomConfig?.width ?? 8
-  const length = roomConfig?.length ?? 10
-  const height = roomConfig?.height ?? 3.5
+  const resolvedTheme: ThemeId =
+    theme === "dark" || theme === "concrete" || theme === "wood" ? theme : "white"
+
+  const layout: GeneratedLayout = useMemo(() => {
+    const layoutId = (roomConfig?.layout as LayoutId) || suggestLayout(artworks.length)
+    return generateLayout(layoutId, artworks.length)
+  }, [roomConfig?.layout, artworks.length])
+
+  const segmentMap = useMemo(() => {
+    const map = new Map<string, WallSegment>()
+    for (const seg of layout.allSegments) map.set(seg.id, seg)
+    return map
+  }, [layout])
+
+  const { width, length, height } = layout.room
 
   useEffect(() => {
     const checkMobile = () => {
@@ -88,9 +102,7 @@ export default function Gallery3D({
   const handleArtworkHover = useCallback(
     (artworkId: string | null) => {
       setHighlightedArtworkId(artworkId)
-      if (artworkId) {
-        onAnalyticsEvent?.({ type: "artwork_hover", data: { artworkId } })
-      }
+      if (artworkId) onAnalyticsEvent?.({ type: "artwork_hover", data: { artworkId } })
     },
     [onAnalyticsEvent]
   )
@@ -99,6 +111,8 @@ export default function Gallery3D({
     setIsLocked(locked)
   }, [])
 
+  const cameraFar = Math.max(100, length * 2)
+
   return (
     <div ref={canvasContainerRef} style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden" }}>
       <Suspense
@@ -106,10 +120,7 @@ export default function Gallery3D({
           <div
             style={{
               position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
+              top: 0, left: 0, right: 0, bottom: 0,
               backgroundColor: "#0a0a0a",
               display: "flex",
               alignItems: "center",
@@ -125,44 +136,47 @@ export default function Gallery3D({
       >
         <Canvas
           shadows
-          camera={{ fov: 60, near: 0.1, far: 100, position: [0, 1.7, 0] }}
+          camera={{ fov: 60, near: 0.1, far: cameraFar, position: [0, 1.7, 0] }}
           dpr={[1, 2]}
           style={{ width: "100vw", height: "100vh", display: "block" }}
         >
-          <GalleryLighting theme={theme} roomHeight={height} roomWidth={width} roomLength={length} />
-          <GalleryRoom theme={theme} roomConfig={roomConfig} />
-          {artworks.map((artwork) => (
-            <ArtworkFrame
-              key={artwork.id}
-              artwork={artwork}
-              wall={artwork.wall}
-              positionX={artwork.positionX}
-              positionY={artwork.positionY}
-              scale={artwork.scale}
-              roomWidth={width}
-              roomLength={length}
-              roomHeight={height}
-              isHighlighted={highlightedArtworkId === artwork.id}
-              onClick={() => handleArtworkClick(artwork)}
-              onPointerOver={() => handleArtworkHover(artwork.id)}
-              onPointerOut={() => handleArtworkHover(null)}
-            />
-          ))}
+          <GalleryLighting theme={resolvedTheme} roomHeight={height} roomWidth={width} roomLength={length} />
+          <GalleryRoom theme={resolvedTheme} layout={layout} />
+
+          {artworks.map((artwork) => {
+            const seg = segmentMap.get(artwork.wall)
+            if (!seg) return null
+            return (
+              <ArtworkFrame
+                key={artwork.id}
+                artwork={artwork}
+                segment={seg}
+                positionX={artwork.positionX}
+                positionY={artwork.positionY}
+                scale={artwork.scale}
+                isHighlighted={highlightedArtworkId === artwork.id}
+                onClick={() => handleArtworkClick(artwork)}
+                onPointerOver={() => handleArtworkHover(artwork.id)}
+                onPointerOut={() => handleArtworkHover(null)}
+              />
+            )
+          })}
+
           <PlayerController
             roomWidth={width}
             roomLength={length}
             roomHeight={height}
+            partitions={layout.partitions}
             onLockChange={handleLockChange}
           />
         </Canvas>
       </Suspense>
 
+      {/* ===== TOP BAR ===== */}
       <div
         style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
+          top: 0, left: 0, right: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -175,14 +189,7 @@ export default function Gallery3D({
         <div className="flex-1 mr-4">
           <h1 className="text-white text-lg font-semibold truncate">{title}</h1>
           <p className="text-white/50 text-xs">
-            {artworks.length} œuvre{artworks.length > 1 ? "s" : ""} —{" "}
-            {["north", "south", "east", "west"]
-              .map((w) => {
-                const count = artworks.filter((a) => a.wall === w).length
-                return count > 0 ? `${w === "north" ? "N" : w === "south" ? "S" : w === "east" ? "E" : "O"}:${count}` : null
-              })
-              .filter(Boolean)
-              .join(" · ")}
+            {artworks.length} œuvre{artworks.length > 1 ? "s" : ""}
           </p>
         </div>
         <button
@@ -194,13 +201,12 @@ export default function Gallery3D({
         </button>
       </div>
 
+      {/* ===== ARTWORK DETAIL PANEL ===== */}
       {selectedArtwork && (
         <div
           style={{
             position: "fixed",
-            top: 0,
-            right: 0,
-            bottom: 0,
+            top: 0, right: 0, bottom: 0,
             width: "min(400px, 100%)",
             backgroundColor: "rgba(0, 0, 0, 0.85)",
             zIndex: 200,
@@ -227,10 +233,9 @@ export default function Gallery3D({
             <h2 className="text-white text-xl font-semibold">{selectedArtwork.title}</h2>
             <p className="text-gray-300">{selectedArtwork.artistName}</p>
             <p className="text-white font-medium">
-              {new Intl.NumberFormat("fr-FR", {
-                style: "currency",
-                currency: "EUR",
-              }).format(selectedArtwork.price)}
+              {new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(
+                selectedArtwork.price
+              )}
             </p>
             <Link
               href={`/oeuvre/${selectedArtwork.slug}`}
@@ -249,21 +254,19 @@ export default function Gallery3D({
         </div>
       )}
 
+      {/* ===== ENTER OVERLAY ===== */}
       {!isLocked && !selectedArtwork && (
         <div
           onClick={() => {
             const canvas = canvasContainerRef.current?.querySelector("canvas")
             if (canvas) {
-              try { canvas.requestPointerLock() } catch { /* fallback mode */ }
+              try { canvas.requestPointerLock() } catch { /* fallback */ }
               canvas.click()
             }
           }}
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            top: 0, left: 0, right: 0, bottom: 0,
             backgroundColor: "rgba(0,0,0,0.75)",
             display: "flex",
             flexDirection: "column",
@@ -279,14 +282,16 @@ export default function Gallery3D({
           <p style={{ color: "white", fontSize: "1.8rem", marginBottom: "1.5rem", fontWeight: 300 }}>
             Cliquez pour entrer dans l&apos;exposition
           </p>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "auto auto",
-            gap: "0.5rem 1.5rem",
-            color: "rgba(255,255,255,0.7)",
-            fontSize: "0.85rem",
-            textAlign: "left",
-          }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              gap: "0.5rem 1.5rem",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "0.85rem",
+              textAlign: "left",
+            }}
+          >
             <span style={{ color: "#d4a853" }}>WASD</span><span>Se déplacer</span>
             <span style={{ color: "#d4a853" }}>Flèches ← →</span><span>Tourner la tête</span>
             <span style={{ color: "#d4a853" }}>Souris</span><span>Regarder (clic + glisser)</span>
@@ -296,16 +301,15 @@ export default function Gallery3D({
         </div>
       )}
 
+      {/* ===== CROSSHAIR + CONTROLS HINT ===== */}
       {isLocked && (
         <>
           <div
             style={{
               position: "fixed",
-              top: "50%",
-              left: "50%",
+              top: "50%", left: "50%",
               transform: "translate(-50%, -50%)",
-              width: 6,
-              height: 6,
+              width: 6, height: 6,
               borderRadius: "50%",
               backgroundColor: "rgba(255, 255, 255, 0.5)",
               pointerEvents: "none",
@@ -333,6 +337,7 @@ export default function Gallery3D({
         roomWidth={width}
         roomLength={length}
         artworks={artworks.map((a) => ({ id: a.id, wall: a.wall, positionX: a.positionX, positionY: a.positionY }))}
+        partitions={layout.partitions}
         playerPosition={playerPos}
         playerRotation={playerRot}
         visible={isLocked}

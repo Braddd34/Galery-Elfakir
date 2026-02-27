@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from "react"
 import { useThree, useFrame } from "@react-three/fiber"
 import * as THREE from "three"
+import type { PartitionWall } from "@/lib/virtual-exhibition/types"
 
 const WALK_SPEED = 3
 const RUN_SPEED = 6
@@ -8,18 +9,45 @@ const EYE_HEIGHT = 1.7
 const BOUNDS_MARGIN = 0.5
 const MOUSE_SENSITIVITY = 0.003
 const ARROW_ROTATE_SPEED = 2
+const COLLISION_MARGIN = 0.35
 
 interface PlayerControllerProps {
   roomWidth: number
   roomLength: number
   roomHeight: number
+  partitions?: PartitionWall[]
   enabled?: boolean
   onLockChange?: (locked: boolean) => void
+}
+
+function collidesWithPartition(
+  x: number,
+  z: number,
+  part: PartitionWall
+): boolean {
+  const cx = part.position[0]
+  const cz = part.position[2]
+  const hw = part.width / 2 + COLLISION_MARGIN
+  const ht = part.thickness / 2 + COLLISION_MARGIN
+
+  const isHorizontal = Math.abs(part.rotationY) < 0.01
+  if (isHorizontal) {
+    return (
+      x > cx - hw && x < cx + hw &&
+      z > cz - ht && z < cz + ht
+    )
+  }
+  return (
+    x > cx - ht && x < cx + ht &&
+    z > cz - hw && z < cz + hw
+  )
 }
 
 export default function PlayerController({
   roomWidth,
   roomLength,
+  roomHeight,
+  partitions = [],
   enabled = true,
   onLockChange,
 }: PlayerControllerProps) {
@@ -54,17 +82,16 @@ export default function PlayerController({
     onLockChange?.(locked && hasEnteredRef.current)
   }, [gl.domElement, onLockChange])
 
-  const onMouseMove = useCallback((e: MouseEvent) => {
-    if (isLockedRef.current) {
-      yawRef.current -= e.movementX * MOUSE_SENSITIVITY
-      pitchRef.current -= e.movementY * MOUSE_SENSITIVITY
-      updateCameraRotation()
-    } else if (isDraggingRef.current && hasEnteredRef.current) {
-      yawRef.current -= e.movementX * MOUSE_SENSITIVITY
-      pitchRef.current -= e.movementY * MOUSE_SENSITIVITY
-      updateCameraRotation()
-    }
-  }, [updateCameraRotation])
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isLockedRef.current || (isDraggingRef.current && hasEnteredRef.current)) {
+        yawRef.current -= e.movementX * MOUSE_SENSITIVITY
+        pitchRef.current -= e.movementY * MOUSE_SENSITIVITY
+        updateCameraRotation()
+      }
+    },
+    [updateCameraRotation]
+  )
 
   const handleCanvasClick = useCallback(() => {
     if (!hasEnteredRef.current) {
@@ -75,7 +102,7 @@ export default function PlayerController({
       try {
         gl.domElement.requestPointerLock()
       } catch {
-        // Pointer lock not supported, use drag mode
+        /* fallback drag mode */
       }
     }
   }, [gl.domElement, onLockChange])
@@ -97,8 +124,12 @@ export default function PlayerController({
     gl.domElement.addEventListener("click", handleCanvasClick)
     gl.domElement.addEventListener("mousedown", handleMouseDown)
 
-    const handleKeyDown = (e: KeyboardEvent) => { keysRef.current[e.code] = true }
-    const handleKeyUp = (e: KeyboardEvent) => { keysRef.current[e.code] = false }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keysRef.current[e.code] = true
+    }
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysRef.current[e.code] = false
+    }
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("keyup", handleKeyUp)
 
@@ -143,7 +174,6 @@ export default function PlayerController({
     right.current.crossVectors(forward.current, new THREE.Vector3(0, 1, 0)).normalize()
 
     movement.current.set(0, 0, 0)
-
     if (keys["KeyW"]) movement.current.add(forward.current)
     if (keys["KeyS"]) movement.current.sub(forward.current)
     if (keys["KeyA"]) movement.current.sub(right.current)
@@ -151,17 +181,38 @@ export default function PlayerController({
 
     if (movement.current.lengthSq() > 0) {
       movement.current.normalize()
+
+      const prevX = camera.position.x
+      const prevZ = camera.position.z
+
       camera.position.addScaledVector(movement.current, speed * delta)
+
+      const minX = -roomWidth / 2 + BOUNDS_MARGIN
+      const maxX = roomWidth / 2 - BOUNDS_MARGIN
+      const minZ = -roomLength / 2 + BOUNDS_MARGIN
+      const maxZ = roomLength / 2 - BOUNDS_MARGIN
+
+      camera.position.x = Math.max(minX, Math.min(maxX, camera.position.x))
+      camera.position.z = Math.max(minZ, Math.min(maxZ, camera.position.z))
+
+      for (const part of partitions) {
+        if (collidesWithPartition(camera.position.x, camera.position.z, part)) {
+          const onlyX = collidesWithPartition(camera.position.x, prevZ, part)
+          const onlyZ = collidesWithPartition(prevX, camera.position.z, part)
+
+          if (onlyX && !onlyZ) {
+            camera.position.x = prevX
+          } else if (!onlyX && onlyZ) {
+            camera.position.z = prevZ
+          } else {
+            camera.position.x = prevX
+            camera.position.z = prevZ
+          }
+        }
+      }
     }
 
-    const minX = -roomWidth / 2 + BOUNDS_MARGIN
-    const maxX = roomWidth / 2 - BOUNDS_MARGIN
-    const minZ = -roomLength / 2 + BOUNDS_MARGIN
-    const maxZ = roomLength / 2 - BOUNDS_MARGIN
-
-    camera.position.x = Math.max(minX, Math.min(maxX, camera.position.x))
     camera.position.y = EYE_HEIGHT
-    camera.position.z = Math.max(minZ, Math.min(maxZ, camera.position.z))
   })
 
   return null

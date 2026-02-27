@@ -2,15 +2,26 @@
 
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Check } from "lucide-react"
 import { getArtworkImageUrl } from "@/lib/image-utils"
+import {
+  LAYOUT_META,
+  LAYOUT_IDS,
+  THEME_META,
+  THEME_IDS,
+} from "@/lib/virtual-exhibition/types"
+import type { LayoutId, ThemeId } from "@/lib/virtual-exhibition/types"
+import { generateLayout, suggestLayout } from "@/lib/virtual-exhibition/layouts"
+import { autoPlaceArtworks } from "@/lib/virtual-exhibition/auto-placement"
 
 interface Artwork {
   id: string
   title: string
   images: unknown
+  width: number | string
+  height: number | string
   artist?: { user?: { name?: string } }
 }
 
@@ -20,13 +31,12 @@ interface PlacedArtwork {
   wall: string
   positionX: number
   positionY: number
+  scale: number
 }
 
 function getImageUrl(images: unknown): string {
   return getArtworkImageUrl(images)
 }
-
-const WALLS = ["north", "south", "east", "west"] as const
 
 export default function NewVirtualExhibitionPage() {
   const { data: session, status } = useSession()
@@ -37,18 +47,25 @@ export default function NewVirtualExhibitionPage() {
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [theme, setTheme] = useState<"white" | "dark">("white")
+  const [selectedLayout, setSelectedLayout] = useState<LayoutId>("intime")
+  const [selectedTheme, setSelectedTheme] = useState<ThemeId>("white")
   const [coverImage, setCoverImage] = useState("")
 
   const [artworks, setArtworks] = useState<Artwork[]>([])
   const [artworkSearch, setArtworkSearch] = useState("")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [placedArtworks, setPlacedArtworks] = useState<PlacedArtwork[]>([])
-  const [selectedForPlacement, setSelectedForPlacement] = useState<string | null>(null)
+
+  const selectedArtworks = artworks.filter((a) => selectedIds.has(a.id))
+
+  const layout = useMemo(
+    () => generateLayout(selectedLayout, selectedIds.size),
+    [selectedLayout, selectedIds.size]
+  )
 
   const fetchArtworks = useCallback(async () => {
     try {
-      const params = new URLSearchParams({ limit: "100", page: "1" })
+      const params = new URLSearchParams({ limit: "200", page: "1" })
       if (artworkSearch) params.set("search", artworkSearch)
       const res = await fetch(`/api/catalogue?${params}`)
       if (!res.ok) throw new Error("Erreur chargement")
@@ -78,64 +95,36 @@ export default function NewVirtualExhibitionPage() {
     setSelectedIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
-      else next.add(id)
+      else if (next.size < 100) next.add(id)
       return next
     })
   }
 
-  const handleWallClick = (wall: string, e: React.MouseEvent<HTMLDivElement>) => {
-    if (!selectedForPlacement) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width
-    const y = (e.clientY - rect.top) / rect.height
-    const positionX = Math.max(0, Math.min(1, wall === "north" || wall === "south" ? x : y))
-    const positionY = 0.5
-    const artwork = artworks.find((a) => a.id === selectedForPlacement)
-    if (!artwork) return
-    setPlacedArtworks((prev) => {
-      const filtered = prev.filter((p) => p.artworkId !== selectedForPlacement)
-      return [
-        ...filtered,
-        { artworkId: selectedForPlacement, artwork, wall, positionX, positionY },
-      ]
-    })
-    setSelectedForPlacement(null)
-  }
-
-  const removePlaced = (artworkId: string) => {
-    setPlacedArtworks((prev) => prev.filter((p) => p.artworkId !== artworkId))
-  }
-
-  const selectedArtworks = artworks.filter((a) => selectedIds.has(a.id))
-  const canProceedStep1 = title.trim().length > 0 && description.trim().length > 0
-  const canProceedStep2 = selectedIds.size > 0
-  const canProceedStep3 = placedArtworks.length > 0
-
-  const autoPlaceArtworks = useCallback(() => {
+  const runAutoPlacement = useCallback(() => {
     const selected = artworks.filter((a) => selectedIds.has(a.id))
     if (selected.length === 0) return
 
-    const walls: ("north" | "east" | "west")[] = ["north", "east", "west"]
-    const placed: PlacedArtwork[] = []
+    const suggested = suggestLayout(selected.length)
+    const layoutForPlace = generateLayout(selectedLayout || suggested, selected.length)
+    const placements = autoPlaceArtworks(
+      selected.map((a) => ({
+        width: Number(a.width) || 50,
+        height: Number(a.height) || 50,
+      })),
+      layoutForPlace.allSegments
+    )
 
-    selected.forEach((artwork, index) => {
-      const wall = walls[index % walls.length]
-      const artworksOnWall = placed.filter((p) => p.wall === wall).length
-      const totalOnWall = Math.ceil(selected.length / walls.length)
-      const spacing = 1 / (totalOnWall + 1)
-      const posX = spacing * (artworksOnWall + 1)
-
-      placed.push({
-        artworkId: artwork.id,
-        artwork,
-        wall,
-        positionX: Math.max(0.15, Math.min(0.85, posX)),
-        positionY: 0.5,
-      })
-    })
+    const placed: PlacedArtwork[] = placements.map((p) => ({
+      artworkId: selected[p.artworkIndex].id,
+      artwork: selected[p.artworkIndex],
+      wall: p.segmentId,
+      positionX: p.positionX,
+      positionY: p.positionY,
+      scale: p.scale,
+    }))
 
     setPlacedArtworks(placed)
-  }, [artworks, selectedIds])
+  }, [artworks, selectedIds, selectedLayout])
 
   const handleSubmit = async (asDraft: boolean) => {
     setLoading(true)
@@ -147,9 +136,15 @@ export default function NewVirtualExhibitionPage() {
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim(),
-          theme: theme === "white" ? "white" : "dark",
+          theme: selectedTheme,
           coverImage: coverImage || null,
           status: asDraft ? "DRAFT" : "PENDING",
+          roomConfig: {
+            layout: selectedLayout,
+            width: layout.room.width,
+            length: layout.room.length,
+            height: layout.room.height,
+          },
         }),
       })
       if (!res.ok) {
@@ -158,26 +153,26 @@ export default function NewVirtualExhibitionPage() {
       }
       const exhibition = await res.json()
 
-      const batchRes = await fetch(`/api/virtual-exhibitions/${exhibition.id}/artworks`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          placements: placedArtworks.map((p, i) => ({
-            artworkId: p.artworkId,
-            wall: p.wall,
-            positionX: p.positionX,
-            positionY: p.positionY,
-            displayOrder: i,
-          })),
-        }),
-      })
+      const batchRes = await fetch(
+        `/api/virtual-exhibitions/${exhibition.id}/artworks`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            placements: placedArtworks.map((p, i) => ({
+              artworkId: p.artworkId,
+              wall: p.wall,
+              positionX: p.positionX,
+              positionY: p.positionY,
+              scale: p.scale,
+              displayOrder: i,
+            })),
+          }),
+        }
+      )
       if (!batchRes.ok) {
         const data = await batchRes.json().catch(() => ({}))
-        throw new Error(data.error || `Erreur ajout des ${placedArtworks.length} œuvres`)
-      }
-      const batchData = await batchRes.json()
-      if (batchData.count !== placedArtworks.length) {
-        throw new Error(`Seulement ${batchData.count}/${placedArtworks.length} œuvres sauvegardées`)
+        throw new Error(data.error || "Erreur ajout des œuvres")
       }
 
       router.push("/admin/virtual-exhibitions")
@@ -187,6 +182,10 @@ export default function NewVirtualExhibitionPage() {
       setLoading(false)
     }
   }
+
+  const canProceedStep1 = title.trim().length > 0 && description.trim().length > 0
+  const canProceedStep2 = selectedIds.size > 0
+  const canProceedStep3 = placedArtworks.length > 0
 
   if (status === "loading") {
     return (
@@ -199,113 +198,144 @@ export default function NewVirtualExhibitionPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4">
-        <Link
-          href="/admin/virtual-exhibitions"
-          className="text-neutral-400 hover:text-white transition-colors"
-        >
+        <Link href="/admin/virtual-exhibitions" className="text-neutral-400 hover:text-white transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-3xl font-light text-white">
-            Nouvelle exposition virtuelle
-          </h1>
+          <h1 className="text-3xl font-light text-white">Nouvelle exposition virtuelle</h1>
           <p className="text-neutral-500 mt-1">Étape {step} sur 4</p>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-900/30 border border-red-500/50 text-red-400 px-4 py-3">
-          {error}
-        </div>
+        <div className="bg-red-900/30 border border-red-500/50 text-red-400 px-4 py-3">{error}</div>
       )}
 
       <div className="flex gap-2 mb-8">
         {[1, 2, 3, 4].map((s) => (
           <div
             key={s}
-            className={`h-1 flex-1 rounded ${
-              s <= step ? "bg-amber-500" : "bg-neutral-800"
-            }`}
+            className={`h-1 flex-1 rounded ${s <= step ? "bg-amber-500" : "bg-neutral-800"}`}
           />
         ))}
       </div>
 
+      {/* ================================================================ */}
+      {/* STEP 1 : Informations + Layout + Thème                          */}
+      {/* ================================================================ */}
       {step === 1 && (
-        <div className="space-y-6 max-w-2xl">
-          <div>
-            <label className="block text-sm text-neutral-400 mb-2">Titre</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-gray-900 border border-neutral-700 text-white px-4 py-3 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              placeholder="Ex: Printemps 2025"
-            />
+        <div className="space-y-8 max-w-3xl">
+          <div className="grid sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm text-neutral-400 mb-2">Titre</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-gray-900 border border-neutral-700 text-white px-4 py-3 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                placeholder="Ex: Printemps 2025"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-neutral-400 mb-2">URL image de couverture</label>
+              <input
+                type="url"
+                value={coverImage}
+                onChange={(e) => setCoverImage(e.target.value)}
+                className="w-full bg-gray-900 border border-neutral-700 text-white px-4 py-3 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                placeholder="https://..."
+              />
+            </div>
           </div>
           <div>
-            <label className="block text-sm text-neutral-400 mb-2">
-              Description
-            </label>
+            <label className="block text-sm text-neutral-400 mb-2">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
+              rows={3}
               className="w-full bg-gray-900 border border-neutral-700 text-white px-4 py-3 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
               placeholder="Décrivez votre exposition..."
             />
           </div>
+
+          {/* Layout selector */}
           <div>
-            <label className="block text-sm text-neutral-400 mb-2">Thème</label>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="theme"
-                  checked={theme === "white"}
-                  onChange={() => setTheme("white")}
-                  className="accent-amber-500"
-                />
-                <span className="text-white">Galerie blanche</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="theme"
-                  checked={theme === "dark"}
-                  onChange={() => setTheme("dark")}
-                  className="accent-amber-500"
-                />
-                <span className="text-white">Galerie sombre</span>
-              </label>
+            <label className="block text-sm text-neutral-400 mb-3">Disposition de la salle</label>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {LAYOUT_IDS.map((lid) => {
+                const meta = LAYOUT_META[lid]
+                const active = selectedLayout === lid
+                return (
+                  <button
+                    key={lid}
+                    type="button"
+                    onClick={() => setSelectedLayout(lid)}
+                    className={`text-left p-4 border-2 transition-all ${
+                      active
+                        ? "border-amber-500 bg-amber-500/10"
+                        : "border-neutral-700 hover:border-neutral-500 bg-neutral-900"
+                    }`}
+                  >
+                    <p className="text-white font-medium text-sm">{meta.name}</p>
+                    <p className="text-neutral-500 text-xs mt-1 leading-relaxed">{meta.description}</p>
+                    <p className="text-amber-500/70 text-[11px] mt-2 font-mono">{meta.range}</p>
+                  </button>
+                )
+              })}
             </div>
           </div>
+
+          {/* Theme selector */}
           <div>
-            <label className="block text-sm text-neutral-400 mb-2">
-              URL image de couverture
-            </label>
-            <input
-              type="url"
-              value={coverImage}
-              onChange={(e) => setCoverImage(e.target.value)}
-              className="w-full bg-gray-900 border border-neutral-700 text-white px-4 py-3 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              placeholder="https://..."
-            />
+            <label className="block text-sm text-neutral-400 mb-3">Ambiance visuelle</label>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {THEME_IDS.map((tid) => {
+                const meta = THEME_META[tid]
+                const active = selectedTheme === tid
+                return (
+                  <button
+                    key={tid}
+                    type="button"
+                    onClick={() => setSelectedTheme(tid)}
+                    className={`text-left p-4 border-2 transition-all ${
+                      active
+                        ? "border-amber-500 bg-amber-500/10"
+                        : "border-neutral-700 hover:border-neutral-500 bg-neutral-900"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <div
+                        className="w-5 h-5 rounded-full border border-neutral-600"
+                        style={{ backgroundColor: meta.accent }}
+                      />
+                      <p className="text-white font-medium text-sm">{meta.name}</p>
+                    </div>
+                    <p className="text-neutral-500 text-xs leading-relaxed">{meta.description}</p>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
       )}
 
+      {/* ================================================================ */}
+      {/* STEP 2 : Sélection des œuvres                                   */}
+      {/* ================================================================ */}
       {step === 2 && (
         <div className="space-y-6">
-          <input
-            type="text"
-            placeholder="Rechercher des œuvres..."
-            value={artworkSearch}
-            onChange={(e) => setArtworkSearch(e.target.value)}
-            className="w-full max-w-md bg-gray-900 border border-neutral-700 text-white px-4 py-2 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          />
-          <p className="text-neutral-400 text-sm">
-            {selectedIds.size} œuvre(s) sélectionnée(s)
-          </p>
+          <div className="flex items-center gap-4 flex-wrap">
+            <input
+              type="text"
+              placeholder="Rechercher des œuvres..."
+              value={artworkSearch}
+              onChange={(e) => setArtworkSearch(e.target.value)}
+              className="w-full max-w-md bg-gray-900 border border-neutral-700 text-white px-4 py-2 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            <p className="text-neutral-400 text-sm">
+              {selectedIds.size} / 100 œuvre(s) sélectionnée(s)
+            </p>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
             {artworks.map((a) => (
               <label
@@ -339,176 +369,70 @@ export default function NewVirtualExhibitionPage() {
         </div>
       )}
 
+      {/* ================================================================ */}
+      {/* STEP 3 : Placement automatique + aperçu plan 2D                 */}
+      {/* ================================================================ */}
       {step === 3 && (
         <div className="space-y-6">
-          {placedArtworks.length < selectedIds.size && (
-            <div className="bg-amber-900/30 border border-amber-500/50 text-amber-400 px-4 py-3 text-sm">
-              {placedArtworks.length} / {selectedIds.size} œuvres placées. Les œuvres non placées n&apos;apparaîtront pas dans l&apos;exposition.
-            </div>
-          )}
-          <div className="flex gap-3">
+          <div className="flex items-center gap-4 flex-wrap">
             <button
               type="button"
-              onClick={autoPlaceArtworks}
-              className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white text-sm border border-neutral-600 transition-colors"
+              onClick={runAutoPlacement}
+              className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-black text-sm font-medium transition-colors"
             >
               Redistribuer automatiquement
             </button>
-            <span className="text-neutral-500 text-sm flex items-center">
-              {placedArtworks.length} œuvre(s) placée(s) sur les murs
+            <span className="text-neutral-400 text-sm">
+              {placedArtworks.length} œuvre(s) placée(s) — Layout : {LAYOUT_META[selectedLayout].name}
             </span>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="relative w-full aspect-[4/3] max-w-2xl mx-auto border-2 border-amber-500/50 bg-neutral-900">
-                <div
-                  className="absolute top-0 left-0 right-0 h-14 border-b border-neutral-700 flex flex-col items-center justify-center gap-1 text-xs text-neutral-400 bg-neutral-800/80 cursor-pointer hover:bg-neutral-700/80 transition-colors"
-                  onClick={(e) => handleWallClick("north", e)}
-                >
-                  <span>Nord</span>
-                  <div className="flex gap-1 overflow-x-auto max-w-full">
-                    {placedArtworks
-                      .filter((p) => p.wall === "north")
-                      .sort((a, b) => a.positionX - b.positionX)
-                      .map((p) => (
-                        <div key={p.artworkId} className="relative group flex-shrink-0" onClick={(ev) => ev.stopPropagation()}>
-                          <div className="w-10 h-10 bg-neutral-800 border border-neutral-600 overflow-hidden">
-                            <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
-                          </div>
-                          <button type="button" onClick={() => removePlaced(p.artworkId)} className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center">×</button>
-                        </div>
-                      ))}
-                  </div>
+
+          {/* Plan 2D vue du dessus */}
+          <div className="max-w-2xl mx-auto">
+            <FloorPlan
+              layout={layout}
+              placedArtworks={placedArtworks}
+              getImageUrl={getImageUrl}
+            />
+          </div>
+
+          {/* List of placed artworks */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 max-h-64 overflow-y-auto">
+            {placedArtworks.map((p) => (
+              <div key={p.artworkId} className="flex items-center gap-2 p-2 bg-neutral-900 border border-neutral-800">
+                <div className="w-8 h-8 bg-neutral-800 flex-shrink-0 overflow-hidden">
+                  <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
                 </div>
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-14 border-t border-neutral-700 flex flex-col items-center justify-center gap-1 text-xs text-neutral-400 bg-neutral-800/80 cursor-pointer hover:bg-neutral-700/80 transition-colors"
-                  onClick={(e) => handleWallClick("south", e)}
-                >
-                  <span>Sud</span>
-                  <div className="flex gap-1 overflow-x-auto max-w-full">
-                    {placedArtworks
-                      .filter((p) => p.wall === "south")
-                      .sort((a, b) => a.positionX - b.positionX)
-                      .map((p) => (
-                        <div key={p.artworkId} className="relative group flex-shrink-0" onClick={(ev) => ev.stopPropagation()}>
-                          <div className="w-10 h-10 bg-neutral-800 border border-neutral-600 overflow-hidden">
-                            <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
-                          </div>
-                          <button type="button" onClick={() => removePlaced(p.artworkId)} className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center">×</button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-                <div
-                  className="absolute top-14 bottom-14 left-0 w-14 border-r border-neutral-700 flex flex-col items-center justify-center gap-1 text-xs text-neutral-400 bg-neutral-800/80 cursor-pointer hover:bg-neutral-700/80 transition-colors"
-                  onClick={(e) => handleWallClick("west", e)}
-                >
-                  <span>Ouest</span>
-                  <div className="flex flex-col gap-1 overflow-y-auto max-h-20">
-                    {placedArtworks
-                      .filter((p) => p.wall === "west")
-                      .sort((a, b) => a.positionX - b.positionX)
-                      .map((p) => (
-                        <div key={p.artworkId} className="relative group flex-shrink-0" onClick={(ev) => ev.stopPropagation()}>
-                          <div className="w-10 h-10 bg-neutral-800 border border-neutral-600 overflow-hidden">
-                            <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
-                          </div>
-                          <button type="button" onClick={() => removePlaced(p.artworkId)} className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center">×</button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-                <div
-                  className="absolute top-14 bottom-14 right-0 w-14 border-l border-neutral-700 flex flex-col items-center justify-center gap-1 text-xs text-neutral-400 bg-neutral-800/80 cursor-pointer hover:bg-neutral-700/80 transition-colors"
-                  onClick={(e) => handleWallClick("east", e)}
-                >
-                  <span>Est</span>
-                  <div className="flex flex-col gap-1 overflow-y-auto max-h-20">
-                    {placedArtworks
-                      .filter((p) => p.wall === "east")
-                      .sort((a, b) => a.positionX - b.positionX)
-                      .map((p) => (
-                        <div key={p.artworkId} className="relative group flex-shrink-0" onClick={(ev) => ev.stopPropagation()}>
-                          <div className="w-10 h-10 bg-neutral-800 border border-neutral-600 overflow-hidden">
-                            <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
-                          </div>
-                          <button type="button" onClick={() => removePlaced(p.artworkId)} className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center">×</button>
-                        </div>
-                      ))}
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-white truncate">{p.artwork.title}</p>
+                  <p className="text-[10px] text-amber-500/70 font-mono">{p.wall}</p>
                 </div>
               </div>
-              <p className="text-neutral-500 text-sm mt-2">
-                Cliquez sur une œuvre à droite puis sur un mur (Nord, Sud, Est, Ouest) pour la placer
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-neutral-400 mb-2">Œuvres sélectionnées</p>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {selectedArtworks.map((a) => (
-                  <button
-                    key={a.id}
-                    type="button"
-                    onClick={() =>
-                      setSelectedForPlacement(
-                        selectedForPlacement === a.id ? null : a.id
-                      )
-                    }
-                    className={`w-full flex items-center gap-3 p-2 border text-left transition-colors ${
-                      selectedForPlacement === a.id
-                        ? "border-amber-500 bg-amber-500/20"
-                        : "border-neutral-700 hover:border-neutral-600"
-                    }`}
-                  >
-                    <div className="w-10 h-10 bg-neutral-800 flex-shrink-0 overflow-hidden">
-                      <img
-                        src={getImageUrl(a.images) || ""}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <span className="text-sm text-white truncate flex-1">
-                      {a.title}
-                    </span>
-                    {placedArtworks.some((p) => p.artworkId === a.id) && (
-                      <Check className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       )}
 
+      {/* ================================================================ */}
+      {/* STEP 4 : Récapitulatif                                          */}
+      {/* ================================================================ */}
       {step === 4 && (
         <div className="space-y-6 max-w-2xl">
           <div className="bg-neutral-900 border border-neutral-800 p-6 space-y-4">
             <h2 className="text-xl font-light text-white">{title}</h2>
             <p className="text-neutral-400 text-sm">{description}</p>
-            <p className="text-neutral-500 text-sm">
-              Thème : {theme === "white" ? "Galerie blanche" : "Galerie sombre"}
-            </p>
+            <div className="flex gap-4 text-sm text-neutral-500">
+              <span>Layout : {LAYOUT_META[selectedLayout].name}</span>
+              <span>Thème : {THEME_META[selectedTheme].name}</span>
+            </div>
+            <div className="flex gap-4 text-sm text-neutral-500">
+              <span>Salle : {layout.room.width.toFixed(0)}m × {layout.room.length.toFixed(0)}m</span>
+              <span>{layout.partitions.length} cloison(s)</span>
+            </div>
             <div className="border-t border-neutral-800 pt-4 mt-4">
               <p className="text-white text-sm font-medium mb-3">
-                {placedArtworks.length} œuvre(s) placée(s) :
+                {placedArtworks.length} œuvre(s) placée(s)
               </p>
-              <div className="space-y-2">
-                {placedArtworks.map((p) => (
-                  <div key={p.artworkId} className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 bg-neutral-800 flex-shrink-0 overflow-hidden">
-                      <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
-                    </div>
-                    <span className="text-white truncate flex-1">{p.artwork.title}</span>
-                    <span className="text-amber-500 font-mono text-xs uppercase">
-                      {p.wall === "north" ? "Nord" : p.wall === "south" ? "Sud" : p.wall === "east" ? "Est" : "Ouest"}
-                    </span>
-                    <span className="text-neutral-600 text-xs">
-                      x:{p.positionX.toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
           <div className="flex gap-4">
@@ -532,6 +456,9 @@ export default function NewVirtualExhibitionPage() {
         </div>
       )}
 
+      {/* ================================================================ */}
+      {/* Navigation                                                       */}
+      {/* ================================================================ */}
       <div className="flex justify-between pt-8 border-t border-neutral-800">
         <button
           type="button"
@@ -546,9 +473,7 @@ export default function NewVirtualExhibitionPage() {
           <button
             type="button"
             onClick={() => {
-              if (step === 2) {
-                autoPlaceArtworks()
-              }
+              if (step === 2) runAutoPlacement()
               setStep((s) => s + 1)
             }}
             disabled={
@@ -564,5 +489,111 @@ export default function NewVirtualExhibitionPage() {
         ) : null}
       </div>
     </div>
+  )
+}
+
+/* ====================================================================== */
+/* Floor Plan 2D Component                                                */
+/* ====================================================================== */
+
+function FloorPlan({
+  layout,
+  placedArtworks,
+  getImageUrl,
+}: {
+  layout: ReturnType<typeof generateLayout>
+  placedArtworks: PlacedArtwork[]
+  getImageUrl: (images: unknown) => string
+}) {
+  const { room, partitions } = layout
+  const padding = 20
+  const maxW = 560
+  const scale = Math.min((maxW - padding * 2) / room.width, 300 / room.length)
+  const w = room.width * scale + padding * 2
+  const h = room.length * scale + padding * 2
+
+  function toSvg(worldX: number, worldZ: number) {
+    return {
+      x: padding + (room.width / 2 + worldX) * scale,
+      y: padding + (room.length / 2 - worldZ) * scale,
+    }
+  }
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full border border-neutral-700 bg-neutral-950 rounded">
+      {/* Room outline */}
+      <rect
+        x={padding}
+        y={padding}
+        width={room.width * scale}
+        height={room.length * scale}
+        fill="none"
+        stroke="#555"
+        strokeWidth={2}
+      />
+
+      {/* Doorway (gap in south wall) */}
+      {(() => {
+        const doorW = 2 * scale
+        const cx = padding + (room.width * scale) / 2
+        const y = padding + room.length * scale
+        return (
+          <line x1={cx - doorW / 2} y1={y} x2={cx + doorW / 2} y2={y} stroke="#111" strokeWidth={3} />
+        )
+      })()}
+
+      {/* Partitions */}
+      {partitions.map((part) => {
+        const cx = part.position[0]
+        const cz = part.position[2]
+        const hw = part.width / 2
+        const isHoriz = Math.abs(part.rotationY) < 0.01
+        const x1 = isHoriz ? cx - hw : cx
+        const z1 = isHoriz ? cz : cz - hw
+        const x2 = isHoriz ? cx + hw : cx
+        const z2 = isHoriz ? cz : cz + hw
+        const p1 = toSvg(x1, z1)
+        const p2 = toSvg(x2, z2)
+        return (
+          <line
+            key={part.id}
+            x1={p1.x} y1={p1.y}
+            x2={p2.x} y2={p2.y}
+            stroke="#666"
+            strokeWidth={3}
+            strokeLinecap="round"
+          />
+        )
+      })}
+
+      {/* Artwork dots */}
+      {placedArtworks.map((p) => {
+        const seg = layout.allSegments.find((s) => s.id === p.wall)
+        if (!seg) return null
+        const localX = (p.positionX - 0.5) * seg.width
+        const cosR = Math.cos(seg.rotation[1])
+        const sinR = Math.sin(seg.rotation[1])
+        const wx = seg.position[0] + localX * cosR
+        const wz = seg.position[2] - localX * sinR
+        const pt = toSvg(wx, wz)
+        return (
+          <circle
+            key={p.artworkId}
+            cx={pt.x}
+            cy={pt.y}
+            r={4}
+            fill="#d4af37"
+            stroke="#000"
+            strokeWidth={0.5}
+          />
+        )
+      })}
+
+      {/* Labels */}
+      <text x={w / 2} y={padding - 5} textAnchor="middle" fill="#888" fontSize={10}>Nord</text>
+      <text x={w / 2} y={h - padding + 14} textAnchor="middle" fill="#888" fontSize={10}>Sud</text>
+      <text x={padding - 5} y={h / 2} textAnchor="end" fill="#888" fontSize={10} dominantBaseline="middle">O</text>
+      <text x={w - padding + 5} y={h / 2} textAnchor="start" fill="#888" fontSize={10} dominantBaseline="middle">E</text>
+    </svg>
   )
 }

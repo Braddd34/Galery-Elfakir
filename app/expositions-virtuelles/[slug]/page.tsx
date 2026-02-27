@@ -193,7 +193,7 @@ export default function ExpositionVirtuelleViewerPage() {
         imageUrl,
         width: Number(ea.artwork.width),
         height: Number(ea.artwork.height),
-        wall: ea.wall as "north" | "south" | "east" | "west",
+        wall: ea.wall,
         positionX: ea.positionX,
         positionY: ea.positionY,
         scale: ea.scale,
@@ -201,8 +201,7 @@ export default function ExpositionVirtuelleViewerPage() {
     }
   )
 
-  const theme =
-    exhibition.theme === "dark" ? "dark" : "white"
+  const theme = exhibition.theme || "white"
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden">

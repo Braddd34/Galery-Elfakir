@@ -1,12 +1,73 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useThree } from "@react-three/fiber"
 import * as THREE from "three"
+import type { ThemeId } from "@/lib/virtual-exhibition/types"
 
 interface GalleryLightingProps {
-  theme: "white" | "dark"
+  theme: ThemeId
   roomHeight?: number
   roomWidth?: number
   roomLength?: number
+}
+
+const themeLighting: Record<
+  ThemeId,
+  {
+    background: string
+    ambientColor: string
+    ambientIntensity: number
+    hemisphereColor: string
+    hemisphereGround: string
+    hemisphereIntensity: number
+    pointColor: string
+    pointIntensity: number
+    pointDistance: number
+  }
+> = {
+  white: {
+    background: "#d4cfc6",
+    ambientColor: "#ffffff",
+    ambientIntensity: 0.8,
+    hemisphereColor: "#ffffff",
+    hemisphereGround: "#e8dcc8",
+    hemisphereIntensity: 0.5,
+    pointColor: "#ffffff",
+    pointIntensity: 0.8,
+    pointDistance: 25,
+  },
+  dark: {
+    background: "#050505",
+    ambientColor: "#2a2018",
+    ambientIntensity: 0.25,
+    hemisphereColor: "#1a1510",
+    hemisphereGround: "#0a0a0a",
+    hemisphereIntensity: 0.1,
+    pointColor: "#ffddaa",
+    pointIntensity: 0.5,
+    pointDistance: 20,
+  },
+  concrete: {
+    background: "#3a3a38",
+    ambientColor: "#c0c0c0",
+    ambientIntensity: 0.6,
+    hemisphereColor: "#b0b0b0",
+    hemisphereGround: "#505050",
+    hemisphereIntensity: 0.3,
+    pointColor: "#f0e8d8",
+    pointIntensity: 0.7,
+    pointDistance: 25,
+  },
+  wood: {
+    background: "#c8bfb0",
+    ambientColor: "#fff8ee",
+    ambientIntensity: 0.7,
+    hemisphereColor: "#fff4e0",
+    hemisphereGround: "#c8a878",
+    hemisphereIntensity: 0.4,
+    pointColor: "#ffe8c0",
+    pointIntensity: 0.8,
+    pointDistance: 25,
+  },
 }
 
 export default function GalleryLighting({
@@ -16,53 +77,50 @@ export default function GalleryLighting({
   roomLength = 10,
 }: GalleryLightingProps) {
   const { scene } = useThree()
+  const cfg = themeLighting[theme] ?? themeLighting.white
 
   useEffect(() => {
-    if (theme === "white") {
-      scene.background = new THREE.Color("#d4cfc6")
-      scene.fog = null
-    } else {
-      scene.background = new THREE.Color("#050505")
-      scene.fog = null
-    }
+    scene.background = new THREE.Color(cfg.background)
+    scene.fog = null
     return () => {
       scene.background = null
       scene.fog = null
     }
-  }, [scene, theme])
+  }, [scene, cfg.background])
 
-  const qw = roomWidth / 4
-  const ql = roomLength / 4
+  const lightGrid = useMemo(() => {
+    const spacing = 6
+    const cols = Math.max(2, Math.ceil(roomWidth / spacing))
+    const rows = Math.max(2, Math.ceil(roomLength / spacing))
+    const points: [number, number, number][] = []
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = -roomWidth / 2 + (roomWidth / cols) * (c + 0.5)
+        const z = -roomLength / 2 + (roomLength / rows) * (r + 0.5)
+        points.push([x, roomHeight - 0.2, z])
+      }
+    }
+    return points
+  }, [roomWidth, roomLength, roomHeight])
 
   return (
     <>
-      {theme === "white" ? (
-        <>
-          <ambientLight color="#ffffff" intensity={0.8} />
-          <hemisphereLight
-            color="#ffffff"
-            groundColor="#e8dcc8"
-            intensity={0.5}
-          />
-          <pointLight position={[-qw, roomHeight - 0.2, -ql]} intensity={0.8} color="#ffffff" distance={20} />
-          <pointLight position={[qw, roomHeight - 0.2, -ql]} intensity={0.8} color="#ffffff" distance={20} />
-          <pointLight position={[-qw, roomHeight - 0.2, ql]} intensity={0.8} color="#ffffff" distance={20} />
-          <pointLight position={[qw, roomHeight - 0.2, ql]} intensity={0.8} color="#ffffff" distance={20} />
-          <pointLight position={[0, roomHeight - 0.2, 0]} intensity={0.6} color="#ffffff" distance={20} />
-        </>
-      ) : (
-        <>
-          <ambientLight color="#2a2018" intensity={0.25} />
-          <hemisphereLight
-            color="#1a1510"
-            groundColor="#0a0a0a"
-            intensity={0.1}
-          />
-          <pointLight position={[0, roomHeight - 0.2, 0]} intensity={0.5} color="#ffddaa" distance={20} />
-          <pointLight position={[-qw, roomHeight - 0.2, -ql]} intensity={0.3} color="#ffddaa" distance={15} />
-          <pointLight position={[qw, roomHeight - 0.2, ql]} intensity={0.3} color="#ffddaa" distance={15} />
-        </>
-      )}
+      <ambientLight color={cfg.ambientColor} intensity={cfg.ambientIntensity} />
+      <hemisphereLight
+        color={cfg.hemisphereColor}
+        groundColor={cfg.hemisphereGround}
+        intensity={cfg.hemisphereIntensity}
+      />
+      {lightGrid.map((pos, i) => (
+        <pointLight
+          key={`light-${i}`}
+          position={pos}
+          intensity={cfg.pointIntensity}
+          color={cfg.pointColor}
+          distance={cfg.pointDistance}
+        />
+      ))}
     </>
   )
 }
