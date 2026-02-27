@@ -241,7 +241,10 @@ export default function Gallery3D({
         <div
           onClick={() => {
             const canvas = canvasContainerRef.current?.querySelector("canvas")
-            if (canvas) canvas.requestPointerLock()
+            if (canvas) {
+              try { canvas.requestPointerLock() } catch { /* fallback mode */ }
+              canvas.click()
+            }
           }}
           style={{
             position: "fixed",
@@ -249,7 +252,7 @@ export default function Gallery3D({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.7)",
+            backgroundColor: "rgba(0,0,0,0.75)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -261,30 +264,57 @@ export default function Gallery3D({
             cursor: "pointer",
           }}
         >
-          <p style={{ color: "white", fontSize: "1.5rem", marginBottom: "1rem" }}>
+          <p style={{ color: "white", fontSize: "1.8rem", marginBottom: "1.5rem", fontWeight: 300 }}>
             Cliquez pour entrer dans l&apos;exposition
           </p>
-          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.9rem" }}>
-            WASD ou flèches : se déplacer · Souris : regarder · Shift : courir · Échap : quitter
-          </p>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "auto auto",
+            gap: "0.5rem 1.5rem",
+            color: "rgba(255,255,255,0.7)",
+            fontSize: "0.85rem",
+            textAlign: "left",
+          }}>
+            <span style={{ color: "#d4a853" }}>WASD</span><span>Se déplacer</span>
+            <span style={{ color: "#d4a853" }}>Flèches ← →</span><span>Tourner la tête</span>
+            <span style={{ color: "#d4a853" }}>Souris</span><span>Regarder (clic + glisser)</span>
+            <span style={{ color: "#d4a853" }}>Shift</span><span>Courir</span>
+            <span style={{ color: "#d4a853" }}>Échap</span><span>Quitter</span>
+          </div>
         </div>
       )}
 
       {isLocked && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            backgroundColor: "rgba(255, 255, 255, 0.7)",
-            pointerEvents: "none",
-            zIndex: 50,
-          }}
-        />
+        <>
+          <div
+            style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.5)",
+              pointerEvents: "none",
+              zIndex: 50,
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              bottom: "1rem",
+              left: "50%",
+              transform: "translateX(-50%)",
+              color: "rgba(255,255,255,0.4)",
+              fontSize: "0.75rem",
+              pointerEvents: "none",
+              zIndex: 50,
+            }}
+          >
+            WASD : déplacer · Flèches : tourner · Souris : regarder · Échap : quitter
+          </div>
+        </>
       )}
 
       <Minimap

@@ -19,21 +19,23 @@ interface GalleryRoomProps {
 
 const themeColors = {
   white: {
-    wall: "#f5f5f0",
-    floor: "#c4a882",
-    ceiling: "#ffffff",
-    baseboard: "#8b7355",
-    wallRoughness: 0.8,
-    floorRoughness: 0.9,
-    floorMetalness: 0,
+    wall: "#e8e4de",
+    floor: "#b89b78",
+    ceiling: "#f5f5f0",
+    baseboard: "#6b5a45",
+    edge: "#c8c0b4",
+    wallRoughness: 0.9,
+    floorRoughness: 0.85,
+    floorMetalness: 0.02,
     ceilingRoughness: 0.8,
     ceilingMetalness: 0,
   },
   dark: {
-    wall: "#1a1a1a",
+    wall: "#1e1e1e",
     floor: "#2a2a2a",
     ceiling: "#111111",
     baseboard: "#0d0d0d",
+    edge: "#333333",
     wallRoughness: 0.8,
     floorRoughness: 0.4,
     floorMetalness: 0.1,
@@ -215,6 +217,31 @@ export default function GalleryRoom({ theme, roomConfig }: GalleryRoomProps) {
           roughness={0.9}
           metalness={0}
         />
+      </mesh>
+
+      {[
+        [-width / 2 + 0.01, -length / 2 + 0.01],
+        [width / 2 - 0.01, -length / 2 + 0.01],
+        [-width / 2 + 0.01, length / 2 - 0.01],
+        [width / 2 - 0.01, length / 2 - 0.01],
+      ].map(([cx, cz], i) => (
+        <mesh key={`corner-${i}`} position={[cx, height / 2, cz]}>
+          <boxGeometry args={[0.06, height, 0.06]} />
+          <meshStandardMaterial color={colors.edge} roughness={0.7} />
+        </mesh>
+      ))}
+
+      <mesh position={[0, height - 0.02, -length / 2 + WALL_THICKNESS / 2]}>
+        <boxGeometry args={[width, 0.04, WALL_THICKNESS]} />
+        <meshStandardMaterial color={colors.edge} roughness={0.7} />
+      </mesh>
+      <mesh position={[width / 2 - WALL_THICKNESS / 2, height - 0.02, 0]}>
+        <boxGeometry args={[WALL_THICKNESS, 0.04, length]} />
+        <meshStandardMaterial color={colors.edge} roughness={0.7} />
+      </mesh>
+      <mesh position={[-width / 2 + WALL_THICKNESS / 2, height - 0.02, 0]}>
+        <boxGeometry args={[WALL_THICKNESS, 0.04, length]} />
+        <meshStandardMaterial color={colors.edge} roughness={0.7} />
       </mesh>
     </group>
   )

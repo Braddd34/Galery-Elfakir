@@ -19,11 +19,11 @@ export default function GalleryLighting({
 
   useEffect(() => {
     if (theme === "white") {
-      scene.background = new THREE.Color("#f5f5f0")
-      scene.fog = new THREE.Fog(0xf5f5f0, 25, 50)
+      scene.background = new THREE.Color("#d4cfc6")
+      scene.fog = null
     } else {
-      scene.background = new THREE.Color("#0a0a0a")
-      scene.fog = new THREE.Fog(0x0a0a0a, 20, 40)
+      scene.background = new THREE.Color("#050505")
+      scene.fog = null
     }
     return () => {
       scene.background = null

@@ -5,8 +5,9 @@ import * as THREE from "three"
 const WALK_SPEED = 3
 const RUN_SPEED = 6
 const EYE_HEIGHT = 1.7
-const COLLISION_DISTANCE = 0.5
 const BOUNDS_MARGIN = 0.5
+const MOUSE_SENSITIVITY = 0.003
+const ARROW_ROTATE_SPEED = 2
 
 interface PlayerControllerProps {
   roomWidth: number
@@ -25,41 +26,76 @@ export default function PlayerController({
   const { camera, gl } = useThree()
   const keysRef = useRef<Record<string, boolean>>({})
   const isLockedRef = useRef(false)
-  const euler = useRef(new THREE.Euler(0, 0, 0, "YXZ"))
+  const isDraggingRef = useRef(false)
+  const hasEnteredRef = useRef(false)
+  const yawRef = useRef(0)
+  const pitchRef = useRef(0)
   const forward = useRef(new THREE.Vector3())
   const right = useRef(new THREE.Vector3())
   const movement = useRef(new THREE.Vector3())
 
   useEffect(() => {
     camera.position.set(0, EYE_HEIGHT, roomLength * 0.25)
+    yawRef.current = 0
+    pitchRef.current = 0
     camera.rotation.set(0, 0, 0)
   }, [camera, roomLength])
+
+  const updateCameraRotation = useCallback(() => {
+    pitchRef.current = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, pitchRef.current))
+    const euler = new THREE.Euler(pitchRef.current, yawRef.current, 0, "YXZ")
+    camera.quaternion.setFromEuler(euler)
+  }, [camera])
 
   const onPointerLockChange = useCallback(() => {
     const locked = document.pointerLockElement === gl.domElement
     isLockedRef.current = locked
-    onLockChange?.(locked)
+    if (locked) hasEnteredRef.current = true
+    onLockChange?.(locked && hasEnteredRef.current)
   }, [gl.domElement, onLockChange])
 
   const onMouseMove = useCallback((e: MouseEvent) => {
-    if (!isLockedRef.current) return
-    euler.current.setFromQuaternion(camera.quaternion)
-    euler.current.y -= e.movementX * 0.002
-    euler.current.x -= e.movementY * 0.002
-    euler.current.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.current.x))
-    camera.quaternion.setFromEuler(euler.current)
-  }, [camera])
-
-  const requestLock = useCallback(() => {
-    if (!isLockedRef.current) {
-      gl.domElement.requestPointerLock()
+    if (isLockedRef.current) {
+      yawRef.current -= e.movementX * MOUSE_SENSITIVITY
+      pitchRef.current -= e.movementY * MOUSE_SENSITIVITY
+      updateCameraRotation()
+    } else if (isDraggingRef.current && hasEnteredRef.current) {
+      yawRef.current -= e.movementX * MOUSE_SENSITIVITY
+      pitchRef.current -= e.movementY * MOUSE_SENSITIVITY
+      updateCameraRotation()
     }
-  }, [gl.domElement])
+  }, [updateCameraRotation])
+
+  const handleCanvasClick = useCallback(() => {
+    if (!hasEnteredRef.current) {
+      hasEnteredRef.current = true
+      onLockChange?.(true)
+    }
+    if (!isLockedRef.current) {
+      try {
+        gl.domElement.requestPointerLock()
+      } catch {
+        // Pointer lock not supported, use drag mode
+      }
+    }
+  }, [gl.domElement, onLockChange])
+
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    if (!isLockedRef.current && hasEnteredRef.current && e.button === 0) {
+      isDraggingRef.current = true
+    }
+  }, [])
+
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false
+  }, [])
 
   useEffect(() => {
     document.addEventListener("pointerlockchange", onPointerLockChange)
     document.addEventListener("mousemove", onMouseMove)
-    gl.domElement.addEventListener("click", requestLock)
+    document.addEventListener("mouseup", handleMouseUp)
+    gl.domElement.addEventListener("click", handleCanvasClick)
+    gl.domElement.addEventListener("mousedown", handleMouseDown)
 
     const handleKeyDown = (e: KeyboardEvent) => { keysRef.current[e.code] = true }
     const handleKeyUp = (e: KeyboardEvent) => { keysRef.current[e.code] = false }
@@ -69,18 +105,37 @@ export default function PlayerController({
     return () => {
       document.removeEventListener("pointerlockchange", onPointerLockChange)
       document.removeEventListener("mousemove", onMouseMove)
-      gl.domElement.removeEventListener("click", requestLock)
+      document.removeEventListener("mouseup", handleMouseUp)
+      gl.domElement.removeEventListener("click", handleCanvasClick)
+      gl.domElement.removeEventListener("mousedown", handleMouseDown)
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("keyup", handleKeyUp)
     }
-  }, [gl.domElement, onPointerLockChange, onMouseMove, requestLock])
+  }, [gl.domElement, onPointerLockChange, onMouseMove, handleCanvasClick, handleMouseDown, handleMouseUp])
 
   useFrame((_, delta) => {
-    if (!enabled || !isLockedRef.current) return
+    if (!enabled || !hasEnteredRef.current) return
 
     const keys = keysRef.current
     const isRunning = keys["ShiftLeft"] || keys["ShiftRight"]
     const speed = isRunning ? RUN_SPEED : WALK_SPEED
+
+    if (keys["ArrowLeft"]) {
+      yawRef.current += ARROW_ROTATE_SPEED * delta
+      updateCameraRotation()
+    }
+    if (keys["ArrowRight"]) {
+      yawRef.current -= ARROW_ROTATE_SPEED * delta
+      updateCameraRotation()
+    }
+    if (keys["ArrowUp"]) {
+      pitchRef.current += ARROW_ROTATE_SPEED * delta * 0.5
+      updateCameraRotation()
+    }
+    if (keys["ArrowDown"]) {
+      pitchRef.current -= ARROW_ROTATE_SPEED * delta * 0.5
+      updateCameraRotation()
+    }
 
     camera.getWorldDirection(forward.current)
     forward.current.y = 0
@@ -89,10 +144,10 @@ export default function PlayerController({
 
     movement.current.set(0, 0, 0)
 
-    if (keys["KeyW"] || keys["ArrowUp"]) movement.current.add(forward.current)
-    if (keys["KeyS"] || keys["ArrowDown"]) movement.current.sub(forward.current)
-    if (keys["KeyA"] || keys["ArrowLeft"]) movement.current.sub(right.current)
-    if (keys["KeyD"] || keys["ArrowRight"]) movement.current.add(right.current)
+    if (keys["KeyW"]) movement.current.add(forward.current)
+    if (keys["KeyS"]) movement.current.sub(forward.current)
+    if (keys["KeyA"]) movement.current.sub(right.current)
+    if (keys["KeyD"]) movement.current.add(right.current)
 
     if (movement.current.lengthSq() > 0) {
       movement.current.normalize()
