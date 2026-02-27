@@ -8,11 +8,12 @@ const MAX_DIMENSION_M = 2
 const CM_TO_M = 0.01
 
 const fallbackTexture = (() => {
-  const data = new Uint8Array(3)
+  const data = new Uint8Array(4)
   data[0] = 136
   data[1] = 136
   data[2] = 136
-  const tex = new THREE.DataTexture(data, 1, 1)
+  data[3] = 255
+  const tex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat)
   tex.needsUpdate = true
   return tex
 })()
@@ -45,17 +46,17 @@ function useArtworkTexture(imageUrl: string): THREE.Texture {
   const [texture, setTexture] = useState<THREE.Texture>(fallbackTexture)
 
   useEffect(() => {
-    if (!imageUrl || !imageUrl.startsWith("http")) {
+    if (!imageUrl || (imageUrl.length < 2)) {
       setTexture(fallbackTexture)
       return
     }
 
-    const encodedUrl = encodeImageUrl(imageUrl)
+    const finalUrl = imageUrl.startsWith("/") ? imageUrl : encodeImageUrl(imageUrl)
     const loader = new THREE.TextureLoader()
     loader.crossOrigin = "anonymous"
 
     loader.load(
-      encodedUrl,
+      finalUrl,
       (loadedTexture) => {
         setTexture(loadedTexture)
       },
