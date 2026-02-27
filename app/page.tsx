@@ -3,6 +3,7 @@ import Image from "next/image"
 import HomeHeader from "@/components/layout/HomeHeader"
 import prisma from "@/lib/prisma"
 import Recommendations from "@/components/artwork/Recommendations"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
 import { SOCIAL_LINKS } from "@/lib/constants"
@@ -36,18 +37,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://galeryelfakir.vercel.app",
   },
-}
-
-// Helper pour extraire l'URL de l'image depuis le JSON
-function getImageUrl(images: any, index: number = 0): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[index]?.url || fallback
-  } catch {
-    return fallback
-  }
 }
 
 // Récupérer les œuvres à la une depuis la DB
@@ -86,7 +75,7 @@ export default async function HomePage() {
   
   // Image de fond : première œuvre ou fallback
   const heroImage = featuredArtworks[0] 
-    ? getImageUrl(featuredArtworks[0].images) 
+    ? getArtworkImageUrl(featuredArtworks[0].images) 
     : "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1920&h=1080&fit=crop"
 
   const baseUrl = "https://galeryelfakir.vercel.app"
@@ -232,7 +221,7 @@ export default async function HomePage() {
                 <Link href={`/oeuvre/${featuredArtworks[0].slug}`} className="md:col-span-7 group">
                   <div className="relative img-zoom aspect-[4/5] md:aspect-[3/4] bg-neutral-900">
                     <Image
-                      src={getImageUrl(featuredArtworks[0].images)}
+                      src={getArtworkImageUrl(featuredArtworks[0].images)}
                       alt={featuredArtworks[0].title}
                       fill
                       className="object-cover"
@@ -258,7 +247,7 @@ export default async function HomePage() {
                   <Link key={artwork.id} href={`/oeuvre/${artwork.slug}`} className="group">
                     <div className="relative img-zoom aspect-[4/3] bg-neutral-900">
                       <Image
-                        src={getImageUrl(artwork.images)}
+                        src={getArtworkImageUrl(artwork.images)}
                         alt={artwork.title}
                         fill
                         className="object-cover"

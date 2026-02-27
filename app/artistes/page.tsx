@@ -3,6 +3,7 @@ import Image from "next/image"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
 
@@ -73,18 +74,6 @@ async function getArtists() {
   }
 }
 
-// Helper pour extraire l'URL d'une image d'œuvre
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
-  }
-}
-
 export default async function ArtistesPage() {
   const t = getServerTranslation()
   const artists = await getArtists()
@@ -129,7 +118,7 @@ export default async function ArtistesPage() {
                             className="relative aspect-square bg-neutral-900 overflow-hidden"
                           >
                             <Image
-                              src={getImageUrl(artwork.images)}
+                              src={getArtworkImageUrl(artwork.images)}
                               alt={artwork.title}
                               fill
                               className="object-cover transition-transform duration-500 group-hover:scale-105"

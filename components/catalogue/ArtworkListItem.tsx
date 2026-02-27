@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import FavoriteButton from "@/components/ui/FavoriteButton"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 interface ArtworkListItemProps {
   artwork: {
@@ -39,18 +40,6 @@ const categoryLabels: Record<string, string> = {
 }
 
 export default function ArtworkListItem({ artwork }: ArtworkListItemProps) {
-  // Parse les images
-  const getImageUrl = () => {
-    try {
-      const images = typeof artwork.images === 'string' 
-        ? JSON.parse(artwork.images) 
-        : artwork.images
-      return images?.[0]?.url || "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
-    } catch {
-      return "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
-    }
-  }
-  
   const formatDimensions = () => {
     let dims = `${artwork.width} × ${artwork.height}`
     if (artwork.depth) dims += ` × ${artwork.depth}`
@@ -62,7 +51,7 @@ export default function ArtworkListItem({ artwork }: ArtworkListItemProps) {
       {/* Image */}
       <Link href={`/oeuvre/${artwork.slug}`} className="relative w-40 h-40 flex-shrink-0">
         <Image
-          src={getImageUrl()}
+          src={getArtworkImageUrl(artwork.images)}
           alt={artwork.title}
           fill
           className="object-cover rounded"

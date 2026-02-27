@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/lib/toast-context"
 import { CompareButton } from "@/components/artwork/CompareDrawer"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 interface ArtworkCardProps {
   artwork: {
@@ -38,16 +39,7 @@ const categoryLabels: Record<string, string> = {
   OTHER: "Autre"
 }
 
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
-  }
-}
+const getImageUrl = getArtworkImageUrl
 
 // Placeholder blur générique (gris neutre)
 const blurDataURL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjYyNjI2Ii8+PC9zdmc+"

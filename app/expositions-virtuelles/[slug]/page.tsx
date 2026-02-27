@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import { useCart } from "@/lib/cart-context"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 import type { ExhibitionArtwork } from "@/components/virtual-exhibition/Gallery3D"
 
 const Gallery3D = dynamic(
@@ -181,11 +182,7 @@ export default function ExpositionVirtuelleViewerPage() {
 
   const mappedArtworks: ExhibitionArtwork[] = exhibition.artworks.map(
     (ea: (typeof exhibition.artworks)[0]) => {
-      const imgs =
-        typeof ea.artwork.images === "string"
-          ? JSON.parse(ea.artwork.images)
-          : (ea.artwork.images as { url?: string }[] | null)
-      const imageUrl = imgs?.[0]?.url || ""
+      const imageUrl = getArtworkImageUrl(ea.artwork.images)
 
       return {
         id: ea.artwork.id,

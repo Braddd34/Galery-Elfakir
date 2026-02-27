@@ -13,6 +13,7 @@ import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import ShareButtons from "@/components/artwork/ShareButtons"
 import ImageLightbox from "@/components/artwork/ImageLightbox"
 import Recommendations from "@/components/artwork/Recommendations"
+import { getArtworkImages } from "@/lib/image-utils"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
 
@@ -69,17 +70,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-// Helper pour extraire les images
-function getImages(images: any): { url: string }[] {
-  const fallback = [{ url: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200" }]
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed.length > 0 ? parsed : fallback
-  } catch {
-    return fallback
-  }
-}
+const getImages = getArtworkImages
 
 // Récupérer l'œuvre par slug
 async function getArtwork(slug: string) {

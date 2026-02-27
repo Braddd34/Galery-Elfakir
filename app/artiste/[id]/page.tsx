@@ -9,6 +9,7 @@ import ExhibitionsGallery from "@/components/artist/ExhibitionsGallery"
 import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import prisma from "@/lib/prisma"
 import { getServerTranslation } from "@/lib/i18n-server"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = getServerTranslation()
@@ -77,8 +78,13 @@ async function getArtist(id: string) {
         }
       }
     })
+    if (artist && !artist.user) {
+      console.error(`ArtistProfile ${id} has no associated user`)
+      return null
+    }
     return artist
   } catch (error) {
+    console.error(`Error fetching artist ${id}:`, error)
     return null
   }
 }
@@ -91,18 +97,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
     notFound()
   }
 
-  // Parse les images de l'artiste
-  const getImageUrl = (artwork: any) => {
-    if (artwork.images) {
-      try {
-        const images = typeof artwork.images === 'string' 
-          ? JSON.parse(artwork.images) 
-          : artwork.images
-        if (images[0]?.url) return images[0].url
-      } catch (e) {}
-    }
-    return "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
-  }
+  const getImageUrl = (artwork: { images: unknown }) => getArtworkImageUrl(artwork.images)
 
   const baseUrl = "https://galeryelfakir.vercel.app"
   const artistName = artist.user.name || "Artiste"
@@ -292,7 +287,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
                       <h3 className="text-lg font-light group-hover:text-neutral-300 transition-colors">
                         {artwork.title}
                       </h3>
-                      <p className="text-lg">€{artwork.price?.toLocaleString()}</p>
+                      <p className="text-lg">{Number(artwork.price || 0).toLocaleString("fr-FR")} €</p>
                     </div>
                   </Link>
                 ))}
