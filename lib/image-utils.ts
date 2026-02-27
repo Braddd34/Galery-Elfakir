@@ -1,12 +1,27 @@
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
 
+const S3_HOST = "elfakir-gallery.s3.eu-west-3.amazonaws.com"
+
+/**
+ * Transforme une URL S3 en URL locale via le rewrite /img/.
+ * Cela permet à l'optimiseur d'images Next.js de fonctionner
+ * sans dépendre de la connexion Vercel → S3.
+ */
+function toLocalUrl(url: string): string {
+  if (url.includes(S3_HOST)) {
+    const path = url.split(S3_HOST)[1]
+    return `/img${path}`
+  }
+  return url
+}
+
 /**
  * Retourne l'URL telle quelle, ou le fallback si vide.
- * Next.js Image gère l'encodage automatiquement.
+ * Transforme les URLs S3 en URLs locales.
  */
 export function safeImageUrl(url: string | null | undefined): string {
   if (!url || url.trim() === "") return FALLBACK_IMAGE
-  return url
+  return toLocalUrl(url)
 }
 
 /**

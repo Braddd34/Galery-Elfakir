@@ -43,6 +43,17 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
   
+  // Rewrite : les images S3 passent par notre domaine
+  // /img/artworks/fichier.jpg → S3 bucket
+  async rewrites() {
+    return [
+      {
+        source: "/img/:path*",
+        destination: `https://elfakir-gallery.s3.eu-west-3.amazonaws.com/:path*`,
+      },
+    ]
+  },
+
   // Cache headers + sécurité
   async headers() {
     return [
@@ -92,6 +103,16 @@ const nextConfig = {
             // - connect-src 'self' : requêtes API vers notre domaine
             key: "Content-Security-Policy",
             value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://images.unsplash.com https://*.public.blob.vercel-storage.com https://s3.eu-west-3.amazonaws.com https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://utfs.io https://*.utfs.io; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://s3.eu-west-3.amazonaws.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+          },
+        ],
+      },
+      {
+        // Cache long pour les images S3 passant par le rewrite /img/
+        source: "/img/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
