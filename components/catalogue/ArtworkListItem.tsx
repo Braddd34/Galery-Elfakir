@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import SafeImage from "@/components/ui/SafeImage"
+import Image from "next/image"
 import FavoriteButton from "@/components/ui/FavoriteButton"
 import { getArtworkImageUrl } from "@/lib/image-utils"
 
@@ -50,7 +50,7 @@ export default function ArtworkListItem({ artwork }: ArtworkListItemProps) {
     <div className="flex gap-6 p-4 bg-neutral-900/50 rounded-lg hover:bg-neutral-900 transition-colors group">
       {/* Image */}
       <Link href={`/oeuvre/${artwork.slug}`} className="relative w-40 h-40 flex-shrink-0">
-        <SafeImage
+        <Image
           src={getArtworkImageUrl(artwork.images)}
           alt={artwork.title}
           fill

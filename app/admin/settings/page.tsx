@@ -40,8 +40,6 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [fixingImages, setFixingImages] = useState(false)
-  const [fixResult, setFixResult] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === "loading") return
@@ -212,47 +210,6 @@ export default function AdminSettingsPage() {
               />
               <span className="text-neutral-400">Mo</span>
             </div>
-          </div>
-
-          {/* Maintenance images */}
-          <div className="bg-neutral-900 border border-neutral-800 p-6">
-            <h2 className="text-lg font-light mb-4">Maintenance des images</h2>
-            <p className="text-neutral-500 text-sm mb-4">
-              Corrige les noms de fichiers contenant des caractères spéciaux (°, accents, etc.)
-              qui empêchent le chargement des images.
-            </p>
-            <button
-              onClick={async () => {
-                setFixingImages(true)
-                setFixResult(null)
-                try {
-                  const res = await fetch("/api/admin/fix-images", { method: "POST" })
-                  const data = await res.json()
-                  if (res.ok) {
-                    setFixResult(
-                      data.fixes.length > 0
-                        ? `${data.fixes.length} image(s) corrigée(s) avec succès.`
-                        : "Aucune image à corriger."
-                    )
-                  } else {
-                    setFixResult(`Erreur : ${data.error}`)
-                  }
-                } catch {
-                  setFixResult("Erreur réseau")
-                } finally {
-                  setFixingImages(false)
-                }
-              }}
-              disabled={fixingImages}
-              className="px-6 py-3 bg-neutral-800 text-white text-sm hover:bg-neutral-700 transition-colors disabled:opacity-50 border border-neutral-700"
-            >
-              {fixingImages ? "Correction en cours..." : "Corriger les images"}
-            </button>
-            {fixResult && (
-              <p className={`mt-3 text-sm ${fixResult.startsWith("Erreur") ? "text-red-400" : "text-green-400"}`}>
-                {fixResult}
-              </p>
-            )}
           </div>
 
           {/* Bouton sauvegarder */}

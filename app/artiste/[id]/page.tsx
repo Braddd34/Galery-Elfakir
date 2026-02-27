@@ -1,6 +1,5 @@
 import Link from "next/link"
 import Image from "next/image"
-import SafeImage from "@/components/ui/SafeImage"
 import { notFound } from "next/navigation"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
@@ -273,7 +272,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
                     className="group"
                   >
                     <div className="relative aspect-[3/4] bg-neutral-900 overflow-hidden mb-4">
-                      <SafeImage
+                      <Image
                         src={getImageUrl(artwork)}
                         alt={artwork.title}
                         fill

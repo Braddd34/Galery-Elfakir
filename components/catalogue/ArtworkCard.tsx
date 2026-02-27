@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import SafeImage from "@/components/ui/SafeImage"
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -151,7 +151,7 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
       <Link href={`/oeuvre/${artwork.slug}`}>
         {/* Image */}
         <div className="relative aspect-[3/4] bg-neutral-900 mb-4 overflow-hidden rounded-sm">
-          <SafeImage
+          <Image
             src={getImageUrl(artwork.images)}
             alt={artwork.title}
             fill

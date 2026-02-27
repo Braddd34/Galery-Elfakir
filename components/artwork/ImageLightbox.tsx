@@ -2,14 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 
-function safeSrc(url: string): string {
-  try {
-    return encodeURI(decodeURI(url))
-  } catch {
-    try { return encodeURI(url) } catch { return url }
-  }
-}
-
 interface ImageLightboxProps {
   images: { url: string }[]
   alt: string
@@ -141,7 +133,7 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
           onClick={() => openLightbox(0)}
         >
           <img
-            src={safeSrc(images[activeIndex]?.url || images[0]?.url)}
+            src={images[activeIndex]?.url || images[0]?.url}
             alt={alt}
             className="w-full h-full object-cover"
           />
@@ -168,7 +160,7 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
                   setActiveIndex(i)
                 }}
               >
-                <img src={safeSrc(img.url)} alt={`${alt} — vue ${i + 1}`} className="w-full h-full object-cover" />
+                <img src={img.url} alt={`${alt} — vue ${i + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
@@ -253,7 +245,7 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
             onMouseLeave={handleMouseUp}
           >
             <img
-              src={safeSrc(images[activeIndex]?.url)}
+              src={images[activeIndex]?.url}
               alt={alt}
               className="max-w-[90vw] max-h-[85vh] object-contain select-none"
               style={{
@@ -290,7 +282,7 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
                       i === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-40 hover:opacity-80"
                     }`}
                   >
-                    <img src={safeSrc(img.url)} alt={`Miniature ${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={img.url} alt={`Miniature ${i + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
