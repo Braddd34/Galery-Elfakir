@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
+import { safeImageUrl } from "@/lib/image-utils"
 
 export const dynamic = "force-dynamic"
 
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
         let imageUrl = null
         try {
           const images = typeof a.images === "string" ? JSON.parse(a.images) : a.images
-          imageUrl = images?.[0]?.url || null
+          imageUrl = images?.[0]?.url ? safeImageUrl(images[0].url) : null
         } catch {}
 
         return {

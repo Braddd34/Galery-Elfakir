@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { safeImageUrl } from "@/lib/image-utils"
 
 /**
  * API de recommandations personnalisées "Vous aimerez aussi".
@@ -168,7 +169,7 @@ export async function GET(req: NextRequest) {
       let imageUrl = ""
       try {
         const images = typeof artwork.images === "string" ? JSON.parse(artwork.images) : artwork.images
-        if (images?.[0]?.url) imageUrl = images[0].url
+        if (images?.[0]?.url) imageUrl = safeImageUrl(images[0].url)
       } catch {}
 
       return {

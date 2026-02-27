@@ -1,16 +1,9 @@
 import prisma from "@/lib/prisma"
 import Link from "next/link"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 function getImageUrl(images: unknown): string {
-  const fallback =
-    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=100"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === "string" ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
-  }
+  return getArtworkImageUrl(images)
 }
 
 async function getAbandonStats() {
