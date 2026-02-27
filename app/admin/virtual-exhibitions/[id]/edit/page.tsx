@@ -209,26 +209,26 @@ export default function EditVirtualExhibitionPage() {
         throw new Error(data.error || "Erreur mise à jour")
       }
 
-      for (const aid of Array.from(existingArtworkIds)) {
-        await fetch(`/api/virtual-exhibitions/${id}/artworks`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ artworkId: aid }),
-        })
-      }
-
-      for (const p of placedArtworks) {
-        const artRes = await fetch(`/api/virtual-exhibitions/${id}/artworks`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const batchRes = await fetch(`/api/virtual-exhibitions/${id}/artworks`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          placements: placedArtworks.map((p, i) => ({
             artworkId: p.artworkId,
             wall: p.wall,
             positionX: p.positionX,
             positionY: p.positionY,
-          }),
-        })
-        if (!artRes.ok) throw new Error("Erreur ajout œuvre")
+            displayOrder: i,
+          })),
+        }),
+      })
+      if (!batchRes.ok) {
+        const data = await batchRes.json().catch(() => ({}))
+        throw new Error(data.error || `Erreur sauvegarde des ${placedArtworks.length} œuvres`)
+      }
+      const batchData = await batchRes.json()
+      if (batchData.count !== placedArtworks.length) {
+        throw new Error(`Seulement ${batchData.count}/${placedArtworks.length} œuvres sauvegardées`)
       }
 
       router.push("/admin/virtual-exhibitions")
@@ -511,7 +511,27 @@ export default function EditVirtualExhibitionPage() {
             <p className="text-neutral-500 text-sm">
               Thème : {theme === "white" ? "Galerie blanche" : "Galerie sombre"}
             </p>
-            <p className="text-neutral-500 text-sm">{placedArtworks.length} œuvre(s) placée(s)</p>
+            <div className="border-t border-neutral-800 pt-4 mt-4">
+              <p className="text-white text-sm font-medium mb-3">
+                {placedArtworks.length} œuvre(s) placée(s) :
+              </p>
+              <div className="space-y-2">
+                {placedArtworks.map((p) => (
+                  <div key={p.artworkId} className="flex items-center gap-3 text-sm">
+                    <div className="w-8 h-8 bg-neutral-800 flex-shrink-0 overflow-hidden">
+                      <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-white truncate flex-1">{p.artwork.title}</span>
+                    <span className="text-amber-500 font-mono text-xs uppercase">
+                      {p.wall === "north" ? "Nord" : p.wall === "south" ? "Sud" : p.wall === "east" ? "Est" : "Ouest"}
+                    </span>
+                    <span className="text-neutral-600 text-xs">
+                      x:{p.positionX.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <button
             type="button"

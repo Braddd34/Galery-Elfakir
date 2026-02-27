@@ -68,6 +68,101 @@ export async function GET(
   }
 }
 
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: "Non connecté" }, { status: 401 })
+    }
+
+    const { id } = params
+    const exhibition = await prisma.virtualExhibition.findUnique({
+      where: { id }
+    })
+
+    if (!exhibition) {
+      return NextResponse.json({ error: "Exposition non trouvée" }, { status: 404 })
+    }
+
+    const isCreator = session.user.id === exhibition.createdById
+    const isAdmin = session.user.role === "ADMIN"
+    if (!isCreator && !isAdmin) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
+    }
+
+    const body = await request.json()
+    const { placements } = body as {
+      placements: Array<{
+        artworkId: string
+        wall: string
+        positionX: number
+        positionY: number
+        scale?: number
+        displayOrder?: number
+      }>
+    }
+
+    if (!Array.isArray(placements) || placements.length === 0) {
+      return NextResponse.json(
+        { error: "placements doit être un tableau non vide" },
+        { status: 400 }
+      )
+    }
+
+    const validWalls = ["north", "south", "east", "west"]
+    for (const p of placements) {
+      if (!p.artworkId || !p.wall || p.positionX === undefined || p.positionY === undefined) {
+        return NextResponse.json(
+          { error: `Placement invalide pour ${p.artworkId}: artworkId, wall, positionX et positionY requis` },
+          { status: 400 }
+        )
+      }
+      if (!validWalls.includes(p.wall)) {
+        return NextResponse.json(
+          { error: `Mur invalide: ${p.wall}` },
+          { status: 400 }
+        )
+      }
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.virtualExhibitionArtwork.deleteMany({
+        where: { exhibitionId: id }
+      })
+
+      const created = await Promise.all(
+        placements.map((p, index) =>
+          tx.virtualExhibitionArtwork.create({
+            data: {
+              exhibitionId: id,
+              artworkId: p.artworkId,
+              wall: p.wall,
+              positionX: parseFloat(String(p.positionX)),
+              positionY: parseFloat(String(p.positionY)),
+              scale: p.scale ? parseFloat(String(p.scale)) : 1.0,
+              displayOrder: p.displayOrder ?? index,
+            },
+          })
+        )
+      )
+
+      return created
+    })
+
+    return NextResponse.json({
+      success: true,
+      count: result.length,
+      placements: result,
+    })
+  } catch (error) {
+    console.error("Erreur PUT artworks (batch):", error)
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -142,8 +237,18 @@ export async function POST(
       )
     }
 
-    const created = await prisma.virtualExhibitionArtwork.create({
-      data: {
+    const created = await prisma.virtualExhibitionArtwork.upsert({
+      where: {
+        exhibitionId_artworkId: { exhibitionId: id, artworkId }
+      },
+      update: {
+        wall,
+        positionX: px,
+        positionY: py,
+        scale: typeof scale === "number" ? scale : parseFloat(scale) || 1.0,
+        displayOrder: displayOrder ?? 0
+      },
+      create: {
         exhibitionId: id,
         artworkId,
         wall,

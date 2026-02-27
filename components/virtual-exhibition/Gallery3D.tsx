@@ -172,7 +172,19 @@ export default function Gallery3D({
           pointerEvents: "auto",
         }}
       >
-        <h1 className="text-white text-lg font-semibold truncate flex-1 mr-4">{title}</h1>
+        <div className="flex-1 mr-4">
+          <h1 className="text-white text-lg font-semibold truncate">{title}</h1>
+          <p className="text-white/50 text-xs">
+            {artworks.length} œuvre{artworks.length > 1 ? "s" : ""} —{" "}
+            {["north", "south", "east", "west"]
+              .map((w) => {
+                const count = artworks.filter((a) => a.wall === w).length
+                return count > 0 ? `${w === "north" ? "N" : w === "south" ? "S" : w === "east" ? "E" : "O"}:${count}` : null
+              })
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        </div>
         <button
           type="button"
           onClick={onExit}
