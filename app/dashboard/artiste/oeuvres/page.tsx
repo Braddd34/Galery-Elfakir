@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import { ArtworkStatus, ArtworkCategory } from "@prisma/client"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 const statusLabels: Record<ArtworkStatus, { label: string; color: string }> = {
   DRAFT: { label: "Brouillon", color: "bg-neutral-500" },
@@ -23,17 +24,6 @@ const categoryLabels: Record<ArtworkCategory, string> = {
   DIGITAL: "Art numérique",
   MIXED_MEDIA: "Technique mixte",
   OTHER: "Autre"
-}
-
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
-  }
 }
 
 async function getArtistArtworks(userId: string) {
@@ -96,7 +86,7 @@ export default async function ArtistOeuvresPage() {
                 className="bg-neutral-900 border border-neutral-800 p-6 flex gap-6 items-center"
               >
                 <img
-                  src={getImageUrl(artwork.images)}
+                  src={getArtworkImageUrl(artwork.images)}
                   alt={artwork.title}
                   className="w-24 h-24 object-cover bg-neutral-800"
                 />

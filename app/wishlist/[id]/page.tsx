@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
 import { Metadata } from "next"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 // Metadata dynamique
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -17,17 +18,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     description: user 
       ? `Découvrez la sélection d'œuvres d'art de ${user.name} sur ELFAKIR Gallery.`
       : "Wishlist d'œuvres d'art",
-  }
-}
-
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === "string" ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
   }
 }
 
@@ -122,7 +112,7 @@ export default async function WishlistPage({ params }: { params: { id: string } 
                   >
                     <div className="relative aspect-[3/4] bg-neutral-900 overflow-hidden mb-3">
                       <Image
-                        src={getImageUrl(artwork.images)}
+                        src={getArtworkImageUrl(artwork.images)}
                         alt={artwork.title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"

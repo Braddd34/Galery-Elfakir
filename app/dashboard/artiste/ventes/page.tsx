@@ -4,17 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import ArtistStatsChart from "@/components/dashboard/ArtistStatsChart"
-
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
-  }
-}
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 async function getArtistSales(userId: string) {
   const artistProfile = await prisma.artistProfile.findUnique({
@@ -87,7 +77,7 @@ export default async function ArtistVentesPage() {
                 className="bg-neutral-900 border border-neutral-800 p-6 flex gap-6 items-center"
               >
                 <img
-                  src={getImageUrl(artwork.images)}
+                  src={getArtworkImageUrl(artwork.images)}
                   alt={artwork.title}
                   className="w-20 h-20 object-cover bg-neutral-800"
                 />

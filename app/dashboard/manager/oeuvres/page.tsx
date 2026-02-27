@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 interface Artist {
   id: string
@@ -60,17 +61,6 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const EDIT_STATUS_OPTIONS = ["DRAFT", "PENDING", "AVAILABLE", "ARCHIVED"]
-
-function getImageUrl(images: string | null): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === "string" ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
-  }
-}
 
 export default function ManagerOeuvresPage() {
   const [artworks, setArtworks] = useState<Artwork[]>([])
@@ -330,7 +320,7 @@ export default function ManagerOeuvresPage() {
                       {/* Desktop */}
                       <div className="hidden lg:grid grid-cols-[50px_2fr_1fr_1fr_1fr_1fr_80px_100px_40px] gap-4 items-center">
                         <img
-                          src={getImageUrl(artwork.images)}
+                          src={getArtworkImageUrl(artwork.images)}
                           alt={artwork.title}
                           className="w-[50px] h-[50px] object-cover rounded bg-neutral-800"
                         />
@@ -353,7 +343,7 @@ export default function ManagerOeuvresPage() {
                       {/* Mobile */}
                       <div className="lg:hidden flex gap-4 items-center">
                         <img
-                          src={getImageUrl(artwork.images)}
+                          src={getArtworkImageUrl(artwork.images)}
                           alt={artwork.title}
                           className="w-[50px] h-[50px] object-cover rounded bg-neutral-800"
                         />

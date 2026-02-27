@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Check } from "lucide-react"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 interface Artwork {
   id: string
@@ -22,14 +23,7 @@ interface PlacedArtwork {
 }
 
 function getImageUrl(images: unknown): string {
-  if (!images) return ""
-  try {
-    const parsed =
-      typeof images === "string" ? JSON.parse(images) : (images as { url?: string }[])
-    return Array.isArray(parsed) ? parsed[0]?.url || "" : ""
-  } catch {
-    return ""
-  }
+  return getArtworkImageUrl(images)
 }
 
 const WALLS = ["north", "south", "east", "west"] as const

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/lib/toast-context"
 import { useLanguage } from "@/components/providers/LanguageProvider"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 interface FavoriteArtwork {
   id: string
@@ -21,17 +22,6 @@ interface FavoriteArtwork {
         name: string | null
       }
     }
-  }
-}
-
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
   }
 }
 
@@ -185,7 +175,7 @@ export default function MesFavorisPage() {
                 <Link href={`/oeuvre/${fav.artwork.slug}`}>
                   <div className="aspect-[3/4] bg-neutral-900 mb-4 overflow-hidden">
                     <img
-                      src={getImageUrl(fav.artwork.images)}
+                      src={getArtworkImageUrl(fav.artwork.images)}
                       alt={fav.artwork.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />

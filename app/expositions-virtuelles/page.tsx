@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer"
 import prisma from "@/lib/prisma"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
+import { safeImageUrl } from "@/lib/image-utils"
 
 export const metadata: Metadata = {
   title: "Expositions Virtuelles | Galerie ELFAKIR",
@@ -29,17 +30,6 @@ export const metadata: Metadata = {
     description:
       "Parcourez nos expositions virtuelles 3D et découvrez des œuvres d'art dans un espace immersif.",
   },
-}
-
-function getImageUrl(images: unknown, index = 0): string {
-  if (!images) return ""
-  try {
-    const parsed =
-      typeof images === "string" ? JSON.parse(images) : (images as { url?: string }[])
-    return parsed[index]?.url || ""
-  } catch {
-    return ""
-  }
 }
 
 export default async function ExpositionsVirtuellesPage() {
@@ -97,7 +87,7 @@ export default async function ExpositionsVirtuellesPage() {
           <section className="max-w-7xl mx-auto px-6 md:px-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {exhibitions.map((exhibition) => {
-                const coverUrl = exhibition.coverImage || ""
+                const coverUrl = exhibition.coverImage ? safeImageUrl(exhibition.coverImage) : ""
                 const count = exhibition._count.artworks
                 const artworksLabel = t("virtualExhibitions.artworks")
                   .replace("{count}", String(count))

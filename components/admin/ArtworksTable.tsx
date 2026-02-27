@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import StatusDropdown from "./StatusDropdown"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 interface Artwork {
   id: string
@@ -31,15 +32,6 @@ const categoryLabels: Record<string, string> = {
   DIGITAL: "Art numérique",
   MIXED_MEDIA: "Technique mixte",
   OTHER: "Autre"
-}
-
-function getImageUrl(images: any): string {
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed?.[0]?.url || ""
-  } catch {
-    return ""
-  }
 }
 
 export default function ArtworksTable({ artworks }: ArtworksTableProps) {
@@ -83,7 +75,7 @@ export default function ArtworksTable({ artworks }: ArtworksTableProps) {
         </thead>
         <tbody className="divide-y divide-neutral-800">
           {artworks.map((artwork) => {
-            const imageUrl = getImageUrl(artwork.images)
+            const imageUrl = getArtworkImageUrl(artwork.images)
 
             return (
               <tr key={artwork.id} className="hover:bg-neutral-900/50 transition-colors">

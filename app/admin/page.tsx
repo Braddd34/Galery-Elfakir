@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma"
 import Link from "next/link"
 import { getServerTranslation } from "@/lib/i18n-server"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 async function getCartAbandonStats() {
   const now = new Date()
@@ -139,17 +140,6 @@ async function getStats() {
     monthlyRevenue: Number(monthlyRevenue._sum.total) || 0,
     lastMonthRevenue: Number(lastMonthRevenue._sum.total) || 0,
     catalogValue: Number(catalogValue._sum.price) || 0
-  }
-}
-
-function getImageUrl(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=100"
-  if (!images) return fallback
-  try {
-    const parsed = typeof images === 'string' ? JSON.parse(images) : images
-    return parsed[0]?.url || fallback
-  } catch {
-    return fallback
   }
 }
 
@@ -299,7 +289,7 @@ export default async function AdminDashboard() {
                   className="flex items-center gap-4 p-2 -mx-2 rounded hover:bg-neutral-800/50 transition-colors"
                 >
                   <img 
-                    src={getImageUrl(artwork.images)} 
+                    src={getArtworkImageUrl(artwork.images)} 
                     alt={artwork.title}
                     className="w-12 h-12 object-cover bg-neutral-800"
                   />
