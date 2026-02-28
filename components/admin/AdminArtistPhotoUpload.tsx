@@ -95,8 +95,14 @@ export default function AdminArtistPhotoUpload({
     }
   }
 
+  // N’utiliser que les URLs absolues (https) ; sinon placeholder pour éviter 503/404
+  const isValidImageUrl =
+    currentImage &&
+    (currentImage.startsWith("http://") || currentImage.startsWith("https://"))
   const displayImage =
-    currentImage && !imageLoadError ? currentImage : "/avatar-placeholder.svg"
+    isValidImageUrl && !imageLoadError
+      ? currentImage
+      : "/avatar-placeholder.svg"
 
   return (
     <div className="flex flex-col items-start gap-2">
