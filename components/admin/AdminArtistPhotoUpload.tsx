@@ -95,13 +95,16 @@ export default function AdminArtistPhotoUpload({
     }
   }
 
-  // N’utiliser que les URLs absolues (https) ; sinon placeholder pour éviter 503/404
+  // URLs absolues uniquement ; les URLs S3 passent par le proxy (bucket souvent privé)
   const isValidImageUrl =
     currentImage &&
     (currentImage.startsWith("http://") || currentImage.startsWith("https://"))
+  const isS3Url = isValidImageUrl && currentImage!.includes("amazonaws.com")
   const displayImage =
     isValidImageUrl && !imageLoadError
-      ? currentImage
+      ? isS3Url
+        ? `/api/image-proxy?url=${encodeURIComponent(currentImage!)}`
+        : currentImage!
       : "/avatar-placeholder.svg"
 
   return (

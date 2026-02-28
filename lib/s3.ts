@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 // Client S3
@@ -49,4 +49,26 @@ export function getKeyFromUrl(url: string): string | null {
   } catch {
     return null
   }
+}
+
+// Vérifier si une URL pointe vers notre bucket S3
+export function isOurS3Url(url: string): boolean {
+  if (!url || !url.startsWith("http")) return false
+  try {
+    const u = new URL(url)
+    const bucket = process.env.AWS_BUCKET_NAME
+    const region = process.env.AWS_REGION
+    return !!bucket && !!region && u.hostname === `${bucket}.s3.${region}.amazonaws.com`
+  } catch {
+    return false
+  }
+}
+
+// Récupérer un objet S3 en stream (pour proxy d’images)
+export async function getObjectStream(key: string) {
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+  })
+  return s3Client.send(command)
 }
