@@ -10,6 +10,7 @@ import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import prisma from "@/lib/prisma"
 import { getServerTranslation } from "@/lib/i18n-server"
 import { getArtworkImageUrl } from "@/lib/image-utils"
+import { DEFAULT_AVATAR } from "@/lib/constants"
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = getServerTranslation()
@@ -187,7 +188,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
               <div className="lg:col-span-1">
                 <div className="relative aspect-square bg-neutral-900 overflow-hidden">
                   <Image
-                    src={artist.user.image || ""}
+                    src={artist.user.image || DEFAULT_AVATAR}
                     alt={artist.user.name || "Artiste"}
                     fill
                     className="object-cover"

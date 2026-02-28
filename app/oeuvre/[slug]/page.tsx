@@ -14,6 +14,7 @@ import ShareButtons from "@/components/artwork/ShareButtons"
 import ImageLightbox from "@/components/artwork/ImageLightbox"
 import Recommendations from "@/components/artwork/Recommendations"
 import { getArtworkImages } from "@/lib/image-utils"
+import { DEFAULT_AVATAR } from "@/lib/constants"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
 
@@ -311,7 +312,7 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                   className="flex items-center gap-5 py-6 border-y border-neutral-800 group"
                 >
                   <Image 
-                    src={artwork.artist.user.image || ""} 
+                    src={artwork.artist.user.image || DEFAULT_AVATAR} 
                     alt={artwork.artist.user.name || "Artiste"}
                     width={64}
                     height={64}

@@ -39,4 +39,4 @@ export const CURRENCY_SYMBOL = "€"
 
 // Images par défaut (SVG inline pour ne dépendre d'aucun service externe)
 export const DEFAULT_ARTWORK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' fill='%23222'%3E%3Crect width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-family='system-ui' font-size='14'%3EAucune image%3C/text%3E%3C/svg%3E"
-export const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%23222'%3E%3Crect width='200' height='200' rx='100'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='%23888' font-family='system-ui' font-size='60'%3E%3F%3C/text%3E%3C/svg%3E"
+export const DEFAULT_AVATAR = "/avatar-placeholder.svg"
