@@ -1,3 +1,5 @@
+import { DEFAULT_AVATAR } from "@/lib/constants"
+
 const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' fill='%23222'%3E%3Crect width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-family='system-ui' font-size='14'%3EAucune image%3C/text%3E%3C/svg%3E"
 
 const S3_HOST = "elfakir-gallery.s3.eu-west-3.amazonaws.com"
@@ -9,8 +11,19 @@ const S3_HOST = "elfakir-gallery.s3.eu-west-3.amazonaws.com"
  */
 function toLocalUrl(url: string): string {
   if (url.includes(S3_HOST)) {
-    const path = url.split(S3_HOST)[1]
-    return `/img${path}`
+    const path = url.split(S3_HOST)[1]?.split("?")[0] || ""
+    // Encoder le chemin pour les caractères spéciaux (°, accents, etc.) évite 503/404 S3
+    const encodedPath = path
+      .split("/")
+      .map((seg) => {
+        try {
+          return encodeURIComponent(decodeURIComponent(seg))
+        } catch {
+          return encodeURIComponent(seg)
+        }
+      })
+      .join("/")
+    return `/img${encodedPath}`
   }
   return url
 }
@@ -38,6 +51,14 @@ export function encodeImageUrl(url: string): string {
       return url
     }
   }
+}
+
+/**
+ * URL d'avatar (photo de profil) : passe par le proxy /img si S3, sinon placeholder.
+ */
+export function getAvatarUrl(url: string | null | undefined): string {
+  if (!url || url.trim() === "") return DEFAULT_AVATAR
+  return toLocalUrl(url)
 }
 
 /**
