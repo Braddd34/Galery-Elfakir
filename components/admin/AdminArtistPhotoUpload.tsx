@@ -92,35 +92,37 @@ export default function AdminArtistPhotoUpload({
   const displayImage = currentImage || "/avatar-placeholder.svg"
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative">
+    <div className="flex flex-col items-start gap-2">
+      <div className="flex items-center gap-3">
         <img
           src={displayImage}
           alt={artistName || "Artiste"}
-          className="w-16 h-16 object-cover bg-neutral-800"
+          className="w-16 h-16 object-cover bg-neutral-800 flex-shrink-0"
         />
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileSelect}
-          disabled={uploading}
-        />
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 hover:opacity-100 transition-opacity text-xs text-white"
-        >
-          {uploading ? "..." : "Changer"}
-        </button>
+        <div className="flex flex-col gap-1">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+            disabled={uploading}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="text-xs text-neutral-400 hover:text-white border border-neutral-600 hover:border-neutral-500 px-3 py-1.5 transition-colors disabled:opacity-50"
+          >
+            {uploading ? "Envoi..." : "Changer la photo"}
+          </button>
+          {error && (
+            <p className="text-red-400 text-xs max-w-[200px]" role="alert">
+              {error}
+            </p>
+          )}
+        </div>
       </div>
-      {error && (
-        <p className="text-red-400 text-xs max-w-[180px]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   )
 }
