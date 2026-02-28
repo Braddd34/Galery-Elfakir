@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import { Readable } from "stream"
 import { getKeyFromUrl, isOurS3Url, getObjectStream } from "@/lib/s3"
 
 /**
@@ -34,9 +33,18 @@ export async function GET(request: NextRequest) {
     headers.set("Content-Type", contentType)
     headers.set("Cache-Control", "public, max-age=86400")
 
-    // Convertir le stream Node (S3) en Web ReadableStream pour Response
-    const webStream = Readable.toWeb(result.Body as Readable)
-    return new Response(webStream, {
+    // Lire le stream en buffer (évite conflits de types ReadableStream Node vs Web)
+    const chunks: Uint8Array[] = []
+    for await (const chunk of result.Body as AsyncIterable<Uint8Array>) {
+      chunks.push(chunk)
+    }
+    const bytes = new Uint8Array(chunks.reduce((acc, c) => acc + c.length, 0))
+    let offset = 0
+    for (const c of chunks) {
+      bytes.set(c, offset)
+      offset += c.length
+    }
+    return new Response(bytes, {
       status: 200,
       headers,
     })
