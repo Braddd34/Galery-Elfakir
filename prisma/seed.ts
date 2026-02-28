@@ -169,6 +169,16 @@ async function main() {
 
   console.log("✅ Paramètres créés")
 
+  // Attribuer l'avatar par défaut à tous les artistes sans photo
+  const defaultAvatarUrl = "https://galeryelfakir.vercel.app/avatar-placeholder.svg"
+  const avatarResult = await prisma.user.updateMany({
+    where: { role: "ARTIST", image: null },
+    data: { image: defaultAvatarUrl },
+  })
+  if (avatarResult.count > 0) {
+    console.log(`✅ ${avatarResult.count} artiste(s) sans photo → avatar par défaut assigné`)
+  }
+
   console.log("")
   console.log("🎉 Seeding terminé !")
   console.log("")
