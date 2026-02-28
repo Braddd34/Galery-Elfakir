@@ -13,19 +13,30 @@ interface ArtistProfile {
   website: string
   instagram: string
   phone: string
+  twitter: string
+  facebook: string
+  linkedin: string
+  siret: string
+  vatNumber: string
 }
 
 export default function ArtistProfilPage() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
   
+  const [profileId, setProfileId] = useState<string | null>(null)
   const [profile, setProfile] = useState<ArtistProfile>({
     bio: "",
     country: "",
     city: "",
     website: "",
     instagram: "",
-    phone: ""
+    phone: "",
+    twitter: "",
+    facebook: "",
+    linkedin: "",
+    siret: "",
+    vatNumber: ""
   })
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -46,13 +57,19 @@ export default function ArtistProfilPage() {
       .then(res => res.json())
       .then(data => {
         if (data) {
+          if (data.id) setProfileId(data.id)
           setProfile({
             bio: data.bio || "",
             country: data.country || "",
             city: data.city || "",
             website: data.website || "",
             instagram: data.instagram || "",
-            phone: data.phone || ""
+            phone: data.phone || "",
+            twitter: data.twitter || "",
+            facebook: data.facebook || "",
+            linkedin: data.linkedin || "",
+            siret: data.siret || "",
+            vatNumber: data.vatNumber || ""
           })
         }
         setLoading(false)
@@ -80,7 +97,8 @@ export default function ArtistProfilPage() {
       if (res.ok) {
         setMessage("Profil mis à jour avec succès")
       } else {
-        setMessage("Erreur lors de la mise à jour")
+        const data = await res.json().catch(() => ({}))
+        setMessage(data.error || "Erreur lors de la mise à jour")
       }
     } catch {
       setMessage("Erreur lors de la mise à jour")
@@ -113,18 +131,18 @@ export default function ArtistProfilPage() {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-light mb-8">Mon profil artiste</h1>
-
-        {/* Photo de profil (affichée sur la page publique de l'artiste) */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 mb-10 pb-10 border-b border-neutral-800">
-          <ProfilePhotoUpload
-            currentImage={profileImage}
-            userName={session?.user?.name}
-            onPhotoChange={handlePhotoChange}
-          />
-          <div className="text-center sm:text-left">
-            <p className="text-neutral-500 text-sm">Cette photo apparaît sur votre page artiste publique.</p>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h1 className="text-3xl font-light">Mon profil artiste</h1>
+          {profileId && (
+            <Link
+              href={`/artiste/${profileId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-neutral-400 hover:text-white border border-neutral-700 hover:border-white px-4 py-2 transition-colors"
+            >
+              Voir ma page publique →
+            </Link>
+          )}
         </div>
 
         {message && (
@@ -133,85 +151,162 @@ export default function ArtistProfilPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-              Biographie
-            </label>
-            <textarea
-              value={profile.bio}
-              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-              rows={5}
-              className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors resize-none"
-              placeholder="Parlez de vous, de votre démarche artistique..."
-            />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Pays
-              </label>
-              <input
-                type="text"
-                value={profile.country}
-                onChange={(e) => setProfile({ ...profile, country: e.target.value })}
-                className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-                placeholder="France"
+        <form onSubmit={handleSubmit} className="space-y-10">
+          {/* Section Présentation */}
+          <section className="space-y-6">
+            <h2 className="text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800 pb-2">
+              Présentation
+            </h2>
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <ProfilePhotoUpload
+                currentImage={profileImage}
+                userName={session?.user?.name}
+                onPhotoChange={handlePhotoChange}
               />
+              <div className="text-center sm:text-left">
+                <p className="text-neutral-500 text-sm">Cette photo apparaît sur votre page artiste publique.</p>
+              </div>
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Ville
+                Biographie <span className="font-normal text-neutral-600">(min. 50 caractères)</span>
               </label>
+              <textarea
+                value={profile.bio}
+                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                rows={5}
+                maxLength={2000}
+                className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors resize-none"
+                placeholder="Parlez de vous, de votre démarche artistique..."
+              />
+              <p className="text-right text-neutral-600 text-xs mt-1">
+                {profile.bio.length} / 2000
+              </p>
+            </div>
+          </section>
+
+          {/* Section Contact et réseaux */}
+          <section className="space-y-6">
+            <h2 className="text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800 pb-2">
+              Contact et réseaux
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Pays</label>
+                <input
+                  type="text"
+                  value={profile.country}
+                  onChange={(e) => setProfile({ ...profile, country: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="France"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Ville</label>
+                <input
+                  type="text"
+                  value={profile.city}
+                  onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="Paris"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Site web</label>
               <input
-                type="text"
-                value={profile.city}
-                onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+                type="url"
+                value={profile.website}
+                onChange={(e) => setProfile({ ...profile, website: e.target.value })}
                 className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-                placeholder="Paris"
+                placeholder="https://votresite.com"
               />
             </div>
-          </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Instagram</label>
+                <input
+                  type="text"
+                  value={profile.instagram}
+                  onChange={(e) => setProfile({ ...profile, instagram: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="@votrecompte"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Twitter / X</label>
+                <input
+                  type="text"
+                  value={profile.twitter}
+                  onChange={(e) => setProfile({ ...profile, twitter: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="@votrecompte"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Facebook</label>
+                <input
+                  type="text"
+                  value={profile.facebook}
+                  onChange={(e) => setProfile({ ...profile, facebook: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="URL ou nom de page"
+                />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">LinkedIn</label>
+                <input
+                  type="text"
+                  value={profile.linkedin}
+                  onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="URL ou identifiant"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Téléphone</label>
+                <input
+                  type="tel"
+                  value={profile.phone}
+                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="+33 6 12 34 56 78"
+                />
+              </div>
+            </div>
+          </section>
 
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-              Site web
-            </label>
-            <input
-              type="url"
-              value={profile.website}
-              onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-              className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-              placeholder="https://votresite.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-              Instagram
-            </label>
-            <input
-              type="text"
-              value={profile.instagram}
-              onChange={(e) => setProfile({ ...profile, instagram: e.target.value })}
-              className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-              placeholder="@votrecompte"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-              Téléphone
-            </label>
-            <input
-              type="tel"
-              value={profile.phone}
-              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-              placeholder="+33 6 12 34 56 78"
-            />
-          </div>
+          {/* Section Infos pro */}
+          <section className="space-y-6">
+            <h2 className="text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800 pb-2">
+              Informations professionnelles <span className="font-normal text-neutral-600">(optionnel)</span>
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">SIRET</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={profile.siret}
+                  onChange={(e) => setProfile({ ...profile, siret: e.target.value.replace(/\D/g, "").slice(0, 14) })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="14 chiffres"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">Numéro de TVA</label>
+                <input
+                  type="text"
+                  value={profile.vatNumber}
+                  onChange={(e) => setProfile({ ...profile, vatNumber: e.target.value })}
+                  className="w-full bg-transparent border border-neutral-700 px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                  placeholder="ex. FR12345678901"
+                />
+              </div>
+            </div>
+          </section>
 
           <button
             type="submit"

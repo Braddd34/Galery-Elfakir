@@ -55,7 +55,12 @@ export async function PUT(request: Request) {
         city: valid.city ? sanitize(valid.city) : valid.city,
         website: valid.website || null,
         instagram: valid.instagram || null,
-        phone: valid.phone || null
+        phone: valid.phone || null,
+        twitter: valid.twitter ? sanitize(valid.twitter) : valid.twitter || null,
+        facebook: valid.facebook ? sanitize(valid.facebook) : valid.facebook || null,
+        linkedin: valid.linkedin ? sanitize(valid.linkedin) : valid.linkedin || null,
+        siret: valid.siret || null,
+        vatNumber: valid.vatNumber ? sanitize(valid.vatNumber) : valid.vatNumber || null,
       }
     })
 

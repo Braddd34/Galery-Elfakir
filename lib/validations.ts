@@ -173,6 +173,32 @@ export const artistProfileSchema = z.object({
     .string()
     .regex(/^(\+33|0)[0-9]{9}$/, "Numéro de téléphone invalide")
     .optional()
+    .or(z.literal("")),
+  twitter: z
+    .string()
+    .max(100, "Twitter / X : 100 caractères max")
+    .optional()
+    .or(z.literal("")),
+  facebook: z
+    .string()
+    .max(200, "Facebook : 200 caractères max (URL ou nom de page)")
+    .optional()
+    .or(z.literal("")),
+  linkedin: z
+    .string()
+    .max(200, "LinkedIn : 200 caractères max (URL ou identifiant)")
+    .optional()
+    .or(z.literal("")),
+  siret: z
+    .union([
+      z.literal(""),
+      z.string().regex(/^[0-9]{14}$/, "Le SIRET doit contenir exactement 14 chiffres")
+    ])
+    .optional(),
+  vatNumber: z
+    .string()
+    .max(30, "Numéro de TVA : 30 caractères max")
+    .optional()
     .or(z.literal(""))
 })
 
