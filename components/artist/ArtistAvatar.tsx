@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { DEFAULT_AVATAR } from "@/lib/constants"
 
@@ -15,32 +14,44 @@ interface ArtistAvatarProps {
 }
 
 /**
- * Affiche la photo de l'artiste. En cas d'échec de chargement (503, 404, etc.),
- * affiche le placeholder avec point d'interrogation.
+ * Affiche la photo de l'artiste avec une balise <img> native.
+ * Évite les soucis d'optimisation Next.js / proxy et gère l'échec de chargement.
  */
-export default function ArtistAvatar({ src, alt, fill, sizes, className, width = 200, height = 200 }: ArtistAvatarProps) {
+export default function ArtistAvatar({
+  src,
+  alt,
+  fill,
+  className,
+  width = 200,
+  height = 200,
+}: ArtistAvatarProps) {
   const [currentSrc, setCurrentSrc] = useState(src)
+  const [failed, setFailed] = useState(false)
 
   const handleError = () => {
-    setCurrentSrc(DEFAULT_AVATAR)
+    if (!failed) {
+      setFailed(true)
+      setCurrentSrc(DEFAULT_AVATAR)
+    }
   }
+
+  const displaySrc = currentSrc || DEFAULT_AVATAR
 
   if (fill) {
     return (
-      <Image
-        src={currentSrc}
+      <img
+        src={displaySrc}
         alt={alt}
-        fill
-        sizes={sizes}
         className={className}
         onError={handleError}
+        style={{ objectFit: "cover", width: "100%", height: "100%" }}
       />
     )
   }
 
   return (
-    <Image
-      src={currentSrc}
+    <img
+      src={displaySrc}
       alt={alt}
       width={width}
       height={height}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import ProfilePhotoUpload from "@/components/profile/ProfilePhotoUpload"
 
 interface ArtistProfile {
   bio: string
@@ -15,7 +16,7 @@ interface ArtistProfile {
 }
 
 export default function ArtistProfilPage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   
   const [profile, setProfile] = useState<ArtistProfile>({
@@ -26,6 +27,7 @@ export default function ArtistProfilPage() {
     instagram: "",
     phone: ""
   })
+  const [profileImage, setProfileImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
@@ -36,6 +38,8 @@ export default function ArtistProfilPage() {
       router.push("/dashboard")
       return
     }
+
+    setProfileImage(session.user?.image || null)
 
     // Charger le profil
     fetch("/api/artist/profile")
@@ -55,6 +59,11 @@ export default function ArtistProfilPage() {
       })
       .catch(() => setLoading(false))
   }, [session, status, router])
+
+  const handlePhotoChange = async (newImageUrl: string) => {
+    setProfileImage(newImageUrl)
+    await update({ image: newImageUrl })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -105,6 +114,18 @@ export default function ArtistProfilPage() {
       {/* Content */}
       <div className="max-w-2xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-light mb-8">Mon profil artiste</h1>
+
+        {/* Photo de profil (affichée sur la page publique de l'artiste) */}
+        <div className="flex flex-col sm:flex-row items-center gap-6 mb-10 pb-10 border-b border-neutral-800">
+          <ProfilePhotoUpload
+            currentImage={profileImage}
+            userName={session?.user?.name}
+            onPhotoChange={handlePhotoChange}
+          />
+          <div className="text-center sm:text-left">
+            <p className="text-neutral-500 text-sm">Cette photo apparaît sur votre page artiste publique.</p>
+          </div>
+        </div>
 
         {message && (
           <div className={`mb-6 p-4 border ${message.includes("succès") ? "border-green-500 text-green-400" : "border-red-500 text-red-400"}`}>
