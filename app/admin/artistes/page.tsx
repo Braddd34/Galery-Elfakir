@@ -5,6 +5,7 @@ import Link from "next/link"
 import prisma from "@/lib/prisma"
 import { UserStatus } from "@prisma/client"
 import { getServerTranslation } from "@/lib/i18n-server"
+import AdminArtistPhotoUpload from "@/components/admin/AdminArtistPhotoUpload"
 
 async function getAllArtists() {
   const artists = await prisma.user.findMany({
@@ -95,10 +96,10 @@ export default async function AdminArtistesPage() {
                 key={artist.id}
                 className="bg-neutral-900 border border-neutral-800 p-6 flex items-center gap-6"
               >
-                <img
-                  src={artist.image || "/avatar-placeholder.svg"}
-                  alt={artist.name || "Artiste"}
-                  className="w-16 h-16 object-cover bg-neutral-800"
+                <AdminArtistPhotoUpload
+                  artistId={artist.id}
+                  currentImage={artist.image}
+                  artistName={artist.name}
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
