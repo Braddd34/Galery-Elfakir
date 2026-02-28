@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 interface AdminArtistPhotoUploadProps {
@@ -21,7 +21,13 @@ export default function AdminArtistPhotoUpload({
   const router = useRouter()
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState("")
+  const [imageLoadError, setImageLoadError] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Réafficher l’image si l’URL change (ex. après nouvel upload)
+  useEffect(() => {
+    setImageLoadError(false)
+  }, [currentImage])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -89,7 +95,8 @@ export default function AdminArtistPhotoUpload({
     }
   }
 
-  const displayImage = currentImage || "/avatar-placeholder.svg"
+  const displayImage =
+    currentImage && !imageLoadError ? currentImage : "/avatar-placeholder.svg"
 
   return (
     <div className="flex flex-col items-start gap-2">
@@ -98,6 +105,7 @@ export default function AdminArtistPhotoUpload({
           src={displayImage}
           alt={artistName || "Artiste"}
           className="w-16 h-16 object-cover bg-neutral-800 flex-shrink-0"
+          onError={() => setImageLoadError(true)}
         />
         <div className="flex flex-col gap-1">
           <input
