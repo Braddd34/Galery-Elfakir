@@ -9,8 +9,7 @@ import ExhibitionsGallery from "@/components/artist/ExhibitionsGallery"
 import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import prisma from "@/lib/prisma"
 import { getServerTranslation } from "@/lib/i18n-server"
-import { getArtworkImageUrl, getAvatarUrl } from "@/lib/image-utils"
-import ArtistAvatar from "@/components/artist/ArtistAvatar"
+import { getArtworkImageUrl } from "@/lib/image-utils"
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = getServerTranslation()
@@ -187,12 +186,12 @@ export default async function ArtistePage({ params }: { params: { id: string } }
               {/* Photo */}
               <div className="lg:col-span-1">
                 <div className="relative aspect-square bg-neutral-900 overflow-hidden">
-                  <ArtistAvatar
-                    src={getAvatarUrl(artist.user.image)}
+                  <Image
+                    src={artist.user.image || "/avatar-placeholder.svg"}
                     alt={artist.user.name || "Artiste"}
                     fill
-                    sizes="(max-width: 1024px) 100vw, 33vw"
                     className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 33vw"
                   />
                 </div>
               </div>

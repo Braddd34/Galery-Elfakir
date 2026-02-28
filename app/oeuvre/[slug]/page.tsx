@@ -13,8 +13,7 @@ import ContactArtistButton from "@/components/artist/ContactArtistButton"
 import ShareButtons from "@/components/artwork/ShareButtons"
 import ImageLightbox from "@/components/artwork/ImageLightbox"
 import Recommendations from "@/components/artwork/Recommendations"
-import { getArtworkImages, getAvatarUrl } from "@/lib/image-utils"
-import ArtistAvatar from "@/components/artist/ArtistAvatar"
+import { getArtworkImages } from "@/lib/image-utils"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
 
@@ -311,8 +310,8 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                   href={`/artiste/${artwork.artistId}`}
                   className="flex items-center gap-5 py-6 border-y border-neutral-800 group"
                 >
-                  <ArtistAvatar
-                    src={getAvatarUrl(artwork.artist.user.image)}
+                  <Image
+                    src={artwork.artist.user.image || "/avatar-placeholder.svg"}
                     alt={artwork.artist.user.name || "Artiste"}
                     width={64}
                     height={64}
