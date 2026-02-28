@@ -190,8 +190,7 @@ export async function GET(req: NextRequest) {
 }
 
 function getImageUrl(images: unknown): string {
-  const fallback =
-    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=100"
+  const fallback = ""
   if (!images) return fallback
   try {
     const parsed = typeof images === "string" ? JSON.parse(images) : images

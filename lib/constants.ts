@@ -37,6 +37,6 @@ export const ITEMS_PER_PAGE = 12
 export const DEFAULT_CURRENCY = "EUR"
 export const CURRENCY_SYMBOL = "€"
 
-// Images par défaut
-export const DEFAULT_ARTWORK_IMAGE = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
-export const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400"
+// Images par défaut (SVG inline pour ne dépendre d'aucun service externe)
+export const DEFAULT_ARTWORK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' fill='%23222'%3E%3Crect width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-family='system-ui' font-size='14'%3EAucune image%3C/text%3E%3C/svg%3E"
+export const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%23222'%3E%3Crect width='200' height='200' rx='100'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='%23888' font-family='system-ui' font-size='60'%3E%3F%3C/text%3E%3C/svg%3E"

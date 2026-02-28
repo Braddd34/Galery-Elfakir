@@ -187,7 +187,7 @@ export default async function ArtistePage({ params }: { params: { id: string } }
               <div className="lg:col-span-1">
                 <div className="relative aspect-square bg-neutral-900 overflow-hidden">
                   <Image
-                    src={artist.user.image || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600"}
+                    src={artist.user.image || ""}
                     alt={artist.user.name || "Artiste"}
                     fill
                     className="object-cover"

@@ -5,6 +5,7 @@ import Link from "next/link"
 import prisma from "@/lib/prisma"
 import { UserStatus } from "@prisma/client"
 import { getServerTranslation } from "@/lib/i18n-server"
+import { DEFAULT_AVATAR } from "@/lib/constants"
 
 async function getAllArtists() {
   const artists = await prisma.user.findMany({
@@ -96,7 +97,7 @@ export default async function AdminArtistesPage() {
                 className="bg-neutral-900 border border-neutral-800 p-6 flex items-center gap-6"
               >
                 <img
-                  src={artist.image || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100"}
+                  src={artist.image || DEFAULT_AVATAR}
                   alt={artist.name || "Artiste"}
                   className="w-16 h-16 object-cover bg-neutral-800"
                 />
@@ -135,9 +136,12 @@ export default async function AdminArtistesPage() {
                     </>
                   )}
                   {artist.status === "ACTIVE" && (
-                    <button className="px-4 py-2 border border-neutral-700 text-sm hover:border-white transition-colors">
+                    <Link
+                      href={`/artiste/${artist.artistProfile?.id || artist.id}`}
+                      className="px-4 py-2 border border-neutral-700 text-sm hover:border-white transition-colors inline-block"
+                    >
                       {t("adminArtists.viewProfile")}
-                    </button>
+                    </Link>
                   )}
                 </div>
               </div>

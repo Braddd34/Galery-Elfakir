@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   const artistName = artwork.artist.user.name || "Artiste"
-  let imageUrl = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200"
+  let imageUrl = ""
   
   try {
     const images = typeof artwork.images === 'string' ? JSON.parse(artwork.images) : artwork.images
@@ -311,7 +311,7 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                   className="flex items-center gap-5 py-6 border-y border-neutral-800 group"
                 >
                   <Image 
-                    src={artwork.artist.user.image || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400"} 
+                    src={artwork.artist.user.image || ""} 
                     alt={artwork.artist.user.name || "Artiste"}
                     width={64}
                     height={64}

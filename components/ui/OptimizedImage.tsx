@@ -37,7 +37,7 @@ export default function OptimizedImage({
   const [error, setError] = useState(false)
 
   // Image de fallback en cas d'erreur
-  const fallbackSrc = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800"
+  const fallbackSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' fill='%23222'%3E%3Crect width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-family='system-ui' font-size='14'%3EAucune image%3C/text%3E%3C/svg%3E"
   
   // Placeholder blur SVG minimaliste (gris neutre)
   const blurDataURL = `data:image/svg+xml;base64,${btoa(
