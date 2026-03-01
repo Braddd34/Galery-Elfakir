@@ -237,7 +237,7 @@ export default function NewVirtualExhibitionPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-neutral-400 mb-2">URL image de couverture</label>
+              <label className="block text-sm text-neutral-400 mb-2">Image de couverture (optionnel)</label>
               <input
                 type="url"
                 value={coverImage}
@@ -245,6 +245,9 @@ export default function NewVirtualExhibitionPage() {
                 className="w-full bg-gray-900 border border-neutral-700 text-white px-4 py-3 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 placeholder="https://..."
               />
+              <p className="text-xs text-neutral-500 mt-1.5">
+                Image affichée sur la carte de l’exposition dans la liste des expositions virtuelles. Collez l’URL complète d’une image (ex. une œuvre de l’exposition).
+              </p>
             </div>
           </div>
           <div>
