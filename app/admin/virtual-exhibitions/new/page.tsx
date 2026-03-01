@@ -451,22 +451,24 @@ export default function NewVirtualExhibitionPage() {
             </span>
           </div>
 
-          {/* Plan 2D : chaque œuvre est identifiée par son titre */}
-          <div className="max-w-2xl mx-auto">
-            <p className="text-neutral-500 text-sm mb-2">
-              Sur le plan, chaque cadre affiche le titre de l’œuvre. Utilisez la liste ci-dessous pour déplacer une œuvre vers un autre mur.
-            </p>
-            <FloorPlan
-              layout={layout}
-              placedArtworks={placedArtworks}
-              getImageUrl={getImageUrl}
-            />
-          </div>
+          {/* Plan 2D à côté de la liste : repérage visuel et déplacement par mur */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div className="space-y-2">
+              <p className="text-neutral-500 text-sm">
+                Plan : chaque cadre = une œuvre. Les murs et cloisons sont nommés pour repérer.
+              </p>
+              <FloorPlan
+                layout={layout}
+                placedArtworks={placedArtworks}
+                getImageUrl={getImageUrl}
+                getSegmentLabel={getSegmentLabel}
+              />
+            </div>
 
-          {/* Œuvres par mur : sections groupées + bouton Déplacer (dropdown autres murs) */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-neutral-400">Œuvres par mur</h3>
-            <div className="space-y-6 max-h-[28rem] overflow-y-auto">
+            {/* Œuvres par mur : sections groupées + bouton Déplacer (dropdown autres murs) */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-neutral-400">Œuvres par mur</h3>
+              <div className="space-y-6 max-h-[28rem] overflow-y-auto">
               {layout.allSegments.map((seg) => {
                 const onThisWall = placedArtworks.filter((p) => p.wall === seg.id)
                 if (onThisWall.length === 0) return null
@@ -534,6 +536,7 @@ export default function NewVirtualExhibitionPage() {
                   </div>
                 )
               })}
+              </div>
             </div>
           </div>
         </div>
@@ -622,14 +625,34 @@ export default function NewVirtualExhibitionPage() {
 /* Floor Plan 2D Component                                                */
 /* ====================================================================== */
 
+/** Offset en pixels pour placer le label d’un segment à l’extérieur du mur (éviter chevauchement) */
+function segmentLabelOffset(segmentId: string, rotationY: number): { dx: number; dy: number } {
+  const d = 14
+  if (segmentId === "north") return { dx: 0, dy: d }
+  if (segmentId === "east") return { dx: d, dy: 0 }
+  if (segmentId === "west") return { dx: -d, dy: 0 }
+  if (segmentId === "south-left" || segmentId === "south-right") return { dx: 0, dy: -d }
+  if (segmentId.endsWith("-a")) {
+    const o = 12
+    return { dx: -o * Math.sin(rotationY), dy: -o * Math.cos(rotationY) }
+  }
+  if (segmentId.endsWith("-b")) {
+    const o = 12
+    return { dx: o * Math.sin(rotationY), dy: o * Math.cos(rotationY) }
+  }
+  return { dx: 0, dy: 0 }
+}
+
 function FloorPlan({
   layout,
   placedArtworks,
   getImageUrl,
+  getSegmentLabel,
 }: {
   layout: ReturnType<typeof generateLayout>
   placedArtworks: PlacedArtwork[]
   getImageUrl: (images: unknown) => string
+  getSegmentLabel: (segmentId: string) => string
 }) {
   const { room, partitions } = layout
   const padding = 20
@@ -658,13 +681,13 @@ function FloorPlan({
         strokeWidth={2}
       />
 
-      {/* Doorway (gap in south wall) */}
+      {/* Porte (trou dans le mur sud = bord haut du plan) */}
       {(() => {
         const doorW = 2 * scale
         const cx = padding + (room.width * scale) / 2
-        const y = padding + room.length * scale
+        const ySouth = padding
         return (
-          <line x1={cx - doorW / 2} y1={y} x2={cx + doorW / 2} y2={y} stroke="#111" strokeWidth={3} />
+          <line x1={cx - doorW / 2} y1={ySouth} x2={cx + doorW / 2} y2={ySouth} stroke="#111" strokeWidth={3} />
         )
       })()}
 
@@ -692,6 +715,28 @@ function FloorPlan({
         )
       })}
 
+      {/* Labels des murs et cloisons sur le plan */}
+      {layout.allSegments.map((seg) => {
+        const pt = toSvg(seg.position[0], seg.position[2])
+        const off = segmentLabelOffset(seg.id, seg.rotation[1])
+        const label = getSegmentLabel(seg.id)
+        const isPart = seg.id.endsWith("-a") || seg.id.endsWith("-b")
+        return (
+          <text
+            key={seg.id}
+            x={pt.x + off.dx}
+            y={pt.y + off.dy}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="#888"
+            fontSize={isPart ? 8 : 9}
+            className="font-sans"
+          >
+            {label}
+          </text>
+        )
+      })}
+
       {/* Cadres avec titre pour chaque œuvre (décalage face A/B sur cloisons pour éviter chevauchement) */}
       {placedArtworks.map((p) => {
         const seg = layout.allSegments.find((s) => s.id === p.wall)
@@ -704,7 +749,7 @@ function FloorPlan({
         let pt = toSvg(wx, wz)
         const isPartition = p.wall.endsWith("-a") || p.wall.endsWith("-b")
         if (isPartition) {
-          const offsetPx = 10
+          const offsetPx = 18
           const dx = -offsetPx * Math.sin(seg.rotation[1])
           const dy = -offsetPx * Math.cos(seg.rotation[1])
           if (p.wall.endsWith("-a")) {
@@ -714,8 +759,10 @@ function FloorPlan({
           }
         }
         const label = p.artwork.title.length > 12 ? p.artwork.title.slice(0, 11) + "…" : p.artwork.title
-        const boxW = 44
-        const boxH = 28
+        const isPart = p.wall.endsWith("-a") || p.wall.endsWith("-b")
+        const boxW = isPart ? 36 : 44
+        const boxH = isPart ? 22 : 28
+        const fontSize = isPart ? 7 : 8
         return (
           <g key={p.artworkId} transform={`translate(${pt.x}, ${pt.y})`}>
             <rect
@@ -734,7 +781,7 @@ function FloorPlan({
               textAnchor="middle"
               dominantBaseline="middle"
               fill="#e5e5e5"
-              fontSize={8}
+              fontSize={fontSize}
               className="font-sans"
             >
               {label}
@@ -743,9 +790,9 @@ function FloorPlan({
         )
       })}
 
-      {/* Labels Nord / Sud / O / E */}
-      <text x={w / 2} y={padding - 5} textAnchor="middle" fill="#888" fontSize={10}>Nord</text>
-      <text x={w / 2} y={h - padding + 14} textAnchor="middle" fill="#888" fontSize={10}>Sud</text>
+      {/* Points cardinaux : Sud = haut du plan, Nord = bas (cohérent avec toSvg) */}
+      <text x={w / 2} y={padding - 5} textAnchor="middle" fill="#888" fontSize={10}>Sud</text>
+      <text x={w / 2} y={h - padding + 14} textAnchor="middle" fill="#888" fontSize={10}>Nord</text>
       <text x={padding - 5} y={h / 2} textAnchor="end" fill="#888" fontSize={10} dominantBaseline="middle">O</text>
       <text x={w - padding + 5} y={h / 2} textAnchor="start" fill="#888" fontSize={10} dominantBaseline="middle">E</text>
     </svg>

@@ -420,16 +420,16 @@ export default function EditVirtualExhibitionPage() {
             <span className="text-neutral-400 text-sm">{placedArtworks.length} œuvre(s) placée(s) — Layout : {LAYOUT_META[selectedLayout].name}</span>
           </div>
 
-          <div className="max-w-2xl mx-auto">
-            <p className="text-neutral-500 text-sm mb-2">
-              Sur le plan, chaque cadre affiche le titre de l’œuvre. Utilisez la liste ci-dessous pour déplacer une œuvre vers un autre mur.
-            </p>
-            <FloorPlanSvg layout={layout} placedArtworks={placedArtworks} />
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-neutral-400">Œuvres par mur</h3>
-            <div className="space-y-6 max-h-[28rem] overflow-y-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div className="space-y-2">
+              <p className="text-neutral-500 text-sm">
+                Plan : chaque cadre = une œuvre. Les murs et cloisons sont nommés pour repérer.
+              </p>
+              <FloorPlanSvg layout={layout} placedArtworks={placedArtworks} getSegmentLabel={getSegmentLabel} />
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-neutral-400">Œuvres par mur</h3>
+              <div className="space-y-6 max-h-[28rem] overflow-y-auto">
               {layout.allSegments.map((seg) => {
                 const onThisWall = placedArtworks.filter((p) => p.wall === seg.id)
                 if (onThisWall.length === 0) return null
@@ -482,6 +482,7 @@ export default function EditVirtualExhibitionPage() {
                   </div>
                 )
               })}
+              </div>
             </div>
           </div>
         </div>
@@ -530,12 +531,31 @@ export default function EditVirtualExhibitionPage() {
   )
 }
 
+function segmentLabelOffset(segmentId: string, rotationY: number): { dx: number; dy: number } {
+  const d = 14
+  if (segmentId === "north") return { dx: 0, dy: d }
+  if (segmentId === "east") return { dx: d, dy: 0 }
+  if (segmentId === "west") return { dx: -d, dy: 0 }
+  if (segmentId === "south-left" || segmentId === "south-right") return { dx: 0, dy: -d }
+  if (segmentId.endsWith("-a")) {
+    const o = 12
+    return { dx: -o * Math.sin(rotationY), dy: -o * Math.cos(rotationY) }
+  }
+  if (segmentId.endsWith("-b")) {
+    const o = 12
+    return { dx: o * Math.sin(rotationY), dy: o * Math.cos(rotationY) }
+  }
+  return { dx: 0, dy: 0 }
+}
+
 function FloorPlanSvg({
   layout,
   placedArtworks,
+  getSegmentLabel,
 }: {
   layout: ReturnType<typeof generateLayout>
   placedArtworks: PlacedArtwork[]
+  getSegmentLabel: (segmentId: string) => string
 }) {
   const { room, partitions } = layout
   const padding = 20
@@ -557,8 +577,8 @@ function FloorPlanSvg({
       {(() => {
         const doorW = 2 * scale
         const cx = padding + (room.width * scale) / 2
-        const y = padding + room.length * scale
-        return <line x1={cx - doorW / 2} y1={y} x2={cx + doorW / 2} y2={y} stroke="#111" strokeWidth={3} />
+        const ySouth = padding
+        return <line x1={cx - doorW / 2} y1={ySouth} x2={cx + doorW / 2} y2={ySouth} stroke="#111" strokeWidth={3} />
       })()}
       {partitions.map((part) => {
         const cx = part.position[0]; const cz = part.position[2]; const hw = part.width / 2
@@ -566,6 +586,25 @@ function FloorPlanSvg({
         const p1 = toSvg(isH ? cx - hw : cx, isH ? cz : cz - hw)
         const p2 = toSvg(isH ? cx + hw : cx, isH ? cz : cz + hw)
         return <line key={part.id} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#666" strokeWidth={3} strokeLinecap="round" />
+      })}
+      {layout.allSegments.map((seg) => {
+        const pt = toSvg(seg.position[0], seg.position[2])
+        const off = segmentLabelOffset(seg.id, seg.rotation[1])
+        const label = getSegmentLabel(seg.id)
+        const isPart = seg.id.endsWith("-a") || seg.id.endsWith("-b")
+        return (
+          <text
+            key={seg.id}
+            x={pt.x + off.dx}
+            y={pt.y + off.dy}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="#888"
+            fontSize={isPart ? 8 : 9}
+          >
+            {label}
+          </text>
+        )
       })}
       {placedArtworks.map((p) => {
         const seg = layout.allSegments.find((s) => s.id === p.wall)
@@ -575,7 +614,7 @@ function FloorPlanSvg({
         let pt = toSvg(seg.position[0] + localX * cosR, seg.position[2] - localX * sinR)
         const isPartition = p.wall.endsWith("-a") || p.wall.endsWith("-b")
         if (isPartition) {
-          const offsetPx = 10
+          const offsetPx = 18
           const dx = -offsetPx * Math.sin(seg.rotation[1])
           const dy = -offsetPx * Math.cos(seg.rotation[1])
           if (p.wall.endsWith("-a")) {
@@ -585,17 +624,21 @@ function FloorPlanSvg({
           }
         }
         const label = p.artwork.title.length > 12 ? p.artwork.title.slice(0, 11) + "…" : p.artwork.title
-        const boxW = 44
-        const boxH = 28
+        const isPart = p.wall.endsWith("-a") || p.wall.endsWith("-b")
+        const boxW = isPart ? 36 : 44
+        const boxH = isPart ? 22 : 28
+        const fontSize = isPart ? 7 : 8
         return (
           <g key={p.artworkId} transform={`translate(${pt.x}, ${pt.y})`}>
             <rect x={-boxW / 2} y={-boxH / 2} width={boxW} height={boxH} rx={2} fill="#1a1a1a" stroke="#d4af37" strokeWidth={1.2} />
-            <text x={0} y={0} textAnchor="middle" dominantBaseline="middle" fill="#e5e5e5" fontSize={8}>{label}</text>
+            <text x={0} y={0} textAnchor="middle" dominantBaseline="middle" fill="#e5e5e5" fontSize={fontSize}>{label}</text>
           </g>
         )
       })}
-      <text x={w / 2} y={padding - 5} textAnchor="middle" fill="#888" fontSize={10}>Nord</text>
-      <text x={w / 2} y={h - padding + 14} textAnchor="middle" fill="#888" fontSize={10}>Sud</text>
+      <text x={w / 2} y={padding - 5} textAnchor="middle" fill="#888" fontSize={10}>Sud</text>
+      <text x={w / 2} y={h - padding + 14} textAnchor="middle" fill="#888" fontSize={10}>Nord</text>
+      <text x={padding - 5} y={h / 2} textAnchor="end" fill="#888" fontSize={10} dominantBaseline="middle">O</text>
+      <text x={w - padding + 5} y={h / 2} textAnchor="start" fill="#888" fontSize={10} dominantBaseline="middle">E</text>
     </svg>
   )
 }
