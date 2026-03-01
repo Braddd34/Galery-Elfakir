@@ -749,7 +749,7 @@ function FloorPlan({
         const offX = isHoriz ? 0 : cloisonOffset
         const offY = isHoriz ? -cloisonOffset : 0
         const [segA, segB] = part.segments
-        const faceOffset = 12
+        const faceOffset = 42
         const dxA = -faceOffset * Math.sin(segA.rotation[1])
         const dyA = -faceOffset * Math.cos(segA.rotation[1])
         const dxB = -faceOffset * Math.sin(segB.rotation[1])
