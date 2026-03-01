@@ -25,47 +25,47 @@ const themeLighting: Record<
   }
 > = {
   white: {
-    background: "#d4cfc6",
-    ambientColor: "#ffffff",
-    ambientIntensity: 0.8,
+    background: "#f2f0ec",
+    ambientColor: "#fffaf5",
+    ambientIntensity: 0.5,
     hemisphereColor: "#ffffff",
-    hemisphereGround: "#e8dcc8",
-    hemisphereIntensity: 0.5,
-    pointColor: "#ffffff",
-    pointIntensity: 0.8,
+    hemisphereGround: "#e8e6e2",
+    hemisphereIntensity: 0.4,
+    pointColor: "#fff5eb",
+    pointIntensity: 0.6,
     pointDistance: 25,
   },
   dark: {
-    background: "#181818",
+    background: "#0d0d0d",
     ambientColor: "#e8e4e0",
-    ambientIntensity: 0.45,
-    hemisphereColor: "#c0b8b0",
-    hemisphereGround: "#2a2826",
-    hemisphereIntensity: 0.22,
-    pointColor: "#fff5e8",
-    pointIntensity: 0.85,
+    ambientIntensity: 0.35,
+    hemisphereColor: "#a0a0a0",
+    hemisphereGround: "#1a1a1a",
+    hemisphereIntensity: 0.2,
+    pointColor: "#fff0e0",
+    pointIntensity: 0.75,
     pointDistance: 24,
   },
   concrete: {
-    background: "#3a3a38",
-    ambientColor: "#c0c0c0",
-    ambientIntensity: 0.6,
-    hemisphereColor: "#b0b0b0",
-    hemisphereGround: "#505050",
-    hemisphereIntensity: 0.3,
-    pointColor: "#f0e8d8",
-    pointIntensity: 0.7,
+    background: "#5a5a58",
+    ambientColor: "#c8c8c8",
+    ambientIntensity: 0.45,
+    hemisphereColor: "#b8b8b8",
+    hemisphereGround: "#6a6a68",
+    hemisphereIntensity: 0.35,
+    pointColor: "#e8e8e4",
+    pointIntensity: 0.65,
     pointDistance: 25,
   },
   wood: {
-    background: "#c8bfb0",
-    ambientColor: "#fff8ee",
-    ambientIntensity: 0.7,
-    hemisphereColor: "#fff4e0",
-    hemisphereGround: "#c8a878",
-    hemisphereIntensity: 0.4,
-    pointColor: "#ffe8c0",
-    pointIntensity: 0.8,
+    background: "#e0d8cc",
+    ambientColor: "#fff8f0",
+    ambientIntensity: 0.55,
+    hemisphereColor: "#fff8f0",
+    hemisphereGround: "#b89870",
+    hemisphereIntensity: 0.45,
+    pointColor: "#fff0e0",
+    pointIntensity: 0.7,
     pointDistance: 25,
   },
 }
@@ -112,6 +112,16 @@ export default function GalleryLighting({
         groundColor={cfg.hemisphereGround}
         intensity={cfg.hemisphereIntensity}
       />
+      <directionalLight
+        position={[0, roomHeight + 2, 0]}
+        intensity={0.35}
+        color="#ffffff"
+        castShadow
+        shadow-mapSize={[512, 512]}
+        shadow-bias={-0.0001}
+      >
+        <orthographicCamera attach="shadow-camera" args={[-roomWidth, roomWidth, roomLength, -roomLength, 0.5, roomHeight + 10]} />
+      </directionalLight>
       {lightGrid.map((pos, i) => (
         <pointLight
           key={`light-${i}`}

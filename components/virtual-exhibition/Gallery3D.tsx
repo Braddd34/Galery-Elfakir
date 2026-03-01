@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react"
 import { Canvas } from "@react-three/fiber"
+import * as THREE from "three"
 import GalleryRoom from "./GalleryRoom"
 import ArtworkFrame from "./ArtworkFrame"
 import PlayerController, { type MobileInputRef } from "./PlayerController"
@@ -141,6 +142,11 @@ export default function Gallery3D({
           camera={{ fov: 60, near: 0.1, far: cameraFar, position: [0, 1.8, entranceZ] }}
           dpr={[1, 2]}
           style={{ width: "100vw", height: "100vh", display: "block" }}
+          onCreated={({ gl }) => {
+            gl.toneMapping = THREE.ACESFilmicToneMapping
+            gl.toneMappingExposure = 1.1
+            gl.outputColorSpace = THREE.SRGBColorSpace
+          }}
         >
           <GalleryLighting theme={resolvedTheme} roomHeight={height} roomWidth={width} roomLength={length} />
           <GalleryRoom theme={resolvedTheme} layout={layout} />
@@ -156,6 +162,7 @@ export default function Gallery3D({
                 positionX={artwork.positionX}
                 positionY={artwork.positionY}
                 scale={artwork.scale}
+                theme={resolvedTheme}
                 isHighlighted={highlightedArtworkId === artwork.id}
                 onClick={() => handleArtworkClick(artwork)}
                 onPointerOver={() => handleArtworkHover(artwork.id)}

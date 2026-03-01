@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 import { encodeImageUrl } from "@/lib/image-utils"
 import type { WallSegment } from "@/lib/virtual-exhibition/types"
+import type { ThemeId } from "@/lib/virtual-exhibition/types"
 
 const FRAME_BORDER = 0.03
 const MAX_DIMENSION_M = 2
@@ -20,6 +21,13 @@ const fallbackTexture = (() => {
   return tex
 })()
 
+const SPOT_COLOR_BY_THEME: Record<ThemeId, string> = {
+  white: "#fff5e6",
+  dark: "#fff0e0",
+  concrete: "#e8e8e4",
+  wood: "#ffe8d0",
+}
+
 interface ArtworkFrameProps {
   artwork: {
     id: string
@@ -35,6 +43,7 @@ interface ArtworkFrameProps {
   positionX: number
   positionY: number
   scale?: number
+  theme?: ThemeId
   isHighlighted?: boolean
   onClick: () => void
   onPointerOver?: () => void
@@ -77,6 +86,7 @@ export default function ArtworkFrame({
   positionX,
   positionY,
   scale = 1,
+  theme = "white",
   isHighlighted = false,
   onClick,
   onPointerOver,
@@ -85,6 +95,7 @@ export default function ArtworkFrame({
   const meshRef = useRef<THREE.Group>(null)
   const spotlightRef = useRef<THREE.SpotLight>(null)
   const texture = useArtworkTexture(artwork.imageUrl)
+  const spotColor = SPOT_COLOR_BY_THEME[theme] ?? SPOT_COLOR_BY_THEME.white
 
   const { frameWidth, frameHeight, localX, localY } = useMemo(() => {
     const wCm = artwork.width * CM_TO_M
@@ -149,7 +160,9 @@ export default function ArtworkFrame({
           angle={0.4}
           penumbra={0.5}
           intensity={spotlightIntensity}
-          color="#fff5e6"
+          color={spotColor}
+          castShadow
+          shadow-mapSize={[512, 512]}
         />
       </group>
     </group>
