@@ -605,8 +605,12 @@ function FloorPlanSvg({
       {partitions.map((part) => {
         const pt = toSvg(part.position[0], part.position[2])
         const num = part.id.replace(/\D/g, "") || "0"
+        const isHoriz = Math.abs(part.rotationY) < 0.01
+        const labelOffset = 14
+        const offX = isHoriz ? 0 : labelOffset
+        const offY = isHoriz ? -labelOffset : 0
         return (
-          <text key={part.id} x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle" fill="#666" fontSize={8}>
+          <text key={part.id} x={pt.x + offX} y={pt.y + offY} textAnchor="middle" dominantBaseline="middle" fill="#777" fontSize={8}>
             {`Cloison ${num}`}
           </text>
         )
@@ -619,7 +623,7 @@ function FloorPlanSvg({
         let pt = toSvg(seg.position[0] + localX * cosR, seg.position[2] - localX * sinR)
         const isPartition = p.wall.endsWith("-a") || p.wall.endsWith("-b")
         if (isPartition) {
-          const offsetPx = 38
+          const offsetPx = 20
           const dx = -offsetPx * Math.sin(seg.rotation[1])
           const dy = -offsetPx * Math.cos(seg.rotation[1])
           pt = { x: pt.x + dx, y: pt.y + dy }
