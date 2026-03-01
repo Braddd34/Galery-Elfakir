@@ -332,6 +332,25 @@ export default function EditVirtualExhibitionPage() {
         <div className="space-y-6">
           <div className="flex items-center gap-4 flex-wrap">
             <input type="text" placeholder="Rechercher des œuvres..." value={artworkSearch} onChange={(e) => setArtworkSearch(e.target.value)} className="w-full max-w-md bg-gray-900 border border-neutral-700 text-white px-4 py-2 focus:outline-none focus:ring-1 focus:ring-amber-500" />
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set(artworks.slice(0, 100).map((a) => a.id)))}
+              disabled={artworks.length === 0}
+              className="px-4 py-2 border border-neutral-600 text-neutral-300 hover:border-amber-500 hover:text-amber-400 text-sm transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Tout sélectionner
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedIds(new Set())
+                setPlacedArtworks([])
+              }}
+              disabled={selectedIds.size === 0}
+              className="px-4 py-2 border border-neutral-600 text-neutral-300 hover:border-neutral-500 hover:text-white text-sm transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Tout désélectionner
+            </button>
             <p className="text-neutral-400 text-sm">{selectedIds.size} / 100 œuvre(s) sélectionnée(s)</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
