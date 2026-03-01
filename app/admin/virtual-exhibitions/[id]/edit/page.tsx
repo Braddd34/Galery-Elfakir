@@ -78,6 +78,7 @@ export default function EditVirtualExhibitionPage() {
   const [artworkSearch, setArtworkSearch] = useState("")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [placedArtworks, setPlacedArtworks] = useState<PlacedArtwork[]>([])
+  const [openMoveDropdown, setOpenMoveDropdown] = useState<string | null>(null)
 
   const layout = useMemo(
     () => generateLayout(selectedLayout, selectedIds.size),
@@ -426,31 +427,61 @@ export default function EditVirtualExhibitionPage() {
             <FloorPlanSvg layout={layout} placedArtworks={placedArtworks} />
           </div>
 
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-neutral-400">Œuvres placées — déplacer vers un mur</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto">
-              {placedArtworks.map((p) => (
-                <div key={p.artworkId} className="flex items-center gap-3 p-3 bg-neutral-900 border border-neutral-800 rounded">
-                  <div className="w-12 h-12 bg-neutral-800 flex-shrink-0 overflow-hidden rounded">
-                    <img src={getImageUrl(p.artwork.images) || "/avatar-placeholder.svg"} alt="" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-white truncate font-medium">{p.artwork.title}</p>
-                    <p className="text-xs text-amber-500/90">→ {getSegmentLabel(p.wall)}</p>
-                    <select
-                      value={p.wall}
-                      onChange={(e) => moveArtworkToWall(p.artworkId, e.target.value)}
-                      className="mt-1.5 w-full bg-black border border-neutral-600 text-white text-xs px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    >
-                      {layout.allSegments.map((seg) => (
-                        <option key={seg.id} value={seg.id}>
-                          {getSegmentLabel(seg.id)}
-                        </option>
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-neutral-400">Œuvres par mur</h3>
+            <div className="space-y-6 max-h-[28rem] overflow-y-auto">
+              {layout.allSegments.map((seg) => {
+                const onThisWall = placedArtworks.filter((p) => p.wall === seg.id)
+                if (onThisWall.length === 0) return null
+                return (
+                  <div key={seg.id} className="space-y-2">
+                    <p className="text-xs uppercase tracking-wider text-amber-500/90 border-b border-neutral-800 pb-1.5">
+                      {getSegmentLabel(seg.id)}
+                    </p>
+                    <div className="space-y-2">
+                      {onThisWall.map((p) => (
+                        <div key={p.artworkId} className="flex items-center gap-3 p-3 bg-neutral-900 border border-neutral-800 rounded">
+                          <div className="w-12 h-12 bg-neutral-800 flex-shrink-0 overflow-hidden rounded">
+                            <img src={getImageUrl(p.artwork.images) || "/avatar-placeholder.svg"} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          <p className="min-w-0 flex-1 text-sm text-white truncate font-medium">{p.artwork.title}</p>
+                          <div className="relative flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setOpenMoveDropdown(openMoveDropdown === p.artworkId ? null : p.artworkId)}
+                              className="px-3 py-1.5 text-xs border border-neutral-600 text-neutral-300 hover:border-amber-500 hover:text-amber-400 transition-colors"
+                            >
+                              Déplacer ▼
+                            </button>
+                            {openMoveDropdown === p.artworkId && (
+                              <>
+                                <div className="fixed inset-0 z-10" aria-hidden onClick={() => setOpenMoveDropdown(null)} />
+                                <div className="absolute right-0 top-full mt-1 z-20 min-w-[180px] py-1 bg-neutral-900 border border-neutral-700 rounded shadow-lg">
+                                  {layout.allSegments
+                                    .filter((s) => s.id !== p.wall)
+                                    .map((other) => (
+                                      <button
+                                        key={other.id}
+                                        type="button"
+                                        onClick={() => {
+                                          moveArtworkToWall(p.artworkId, other.id)
+                                          setOpenMoveDropdown(null)
+                                        }}
+                                        className="block w-full text-left px-3 py-2 text-sm text-white hover:bg-neutral-800 transition-colors"
+                                      >
+                                        {getSegmentLabel(other.id)}
+                                      </button>
+                                    ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       ))}
-                    </select>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>
@@ -541,7 +572,18 @@ function FloorPlanSvg({
         if (!seg) return null
         const localX = (p.positionX - 0.5) * seg.width
         const cosR = Math.cos(seg.rotation[1]); const sinR = Math.sin(seg.rotation[1])
-        const pt = toSvg(seg.position[0] + localX * cosR, seg.position[2] - localX * sinR)
+        let pt = toSvg(seg.position[0] + localX * cosR, seg.position[2] - localX * sinR)
+        const isPartition = p.wall.endsWith("-a") || p.wall.endsWith("-b")
+        if (isPartition) {
+          const offsetPx = 10
+          const dx = -offsetPx * Math.sin(seg.rotation[1])
+          const dy = -offsetPx * Math.cos(seg.rotation[1])
+          if (p.wall.endsWith("-a")) {
+            pt = { x: pt.x + dx, y: pt.y + dy }
+          } else {
+            pt = { x: pt.x - dx, y: pt.y - dy }
+          }
+        }
         const label = p.artwork.title.length > 12 ? p.artwork.title.slice(0, 11) + "…" : p.artwork.title
         const boxW = 44
         const boxH = 28
