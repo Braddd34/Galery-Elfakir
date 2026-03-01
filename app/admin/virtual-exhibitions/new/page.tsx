@@ -38,6 +38,26 @@ function getImageUrl(images: unknown): string {
   return getArtworkImageUrl(images)
 }
 
+/** Nom lisible d’un segment (mur ou cloison) pour l’UI */
+function getSegmentLabel(segmentId: string): string {
+  const labels: Record<string, string> = {
+    north: "Mur nord",
+    east: "Mur est",
+    west: "Mur ouest",
+    "south-left": "Mur sud (gauche)",
+    "south-right": "Mur sud (droite)",
+  }
+  if (labels[segmentId]) return labels[segmentId]
+  const m = segmentId.match(/^(.+)-(a|b)$/)
+  if (m) {
+    const part = m[1]
+    const face = m[2] === "a" ? "A" : "B"
+    const partNum = part.replace(/\D/g, "") || "0"
+    return `Cloison ${partNum} (face ${face})`
+  }
+  return segmentId
+}
+
 export default function NewVirtualExhibitionPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -125,6 +145,22 @@ export default function NewVirtualExhibitionPage() {
 
     setPlacedArtworks(placed)
   }, [artworks, selectedIds, selectedLayout])
+
+  /** Déplacer une œuvre vers un autre mur (position X recalculée) */
+  const moveArtworkToWall = useCallback(
+    (artworkId: string, newWallId: string) => {
+      const seg = layout.allSegments.find((s) => s.id === newWallId)
+      if (!seg) return
+      setPlacedArtworks((prev) => {
+        const othersOnWall = prev.filter((p) => p.wall === newWallId && p.artworkId !== artworkId)
+        const positionX = (othersOnWall.length + 1) / (seg.capacity + 1)
+        return prev.map((p) =>
+          p.artworkId === artworkId ? { ...p, wall: newWallId, positionX } : p
+        )
+      })
+    },
+    [layout.allSegments]
+  )
 
   const handleSubmit = async (asDraft: boolean) => {
     setLoading(true)
@@ -401,13 +437,24 @@ export default function NewVirtualExhibitionPage() {
             >
               Redistribuer automatiquement
             </button>
+            <button
+              type="button"
+              onClick={() => setPlacedArtworks([])}
+              disabled={placedArtworks.length === 0}
+              className="px-5 py-2 border border-neutral-600 text-neutral-400 hover:border-red-500/60 hover:text-red-400 text-sm transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Tout enlever du plan
+            </button>
             <span className="text-neutral-400 text-sm">
               {placedArtworks.length} œuvre(s) placée(s) — Layout : {LAYOUT_META[selectedLayout].name}
             </span>
           </div>
 
-          {/* Plan 2D vue du dessus */}
+          {/* Plan 2D : chaque œuvre est identifiée par son titre */}
           <div className="max-w-2xl mx-auto">
+            <p className="text-neutral-500 text-sm mb-2">
+              Sur le plan, chaque cadre affiche le titre de l’œuvre. Utilisez la liste ci-dessous pour déplacer une œuvre vers un autre mur.
+            </p>
             <FloorPlan
               layout={layout}
               placedArtworks={placedArtworks}
@@ -415,19 +462,40 @@ export default function NewVirtualExhibitionPage() {
             />
           </div>
 
-          {/* List of placed artworks */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 max-h-64 overflow-y-auto">
-            {placedArtworks.map((p) => (
-              <div key={p.artworkId} className="flex items-center gap-2 p-2 bg-neutral-900 border border-neutral-800">
-                <div className="w-8 h-8 bg-neutral-800 flex-shrink-0 overflow-hidden">
-                  <img src={getImageUrl(p.artwork.images) || ""} alt="" className="w-full h-full object-cover" />
+          {/* Liste des œuvres placées : mur actuel + déplacer vers */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-neutral-400">Œuvres placées — déplacer vers un mur</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto">
+              {placedArtworks.map((p) => (
+                <div
+                  key={p.artworkId}
+                  className="flex items-center gap-3 p-3 bg-neutral-900 border border-neutral-800 rounded"
+                >
+                  <div className="w-12 h-12 bg-neutral-800 flex-shrink-0 overflow-hidden rounded">
+                    <img
+                      src={getImageUrl(p.artwork.images) || "/avatar-placeholder.svg"}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-white truncate font-medium">{p.artwork.title}</p>
+                    <p className="text-xs text-amber-500/90">→ {getSegmentLabel(p.wall)}</p>
+                    <select
+                      value={p.wall}
+                      onChange={(e) => moveArtworkToWall(p.artworkId, e.target.value)}
+                      className="mt-1.5 w-full bg-black border border-neutral-600 text-white text-xs px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    >
+                      {layout.allSegments.map((seg) => (
+                        <option key={seg.id} value={seg.id}>
+                          {getSegmentLabel(seg.id)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-white truncate">{p.artwork.title}</p>
-                  <p className="text-[10px] text-amber-500/70 font-mono">{p.wall}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -585,7 +653,7 @@ function FloorPlan({
         )
       })}
 
-      {/* Artwork dots */}
+      {/* Cadres avec titre pour chaque œuvre (identification claire sur le plan) */}
       {placedArtworks.map((p) => {
         const seg = layout.allSegments.find((s) => s.id === p.wall)
         if (!seg) return null
@@ -595,20 +663,37 @@ function FloorPlan({
         const wx = seg.position[0] + localX * cosR
         const wz = seg.position[2] - localX * sinR
         const pt = toSvg(wx, wz)
+        const label = p.artwork.title.length > 12 ? p.artwork.title.slice(0, 11) + "…" : p.artwork.title
+        const boxW = 44
+        const boxH = 28
         return (
-          <circle
-            key={p.artworkId}
-            cx={pt.x}
-            cy={pt.y}
-            r={4}
-            fill="#d4af37"
-            stroke="#000"
-            strokeWidth={0.5}
-          />
+          <g key={p.artworkId} transform={`translate(${pt.x}, ${pt.y})`}>
+            <rect
+              x={-boxW / 2}
+              y={-boxH / 2}
+              width={boxW}
+              height={boxH}
+              rx={2}
+              fill="#1a1a1a"
+              stroke="#d4af37"
+              strokeWidth={1.2}
+            />
+            <text
+              x={0}
+              y={0}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#e5e5e5"
+              fontSize={8}
+              className="font-sans"
+            >
+              {label}
+            </text>
+          </g>
         )
       })}
 
-      {/* Labels */}
+      {/* Labels Nord / Sud / O / E */}
       <text x={w / 2} y={padding - 5} textAnchor="middle" fill="#888" fontSize={10}>Nord</text>
       <text x={w / 2} y={h - padding + 14} textAnchor="middle" fill="#888" fontSize={10}>Sud</text>
       <text x={padding - 5} y={h / 2} textAnchor="end" fill="#888" fontSize={10} dominantBaseline="middle">O</text>
