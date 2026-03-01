@@ -5,11 +5,19 @@ import type { PartitionWall } from "@/lib/virtual-exhibition/types"
 
 const WALK_SPEED = 3
 const RUN_SPEED = 6
-const EYE_HEIGHT = 1.7
+const EYE_HEIGHT = 1.8
 const BOUNDS_MARGIN = 0.5
-const MOUSE_SENSITIVITY = 0.003
-const ARROW_ROTATE_SPEED = 2
+const MOUSE_SENSITIVITY = 0.002
+const ARROW_ROTATE_SPEED = 1.8
 const COLLISION_MARGIN = 0.35
+const MOVE_SMOOTH = 12
+
+export interface MobileInputRef {
+  forward: number
+  strafe: number
+  lookX: number
+  lookY: number
+}
 
 interface PlayerControllerProps {
   roomWidth: number
@@ -18,6 +26,7 @@ interface PlayerControllerProps {
   partitions?: PartitionWall[]
   enabled?: boolean
   onLockChange?: (locked: boolean) => void
+  mobileInputRef?: { current: MobileInputRef | null }
 }
 
 function collidesWithPartition(
@@ -50,6 +59,7 @@ export default function PlayerController({
   partitions = [],
   enabled = true,
   onLockChange,
+  mobileInputRef,
 }: PlayerControllerProps) {
   const { camera, gl } = useThree()
   const keysRef = useRef<Record<string, boolean>>({})
@@ -61,12 +71,15 @@ export default function PlayerController({
   const forward = useRef(new THREE.Vector3())
   const right = useRef(new THREE.Vector3())
   const movement = useRef(new THREE.Vector3())
+  const velocity = useRef(new THREE.Vector3())
 
   useEffect(() => {
-    camera.position.set(0, EYE_HEIGHT, 0)
+    const entranceZ = roomLength / 2 - 1.2
+    camera.position.set(0, EYE_HEIGHT, entranceZ)
     yawRef.current = 0
     pitchRef.current = 0
-    camera.rotation.set(0, 0, 0)
+    const euler = new THREE.Euler(0, 0, 0, "YXZ")
+    camera.quaternion.setFromEuler(euler)
   }, [camera, roomLength])
 
   const updateCameraRotation = useCallback(() => {
@@ -151,6 +164,15 @@ export default function PlayerController({
     const isRunning = keys["ShiftLeft"] || keys["ShiftRight"]
     const speed = isRunning ? RUN_SPEED : WALK_SPEED
 
+    if (mobileInputRef?.current) {
+      const mi = mobileInputRef.current
+      yawRef.current -= mi.lookX * MOUSE_SENSITIVITY * 60
+      pitchRef.current -= mi.lookY * MOUSE_SENSITIVITY * 60
+      mi.lookX = 0
+      mi.lookY = 0
+      updateCameraRotation()
+    }
+
     if (keys["ArrowLeft"]) {
       yawRef.current += ARROW_ROTATE_SPEED * delta
       updateCameraRotation()
@@ -174,6 +196,11 @@ export default function PlayerController({
     right.current.crossVectors(forward.current, new THREE.Vector3(0, 1, 0)).normalize()
 
     movement.current.set(0, 0, 0)
+    if (mobileInputRef?.current) {
+      const mi = mobileInputRef.current
+      if (mi.forward !== 0) movement.current.addScaledVector(forward.current, mi.forward)
+      if (mi.strafe !== 0) movement.current.addScaledVector(right.current, mi.strafe)
+    }
     if (keys["KeyW"]) movement.current.add(forward.current)
     if (keys["KeyS"]) movement.current.sub(forward.current)
     if (keys["KeyA"]) movement.current.sub(right.current)
@@ -181,11 +208,16 @@ export default function PlayerController({
 
     if (movement.current.lengthSq() > 0) {
       movement.current.normalize()
+      velocity.current.lerp(movement.current, Math.min(1, MOVE_SMOOTH * delta))
+    } else {
+      velocity.current.lerp(new THREE.Vector3(0, 0, 0), Math.min(1, MOVE_SMOOTH * delta))
+    }
 
-      const prevX = camera.position.x
-      const prevZ = camera.position.z
-
-      camera.position.addScaledVector(movement.current, speed * delta)
+    const prevX = camera.position.x
+    const prevZ = camera.position.z
+    const step = velocity.current.clone().multiplyScalar(speed * delta)
+    if (step.lengthSq() > 1e-6) {
+      camera.position.add(step)
 
       const minX = -roomWidth / 2 + BOUNDS_MARGIN
       const maxX = roomWidth / 2 - BOUNDS_MARGIN

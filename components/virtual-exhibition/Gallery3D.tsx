@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "rea
 import { Canvas } from "@react-three/fiber"
 import GalleryRoom from "./GalleryRoom"
 import ArtworkFrame from "./ArtworkFrame"
-import PlayerController from "./PlayerController"
+import PlayerController, { type MobileInputRef } from "./PlayerController"
 import GalleryLighting from "./GalleryLighting"
 import MobileControls from "./MobileControls"
 import Minimap from "./Minimap"
@@ -57,6 +57,7 @@ export default function Gallery3D({
   const canvasContainerRef = useRef<HTMLDivElement>(null)
   const [playerPos, setPlayerPos] = useState({ x: 0, z: 0 })
   const [playerRot, setPlayerRot] = useState(0)
+  const mobileInputRef = useRef<MobileInputRef>({ forward: 0, strafe: 0, lookX: 0, lookY: 0 })
 
   const resolvedTheme: ThemeId =
     theme === "dark" || theme === "concrete" || theme === "wood" ? theme : "white"
@@ -112,6 +113,7 @@ export default function Gallery3D({
   }, [])
 
   const cameraFar = Math.max(100, length * 2)
+  const entranceZ = length / 2 - 1.2
 
   return (
     <div ref={canvasContainerRef} style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden" }}>
@@ -136,7 +138,7 @@ export default function Gallery3D({
       >
         <Canvas
           shadows
-          camera={{ fov: 60, near: 0.1, far: cameraFar, position: [0, 1.7, 0] }}
+          camera={{ fov: 60, near: 0.1, far: cameraFar, position: [0, 1.8, entranceZ] }}
           dpr={[1, 2]}
           style={{ width: "100vw", height: "100vh", display: "block" }}
         >
@@ -168,6 +170,7 @@ export default function Gallery3D({
             roomHeight={height}
             partitions={layout.partitions}
             onLockChange={handleLockChange}
+            mobileInputRef={mobileInputRef}
           />
         </Canvas>
       </Suspense>
@@ -344,8 +347,16 @@ export default function Gallery3D({
       />
 
       <MobileControls
-        onMove={() => {}}
-        onLook={() => {}}
+        onMove={(forward, strafe) => {
+          const r = mobileInputRef.current
+          r.forward = forward
+          r.strafe = strafe
+        }}
+        onLook={(deltaX, deltaY) => {
+          const r = mobileInputRef.current
+          r.lookX += deltaX
+          r.lookY += deltaY
+        }}
         visible={isMobile && !selectedArtwork}
       />
     </div>
