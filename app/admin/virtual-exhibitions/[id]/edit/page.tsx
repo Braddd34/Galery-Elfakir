@@ -420,16 +420,18 @@ export default function EditVirtualExhibitionPage() {
             <span className="text-neutral-400 text-sm">{placedArtworks.length} œuvre(s) placée(s) — Layout : {LAYOUT_META[selectedLayout].name}</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            <div className="space-y-2">
-              <p className="text-neutral-500 text-sm">
-                Plan : chaque cadre = une œuvre. Les murs et cloisons sont nommés pour repérer.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            <div className="flex flex-col min-h-[320px]">
+              <p className="text-neutral-500 text-sm mb-2">
+                Plan : chaque cadre = une œuvre. Murs et cloisons nommés.
               </p>
-              <FloorPlanSvg layout={layout} placedArtworks={placedArtworks} getSegmentLabel={getSegmentLabel} />
+              <div className="flex-1 min-h-[280px]">
+                <FloorPlanSvg layout={layout} placedArtworks={placedArtworks} getSegmentLabel={getSegmentLabel} />
+              </div>
             </div>
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-neutral-400">Œuvres par mur</h3>
-              <div className="space-y-6 max-h-[28rem] overflow-y-auto">
+            <div className="flex flex-col min-h-[320px]">
+              <h3 className="text-sm font-medium text-neutral-400 mb-2">Œuvres par mur</h3>
+              <div className="flex-1 min-h-[280px] overflow-y-auto space-y-4">
               {layout.allSegments.map((seg) => {
                 const onThisWall = placedArtworks.filter((p) => p.wall === seg.id)
                 if (onThisWall.length === 0) return null
@@ -531,21 +533,22 @@ export default function EditVirtualExhibitionPage() {
   )
 }
 
-function segmentLabelOffset(segmentId: string, rotationY: number): { dx: number; dy: number } {
-  const d = 14
+function wallLabelOffset(segmentId: string): { dx: number; dy: number } {
+  const d = 16
   if (segmentId === "north") return { dx: 0, dy: d }
   if (segmentId === "east") return { dx: d, dy: 0 }
   if (segmentId === "west") return { dx: -d, dy: 0 }
   if (segmentId === "south-left" || segmentId === "south-right") return { dx: 0, dy: -d }
-  if (segmentId.endsWith("-a")) {
-    const o = 12
-    return { dx: -o * Math.sin(rotationY), dy: -o * Math.cos(rotationY) }
-  }
-  if (segmentId.endsWith("-b")) {
-    const o = 12
-    return { dx: o * Math.sin(rotationY), dy: o * Math.cos(rotationY) }
-  }
   return { dx: 0, dy: 0 }
+}
+
+function planWallLabel(segmentId: string): string {
+  if (segmentId === "north") return "Nord"
+  if (segmentId === "east") return "Est"
+  if (segmentId === "west") return "Ouest"
+  if (segmentId === "south-left") return "Sud g."
+  if (segmentId === "south-right") return "Sud d."
+  return ""
 }
 
 function FloorPlanSvg({
@@ -572,7 +575,7 @@ function FloorPlanSvg({
   }
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full border border-neutral-700 bg-neutral-950 rounded">
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" className="w-full border border-neutral-700 bg-neutral-950 rounded" style={{ fontFamily: "system-ui, sans-serif" }}>
       <rect x={padding} y={padding} width={room.width * scale} height={room.length * scale} fill="none" stroke="#555" strokeWidth={2} />
       {(() => {
         const doorW = 2 * scale
@@ -587,22 +590,23 @@ function FloorPlanSvg({
         const p2 = toSvg(isH ? cx + hw : cx, isH ? cz : cz + hw)
         return <line key={part.id} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#666" strokeWidth={3} strokeLinecap="round" />
       })}
-      {layout.allSegments.map((seg) => {
+      {layout.outerWalls.map((seg) => {
+        const short = planWallLabel(seg.id)
+        if (!short) return null
         const pt = toSvg(seg.position[0], seg.position[2])
-        const off = segmentLabelOffset(seg.id, seg.rotation[1])
-        const label = getSegmentLabel(seg.id)
-        const isPart = seg.id.endsWith("-a") || seg.id.endsWith("-b")
+        const off = wallLabelOffset(seg.id)
         return (
-          <text
-            key={seg.id}
-            x={pt.x + off.dx}
-            y={pt.y + off.dy}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#888"
-            fontSize={isPart ? 8 : 9}
-          >
-            {label}
+          <text key={seg.id} x={pt.x + off.dx} y={pt.y + off.dy} textAnchor="middle" dominantBaseline="middle" fill="#888" fontSize={9}>
+            {short}
+          </text>
+        )
+      })}
+      {partitions.map((part) => {
+        const pt = toSvg(part.position[0], part.position[2])
+        const num = part.id.replace(/\D/g, "") || "0"
+        return (
+          <text key={part.id} x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle" fill="#666" fontSize={8}>
+            {`Cloison ${num}`}
           </text>
         )
       })}
@@ -614,7 +618,7 @@ function FloorPlanSvg({
         let pt = toSvg(seg.position[0] + localX * cosR, seg.position[2] - localX * sinR)
         const isPartition = p.wall.endsWith("-a") || p.wall.endsWith("-b")
         if (isPartition) {
-          const offsetPx = 18
+          const offsetPx = 22
           const dx = -offsetPx * Math.sin(seg.rotation[1])
           const dy = -offsetPx * Math.cos(seg.rotation[1])
           if (p.wall.endsWith("-a")) {
@@ -623,11 +627,10 @@ function FloorPlanSvg({
             pt = { x: pt.x - dx, y: pt.y - dy }
           }
         }
-        const label = p.artwork.title.length > 12 ? p.artwork.title.slice(0, 11) + "…" : p.artwork.title
-        const isPart = p.wall.endsWith("-a") || p.wall.endsWith("-b")
-        const boxW = isPart ? 36 : 44
-        const boxH = isPart ? 22 : 28
-        const fontSize = isPart ? 7 : 8
+        const label = p.artwork.title.length > 10 ? p.artwork.title.slice(0, 9) + "…" : p.artwork.title
+        const boxW = 24
+        const boxH = 14
+        const fontSize = 6
         return (
           <g key={p.artworkId} transform={`translate(${pt.x}, ${pt.y})`}>
             <rect x={-boxW / 2} y={-boxH / 2} width={boxW} height={boxH} rx={2} fill="#1a1a1a" stroke="#d4af37" strokeWidth={1.2} />
