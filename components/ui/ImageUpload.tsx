@@ -9,9 +9,21 @@ interface ImageUploadProps {
   disabled?: boolean
 }
 
+// URL d’affichage : passer par le proxy pour les images S3 (bucket souvent privé)
+const FALLBACK_IMAGE = "/avatar-placeholder.svg"
+
+function getDisplayUrl(url: string): string {
+  if (!url || !url.startsWith("http")) return FALLBACK_IMAGE
+  if (url.includes("amazonaws.com")) {
+    return `/api/image-proxy?url=${encodeURIComponent(url)}`
+  }
+  return url
+}
+
 export default function ImageUpload({ images, onChange, maxImages = 5, disabled = false }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState("")
+  const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,9 +105,10 @@ export default function ImageUpload({ images, onChange, maxImages = 5, disabled 
           {images.map((image, index) => (
             <div key={index} className="relative aspect-square bg-neutral-900">
               <img
-                src={image.url}
+                src={loadErrors[image.url] ? FALLBACK_IMAGE : getDisplayUrl(image.url)}
                 alt={`Image ${index + 1}`}
                 className="w-full h-full object-cover"
+                onError={() => setLoadErrors((prev) => ({ ...prev, [image.url]: true }))}
               />
               {!disabled && (
               <button
