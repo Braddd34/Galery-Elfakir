@@ -618,7 +618,7 @@ function FloorPlanSvg({
         let pt = toSvg(seg.position[0] + localX * cosR, seg.position[2] - localX * sinR)
         const isPartition = p.wall.endsWith("-a") || p.wall.endsWith("-b")
         if (isPartition) {
-          const offsetPx = 22
+          const offsetPx = 34
           const dx = -offsetPx * Math.sin(seg.rotation[1])
           const dy = -offsetPx * Math.cos(seg.rotation[1])
           if (p.wall.endsWith("-a")) {
@@ -627,8 +627,12 @@ function FloorPlanSvg({
             pt = { x: pt.x - dx, y: pt.y - dy }
           }
         }
-        const label = p.artwork.title.length > 10 ? p.artwork.title.slice(0, 9) + "…" : p.artwork.title
-        const boxW = 24
+        const rawTitle = p.artwork.title.length > 8 ? p.artwork.title.slice(0, 7) + "…" : p.artwork.title
+        const isPart = p.wall.endsWith("-a") || p.wall.endsWith("-b")
+        const label = isPart
+          ? (p.wall.endsWith("-a") ? "A: " : "B: ") + rawTitle
+          : rawTitle
+        const boxW = isPart ? 28 : 24
         const boxH = 14
         const fontSize = 6
         return (
@@ -638,10 +642,6 @@ function FloorPlanSvg({
           </g>
         )
       })}
-      <text x={w / 2} y={padding - 5} textAnchor="middle" fill="#888" fontSize={10}>Sud</text>
-      <text x={w / 2} y={h - padding + 14} textAnchor="middle" fill="#888" fontSize={10}>Nord</text>
-      <text x={padding - 5} y={h / 2} textAnchor="end" fill="#888" fontSize={10} dominantBaseline="middle">O</text>
-      <text x={w - padding + 5} y={h / 2} textAnchor="start" fill="#888" fontSize={10} dominantBaseline="middle">E</text>
     </svg>
   )
 }
