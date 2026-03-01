@@ -627,9 +627,9 @@ export default function NewVirtualExhibitionPage() {
 /* Floor Plan 2D Component                                                */
 /* ====================================================================== */
 
-/** Offset en pixels pour placer le label d’un mur à l’extérieur (murs uniquement, pas les faces de cloison) */
+/** Offset en pixels pour placer le label d’un mur à l’extérieur (marge pour ne pas rogner Est/Ouest) */
 function wallLabelOffset(segmentId: string): { dx: number; dy: number } {
-  const d = 16
+  const d = 20
   if (segmentId === "north") return { dx: 0, dy: d }
   if (segmentId === "east") return { dx: d, dy: 0 }
   if (segmentId === "west") return { dx: -d, dy: 0 }
@@ -660,15 +660,16 @@ function FloorPlan({
 }) {
   const { room, partitions } = layout
   const padding = 20
+  const labelMargin = 28
   const maxW = 560
-  const scale = Math.min((maxW - padding * 2) / room.width, 300 / room.length)
-  const w = room.width * scale + padding * 2
-  const h = room.length * scale + padding * 2
+  const scale = Math.min((maxW - padding * 2 - labelMargin * 2) / room.width, 300 / room.length)
+  const w = room.width * scale + padding * 2 + labelMargin * 2
+  const h = room.length * scale + padding * 2 + labelMargin * 2
 
   function toSvg(worldX: number, worldZ: number) {
     return {
-      x: padding + (room.width / 2 + worldX) * scale,
-      y: padding + (room.length / 2 - worldZ) * scale,
+      x: padding + labelMargin + (room.width / 2 + worldX) * scale,
+      y: padding + labelMargin + (room.length / 2 - worldZ) * scale,
     }
   }
 
@@ -676,8 +677,8 @@ function FloorPlan({
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" className="w-full border border-neutral-700 bg-neutral-950 rounded" style={{ fontFamily: "system-ui, sans-serif" }}>
       {/* Room outline */}
       <rect
-        x={padding}
-        y={padding}
+        x={padding + labelMargin}
+        y={padding + labelMargin}
         width={room.width * scale}
         height={room.length * scale}
         fill="none"
@@ -688,8 +689,8 @@ function FloorPlan({
       {/* Porte (trou dans le mur sud = bord haut du plan) */}
       {(() => {
         const doorW = 2 * scale
-        const cx = padding + (room.width * scale) / 2
-        const ySouth = padding
+        const cx = padding + labelMargin + (room.width * scale) / 2
+        const ySouth = padding + labelMargin
         return (
           <line x1={cx - doorW / 2} y1={ySouth} x2={cx + doorW / 2} y2={ySouth} stroke="#111" strokeWidth={3} />
         )
@@ -770,14 +771,10 @@ function FloorPlan({
         let pt = toSvg(wx, wz)
         const isPartition = p.wall.endsWith("-a") || p.wall.endsWith("-b")
         if (isPartition) {
-          const offsetPx = 34
+          const offsetPx = 38
           const dx = -offsetPx * Math.sin(seg.rotation[1])
           const dy = -offsetPx * Math.cos(seg.rotation[1])
-          if (p.wall.endsWith("-a")) {
-            pt = { x: pt.x + dx, y: pt.y + dy }
-          } else {
-            pt = { x: pt.x - dx, y: pt.y - dy }
-          }
+          pt = { x: pt.x + dx, y: pt.y + dy }
         }
         const rawTitle = p.artwork.title.length > 8 ? p.artwork.title.slice(0, 7) + "…" : p.artwork.title
         const isPart = p.wall.endsWith("-a") || p.wall.endsWith("-b")
