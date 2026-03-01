@@ -606,7 +606,7 @@ function FloorPlanSvg({
         const pt = toSvg(part.position[0], part.position[2])
         const num = part.id.replace(/\D/g, "") || "0"
         const isHoriz = Math.abs(part.rotationY) < 0.01
-        const labelOffset = 14
+        const labelOffset = 48
         const offX = isHoriz ? 0 : labelOffset
         const offY = isHoriz ? -labelOffset : 0
         return (
