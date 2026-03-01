@@ -745,21 +745,29 @@ function FloorPlan({
         const pt = toSvg(part.position[0], part.position[2])
         const num = part.id.replace(/\D/g, "") || "0"
         const isHoriz = Math.abs(part.rotationY) < 0.01
-        const labelOffset = 48
-        const offX = isHoriz ? 0 : labelOffset
-        const offY = isHoriz ? -labelOffset : 0
+        const cloisonOffset = 8
+        const offX = isHoriz ? 0 : cloisonOffset
+        const offY = isHoriz ? -cloisonOffset : 0
+        const [segA, segB] = part.segments
+        const faceOffset = 12
+        const dxA = -faceOffset * Math.sin(segA.rotation[1])
+        const dyA = -faceOffset * Math.cos(segA.rotation[1])
+        const dxB = -faceOffset * Math.sin(segB.rotation[1])
+        const dyB = -faceOffset * Math.cos(segB.rotation[1])
+        const ptA = toSvg(segA.position[0], segA.position[2])
+        const ptB = toSvg(segB.position[0], segB.position[2])
         return (
-          <text
-            key={part.id}
-            x={pt.x + offX}
-            y={pt.y + offY}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#777"
-            fontSize={8}
-          >
-            {`Cloison ${num}`}
-          </text>
+          <g key={part.id}>
+            <text x={pt.x + offX} y={pt.y + offY} textAnchor="middle" dominantBaseline="middle" fill="#777" fontSize={8}>
+              {`Cloison ${num}`}
+            </text>
+            <text x={ptA.x + dxA} y={ptA.y + dyA} textAnchor="middle" dominantBaseline="middle" fill="#666" fontSize={7}>
+              Face A
+            </text>
+            <text x={ptB.x + dxB} y={ptB.y + dyB} textAnchor="middle" dominantBaseline="middle" fill="#666" fontSize={7}>
+              Face B
+            </text>
+          </g>
         )
       })}
 
