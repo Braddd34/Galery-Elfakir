@@ -129,7 +129,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               prose-strong:text-white
               prose-img:rounded-none
               prose-blockquote:border-neutral-700 prose-blockquote:text-neutral-400"
-            dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(post.content ?? "") }}
+            dangerouslySetInnerHTML={{ __html: await sanitizeBlogHtml(post.content ?? "") }}
           />
 
           {/* Back link */}

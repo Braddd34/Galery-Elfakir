@@ -1,8 +1,7 @@
-import DOMPurify from "isomorphic-dompurify"
-
 /**
  * Sanitise une chaîne de texte simple (titres, noms, messages, etc.) pour éviter l'injection XSS.
- * Échappe les caractères spéciaux HTML.
+ * Échappe les caractères spéciaux HTML. N'utilise pas DOMPurify pour éviter de charger jsdom
+ * dans les API routes (provoque ENOENT sur Vercel au build).
  */
 export function sanitize(text: string): string {
   if (!text || typeof text !== "string") return ""
@@ -14,10 +13,6 @@ export function sanitize(text: string): string {
     .replace(/'/g, "&#x27;")
 }
 
-/**
- * Liste de tags et attributs autorisés pour le contenu riche (ex. articles de blog).
- * Réduit le risque XSS tout en gardant le formatage (titres, liens, images).
- */
 const BLOG_ALLOWED_TAGS = [
   "p", "br", "strong", "em", "u", "s", "h1", "h2", "h3", "h4", "h5", "h6",
   "ul", "ol", "li", "blockquote", "pre", "code", "a", "img", "span", "div",
@@ -30,9 +25,11 @@ const BLOG_ALLOWED_ATTR = [
 
 /**
  * Sanitise du HTML pour l'affichage dans le blog (évite XSS).
+ * DOMPurify est chargé dynamiquement pour ne pas impacter les API qui n'utilisent que sanitize().
  */
-export function sanitizeBlogHtml(html: string): string {
+export async function sanitizeBlogHtml(html: string): Promise<string> {
   if (!html || typeof html !== "string") return ""
+  const DOMPurify = (await import("isomorphic-dompurify")).default
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: BLOG_ALLOWED_TAGS,
     ALLOWED_ATTR: BLOG_ALLOWED_ATTR,
