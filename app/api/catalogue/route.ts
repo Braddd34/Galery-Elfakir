@@ -104,9 +104,8 @@ export async function GET(req: NextRequest) {
               bio: true,
               country: true,
               city: true,
-              profileImage: true,
               user: {
-                select: { name: true }
+                select: { name: true, image: true }
               }
             }
           }

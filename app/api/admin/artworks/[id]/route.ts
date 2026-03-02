@@ -24,9 +24,8 @@ export async function GET(
             bio: true,
             country: true,
             city: true,
-            profileImage: true,
             user: {
-              select: { name: true }
+              select: { name: true, image: true }
             }
           }
         }

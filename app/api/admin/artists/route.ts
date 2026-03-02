@@ -26,7 +26,6 @@ export async function GET() {
         website: true,
         instagram: true,
         phone: true,
-        profileImage: true,
         twitter: true,
         facebook: true,
         linkedin: true,
@@ -36,6 +35,7 @@ export async function GET() {
           select: {
             name: true,
             email: true,
+            image: true,
           }
         }
       },
