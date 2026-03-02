@@ -8,10 +8,21 @@ export async function PUT(
   try {
     const { id: exhibitionId, analyticsId } = params
 
+    const body = await request.json()
+    const { sessionId, duration, artworkClicks, cartAdds, exitedAt } = body
+
+    if (!sessionId || typeof sessionId !== "string") {
+      return NextResponse.json(
+        { error: "sessionId requis" },
+        { status: 400 }
+      )
+    }
+
     const analytics = await prisma.exhibitionAnalytics.findFirst({
       where: {
         id: analyticsId,
         exhibitionId,
+        sessionId,
       },
     })
 
@@ -22,18 +33,11 @@ export async function PUT(
       )
     }
 
-    const body = await request.json()
-    const { duration, artworkClicks, cartAdds, exitedAt } = body
-
     const data: Record<string, unknown> = {}
-    if (duration !== undefined) data.duration = duration
-    if (artworkClicks !== undefined) data.artworkClicks = artworkClicks
-    if (cartAdds !== undefined) data.cartAdds = cartAdds
-    if (exitedAt !== undefined) {
-      data.exitedAt = exitedAt ? new Date(exitedAt) : new Date()
-    } else {
-      data.exitedAt = new Date()
-    }
+    if (typeof duration === "number" && duration >= 0) data.duration = duration
+    if (typeof artworkClicks === "number" && artworkClicks >= 0) data.artworkClicks = artworkClicks
+    if (typeof cartAdds === "number" && cartAdds >= 0) data.cartAdds = cartAdds
+    data.exitedAt = exitedAt ? new Date(exitedAt) : new Date()
 
     await prisma.exhibitionAnalytics.update({
       where: { id: analyticsId },

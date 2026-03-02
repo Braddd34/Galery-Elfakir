@@ -99,7 +99,12 @@ export async function GET(req: NextRequest) {
         take: limit,
         include: {
           artist: {
-            include: {
+            select: {
+              id: true,
+              bio: true,
+              country: true,
+              city: true,
+              profileImage: true,
               user: {
                 select: { name: true }
               }

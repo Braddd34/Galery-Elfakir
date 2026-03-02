@@ -102,6 +102,15 @@ export const formLimiter = rateLimit({
 })
 
 /**
+ * Limiteur pré-configuré pour le proxy d'images.
+ * Maximum 60 requêtes par minute par IP (les pages chargent plusieurs images).
+ */
+export const imageProxyLimiter = rateLimit({
+  interval: 60 * 1000,
+  uniqueTokenPerInterval: 1000
+})
+
+/**
  * Extraire l'IP du client depuis les headers de la requête.
  */
 export function getClientIP(request: Request): string {

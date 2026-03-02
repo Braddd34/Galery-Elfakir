@@ -43,13 +43,17 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
   
-  // Rewrite : les images S3 passent par notre domaine
-  // /img/artworks/fichier.jpg → S3 bucket
+  // Rewrite : seuls les préfixes autorisés (artworks/, profile/) passent vers S3.
+  // Empêche le path traversal vers d'autres clés du bucket.
   async rewrites() {
     return [
       {
-        source: "/img/:path*",
-        destination: `https://elfakir-gallery.s3.eu-west-3.amazonaws.com/:path*`,
+        source: "/img/artworks/:path*",
+        destination: `https://elfakir-gallery.s3.eu-west-3.amazonaws.com/artworks/:path*`,
+      },
+      {
+        source: "/img/profile/:path*",
+        destination: `https://elfakir-gallery.s3.eu-west-3.amazonaws.com/profile/:path*`,
       },
     ]
   },

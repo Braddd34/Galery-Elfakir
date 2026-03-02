@@ -19,7 +19,12 @@ export async function GET(
       where: { id: params.id },
       include: {
         artist: {
-          include: {
+          select: {
+            id: true,
+            bio: true,
+            country: true,
+            city: true,
+            profileImage: true,
             user: {
               select: { name: true }
             }

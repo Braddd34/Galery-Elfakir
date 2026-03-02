@@ -23,9 +23,12 @@ const BLOG_ALLOWED_ATTR = [
   "href", "title", "target", "rel", "src", "alt", "width", "height", "class",
 ]
 
+const SAFE_URI_REGEXP = /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+
 /**
  * Sanitise du HTML pour l'affichage dans le blog (évite XSS).
  * DOMPurify est chargé dynamiquement pour ne pas impacter les API qui n'utilisent que sanitize().
+ * ALLOWED_URI_REGEXP bloque les protocoles dangereux (javascript:, data:, vbscript:, etc.).
  */
 export async function sanitizeBlogHtml(html: string): Promise<string> {
   if (!html || typeof html !== "string") return ""
@@ -33,5 +36,6 @@ export async function sanitizeBlogHtml(html: string): Promise<string> {
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: BLOG_ALLOWED_TAGS,
     ALLOWED_ATTR: BLOG_ALLOWED_ATTR,
+    ALLOWED_URI_REGEXP: SAFE_URI_REGEXP,
   })
 }

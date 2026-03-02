@@ -17,7 +17,21 @@ export async function GET() {
           status: "ACTIVE"
         }
       },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        bio: true,
+        country: true,
+        city: true,
+        website: true,
+        instagram: true,
+        phone: true,
+        profileImage: true,
+        twitter: true,
+        facebook: true,
+        linkedin: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             name: true,

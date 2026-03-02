@@ -15,7 +15,25 @@ export async function GET() {
     }
 
     const profile = await prisma.buyerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+        userId: true,
+        firstName: true,
+        lastName: true,
+        address: true,
+        city: true,
+        postalCode: true,
+        country: true,
+        phone: true,
+        notifyNewArtworks: true,
+        notifyPriceDrops: true,
+        notifyArtistNews: true,
+        notifyNewsletter: true,
+        notifyOrderUpdates: true,
+        createdAt: true,
+        updatedAt: true,
+      }
     })
 
     return NextResponse.json(profile)
@@ -57,14 +75,33 @@ export async function PUT(request: Request) {
       phone: valid.phone || null
     }
     
-    // Créer ou mettre à jour le profil
+    const selectFields = {
+      id: true,
+      userId: true,
+      firstName: true,
+      lastName: true,
+      address: true,
+      city: true,
+      postalCode: true,
+      country: true,
+      phone: true,
+      notifyNewArtworks: true,
+      notifyPriceDrops: true,
+      notifyArtistNews: true,
+      notifyNewsletter: true,
+      notifyOrderUpdates: true,
+      createdAt: true,
+      updatedAt: true,
+    } as const
+
     const profile = await prisma.buyerProfile.upsert({
       where: { userId: session.user.id },
       update: sanitizedData,
       create: {
         userId: session.user.id,
         ...sanitizedData
-      }
+      },
+      select: selectFields,
     })
 
     return NextResponse.json(profile)

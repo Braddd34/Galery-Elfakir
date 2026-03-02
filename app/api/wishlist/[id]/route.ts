@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
 
-// GET - Récupérer une wishlist publique par userId
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+
     const userId = params.id
-    
-    // Récupérer l'utilisateur et ses favoris
+
+    if (userId !== session.user.id && session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 })
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -35,15 +44,14 @@ export async function GET(
         }
       }
     })
-    
+
     if (!user) {
       return NextResponse.json(
         { error: "Utilisateur non trouvé" },
         { status: 404 }
       )
     }
-    
-    // Ne retourner que les œuvres disponibles
+
     const wishlist = user.favorites
       .filter(fav => fav.artwork.status === "AVAILABLE")
       .map(fav => ({
@@ -57,7 +65,7 @@ export async function GET(
         artistName: fav.artwork.artist.user.name || "Artiste",
         addedAt: fav.createdAt
       }))
-    
+
     return NextResponse.json({
       userName: user.name,
       userImage: user.image,

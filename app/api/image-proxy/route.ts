@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getKeyFromUrl, isOurS3Url, validateS3Key, getObjectStream } from "@/lib/s3"
+import { imageProxyLimiter, getClientIP } from "@/lib/rate-limit"
 
-/**
- * GET /api/image-proxy?url=...
- * Sert une image stockée sur notre bucket S3 (lecture avec les identifiants serveur).
- * Utilisé quand le bucket n’est pas public pour afficher les photos de profil, etc.
- */
 export async function GET(request: NextRequest) {
   try {
+    const ip = getClientIP(request)
+    const { success } = await imageProxyLimiter.check(ip, 60)
+    if (!success) {
+      return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 })
+    }
+
     const url = request.nextUrl.searchParams.get("url")
     if (!url || typeof url !== "string") {
       return NextResponse.json({ error: "Paramètre url manquant" }, { status: 400 })
@@ -36,7 +38,6 @@ export async function GET(request: NextRequest) {
     headers.set("Content-Type", contentType)
     headers.set("Cache-Control", "public, max-age=86400")
 
-    // Lire le stream en buffer (évite conflits de types ReadableStream Node vs Web)
     const chunks: Uint8Array[] = []
     for await (const chunk of result.Body as AsyncIterable<Uint8Array>) {
       chunks.push(chunk)

@@ -134,11 +134,14 @@ export async function GET() {
     const artworks = await prisma.artwork.findMany({
       include: {
         artist: {
-          include: {
+          select: {
+            id: true,
+            bio: true,
+            country: true,
+            city: true,
+            profileImage: true,
             user: {
-              select: {
-                name: true,
-              }
+              select: { name: true }
             }
           }
         }

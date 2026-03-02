@@ -15,7 +15,25 @@ export async function GET() {
     }
 
     const profile = await prisma.artistProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+        userId: true,
+        bio: true,
+        country: true,
+        city: true,
+        website: true,
+        instagram: true,
+        phone: true,
+        profileImage: true,
+        twitter: true,
+        facebook: true,
+        linkedin: true,
+        siret: true,
+        vatNumber: true,
+        createdAt: true,
+        updatedAt: true,
+      }
     })
 
     return NextResponse.json(profile)
@@ -61,6 +79,24 @@ export async function PUT(request: Request) {
         linkedin: valid.linkedin ? sanitize(valid.linkedin) : valid.linkedin || null,
         siret: valid.siret || null,
         vatNumber: valid.vatNumber ? sanitize(valid.vatNumber) : valid.vatNumber || null,
+      },
+      select: {
+        id: true,
+        userId: true,
+        bio: true,
+        country: true,
+        city: true,
+        website: true,
+        instagram: true,
+        phone: true,
+        profileImage: true,
+        twitter: true,
+        facebook: true,
+        linkedin: true,
+        siret: true,
+        vatNumber: true,
+        createdAt: true,
+        updatedAt: true,
       }
     })
 
