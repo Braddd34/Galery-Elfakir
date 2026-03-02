@@ -1,6 +1,20 @@
 import DOMPurify from "isomorphic-dompurify"
 
 /**
+ * Sanitise une chaîne de texte simple (titres, noms, messages, etc.) pour éviter l'injection XSS.
+ * Échappe les caractères spéciaux HTML.
+ */
+export function sanitize(text: string): string {
+  if (!text || typeof text !== "string") return ""
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+}
+
+/**
  * Liste de tags et attributs autorisés pour le contenu riche (ex. articles de blog).
  * Réduit le risque XSS tout en gardant le formatage (titres, liens, images).
  */
