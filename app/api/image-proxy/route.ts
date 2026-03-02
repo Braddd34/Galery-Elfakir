@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getKeyFromUrl, isOurS3Url, getObjectStream } from "@/lib/s3"
+import { getKeyFromUrl, isOurS3Url, validateS3Key, getObjectStream } from "@/lib/s3"
 
 /**
  * GET /api/image-proxy?url=...
@@ -18,12 +18,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "URL non autorisée" }, { status: 403 })
     }
 
-    const key = getKeyFromUrl(decoded)
-    if (!key) {
+    const rawKey = getKeyFromUrl(decoded)
+    if (!rawKey) {
       return NextResponse.json({ error: "URL invalide" }, { status: 400 })
     }
+    if (!validateS3Key(rawKey)) {
+      return NextResponse.json({ error: "URL non autorisée" }, { status: 403 })
+    }
 
-    const result = await getObjectStream(key)
+    const result = await getObjectStream(rawKey)
     if (!result.Body) {
       return NextResponse.json({ error: "Image introuvable" }, { status: 404 })
     }

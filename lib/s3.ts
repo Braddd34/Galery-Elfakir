@@ -12,6 +12,28 @@ const s3Client = new S3Client({
 
 const bucketName = process.env.AWS_BUCKET_NAME!
 
+/** Préfixes de clés S3 autorisés pour la lecture (proxy d'images). Évite le path traversal. */
+const ALLOWED_KEY_PREFIXES = ["artworks/", "profile/"]
+
+/**
+ * Valide et normalise une clé S3 pour éviter le path traversal.
+ * Retourne la clé normalisée si elle est autorisée, sinon null.
+ */
+export function validateS3Key(key: string): string | null {
+  if (!key || typeof key !== "string") return null
+  // Interdire les séquences path traversal
+  if (key.includes("..")) return null
+  // Longueur raisonnable
+  if (key.length > 500) return null
+  // Pas de slash initial (pathname peut en avoir un enlevé par getKeyFromUrl)
+  const trimmed = key.replace(/^\/+/, "")
+  if (!trimmed) return null
+  // La clé doit commencer par un préfixe autorisé
+  const allowed = ALLOWED_KEY_PREFIXES.some((p) => trimmed === p || trimmed.startsWith(p + "/") || trimmed.startsWith(p))
+  if (!allowed) return null
+  return trimmed
+}
+
 // Générer une URL signée pour l'upload (le client upload directement vers S3)
 export async function getUploadUrl(filename: string, contentType: string) {
   const key = `artworks/${Date.now()}-${filename}`
@@ -66,9 +88,13 @@ export function isOurS3Url(url: string): boolean {
 
 // Récupérer un objet S3 en stream (pour proxy d’images)
 export async function getObjectStream(key: string) {
+  const safeKey = validateS3Key(key)
+  if (!safeKey) {
+    throw new Error("Clé S3 invalide ou non autorisée")
+  }
   const command = new GetObjectCommand({
     Bucket: bucketName,
-    Key: key,
+    Key: safeKey,
   })
   return s3Client.send(command)
 }

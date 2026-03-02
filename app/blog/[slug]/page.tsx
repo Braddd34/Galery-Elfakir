@@ -3,6 +3,7 @@ import Image from "next/image"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
+import { sanitizeBlogHtml } from "@/lib/sanitize"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 
@@ -128,7 +129,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               prose-strong:text-white
               prose-img:rounded-none
               prose-blockquote:border-neutral-700 prose-blockquote:text-neutral-400"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(post.content ?? "") }}
           />
 
           {/* Back link */}

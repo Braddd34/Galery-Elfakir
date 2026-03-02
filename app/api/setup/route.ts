@@ -13,12 +13,29 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Désactivation après première initialisation réussie (sécurité)
+    const setupDone = await prisma.setting.findUnique({
+      where: { key: "setup_completed" },
+    })
+    if (setupDone) {
+      return NextResponse.json(
+        { error: "L'initialisation a déjà été effectuée. Cette route est désactivée." },
+        { status: 403 }
+      )
+    }
+
     // Vérifier si l'admin existe déjà
     const existingAdmin = await prisma.user.findUnique({
       where: { email: "admin@elfakir.art" }
     })
 
     if (existingAdmin) {
+      // Verrouiller la route pour les prochains appels (même avec le secret)
+      await prisma.setting.upsert({
+        where: { key: "setup_completed" },
+        create: { key: "setup_completed", value: true },
+        update: {},
+      })
       return NextResponse.json({
         message: "Base de données déjà initialisée",
         admin: existingAdmin.email
@@ -177,6 +194,14 @@ export async function GET(request: NextRequest) {
     })
 
     console.log("✅ Paramètres créés")
+
+    // Désactiver définitivement cette route après succès (sécurité)
+    await prisma.setting.create({
+      data: {
+        key: "setup_completed",
+        value: true,
+      },
+    })
 
     return NextResponse.json({
       success: true,
