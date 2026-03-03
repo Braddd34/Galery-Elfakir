@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import SkipLink from "@/components/ui/SkipLink"
 import NetworkStatus from "@/components/ui/NetworkStatus"
 import ServiceWorkerRegister from "@/components/ui/ServiceWorkerRegister"
+import CookieConsent from "@/components/ui/CookieConsent"
 
 export const metadata: Metadata = {
   title: {
@@ -90,6 +91,7 @@ export default function RootLayout({
             </LanguageProvider>
           </ThemeProvider>
         </SessionProvider>
+        <CookieConsent />
         <ServiceWorkerRegister />
         <Analytics />
         <SpeedInsights />
