@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { headers } from "next/headers"
 import "./globals.css"
 import SessionProvider from "@/components/providers/SessionProvider"
 import { CompareProvider } from "@/components/artwork/CompareDrawer"
@@ -51,11 +52,15 @@ export const metadata: Metadata = {
   },
 }
 
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');document.documentElement.style.colorScheme='light'}}catch(e){}})();`
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const nonce = headers().get("x-nonce") ?? undefined
+
   return (
     <html lang="fr" className="dark" suppressHydrationWarning>
       <head>
@@ -65,19 +70,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        {/* Script inline pour éviter le flash de thème au chargement */}
-        <script dangerouslySetInnerHTML={{ __html: `
-          (function() {
-            try {
-              var theme = localStorage.getItem('theme');
-              if (theme === 'light') {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.classList.add('light');
-                document.documentElement.style.colorScheme = 'light';
-              }
-            } catch(e) {}
-          })();
-        `}} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="theme-bg theme-text min-h-screen transition-colors duration-300">
         <SkipLink />

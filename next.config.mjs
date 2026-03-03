@@ -95,10 +95,6 @@ const nextConfig = {
             value: "max-age=31536000; includeSubDomains",
           },
           {
-            key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://images.unsplash.com https://*.public.blob.vercel-storage.com https://s3.eu-west-3.amazonaws.com https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://utfs.io https://*.utfs.io; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://s3.eu-west-3.amazonaws.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
-          },
-          {
             key: "Cross-Origin-Opener-Policy",
             value: "same-origin",
           },

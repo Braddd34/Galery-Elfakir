@@ -1,40 +1,63 @@
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 
+function buildCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: blob: https://images.unsplash.com https://*.public.blob.vercel-storage.com https://s3.eu-west-3.amazonaws.com https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://utfs.io https://*.utfs.io",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https://elfakir-gallery.s3.eu-west-3.amazonaws.com https://s3.eu-west-3.amazonaws.com https://challenges.cloudflare.com",
+    "frame-src https://challenges.cloudflare.com",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ")
+}
+
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token
     const path = req.nextUrl.pathname
 
-    // Routes admin - seulement pour les admins
     if (path.startsWith("/admin")) {
       if (token?.userRole !== "ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url))
       }
     }
 
-    // Routes gestionnaire - pour managers et admins
     if (path.startsWith("/dashboard/manager")) {
       if (token?.userRole !== "MANAGER" && token?.userRole !== "ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url))
       }
     }
 
-    // Routes artiste - pour artistes, managers et admins
     if (path.startsWith("/dashboard/artiste")) {
       if (token?.userRole !== "ARTIST" && token?.userRole !== "MANAGER" && token?.userRole !== "ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url))
       }
     }
 
-    return NextResponse.next()
+    const nonce = Buffer.from(crypto.randomUUID()).toString("base64")
+    const csp = buildCsp(nonce)
+
+    const requestHeaders = new Headers(req.headers)
+    requestHeaders.set("x-nonce", nonce)
+    requestHeaders.set("Content-Security-Policy", csp)
+
+    const response = NextResponse.next({
+      request: { headers: requestHeaders },
+    })
+    response.headers.set("Content-Security-Policy", csp)
+
+    return response
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
         const path = req.nextUrl.pathname
-        
-        // Routes publiques
+
         if (
           path === "/" ||
           path === "/catalogue" ||
@@ -56,7 +79,6 @@ export default withAuth(
           return true
         }
 
-        // Routes protégées - nécessitent un token
         return !!token
       },
     },
@@ -65,14 +87,6 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files
-     * - api routes (setup, etc.)
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\..*|api).*)",
   ],
 }
