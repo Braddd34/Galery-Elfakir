@@ -92,5 +92,5 @@ export default function Turnstile({ onVerify, onExpire }: TurnstileProps) {
 
   if (!SITE_KEY) return null
 
-  return <div ref={containerRef} className="my-3" />
+  return <div ref={containerRef} className="my-4" />
 }
