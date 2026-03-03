@@ -21,13 +21,15 @@ declare global {
   }
 }
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""
+const SITE_KEY = (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "").trim()
 
 export default function Turnstile({ onVerify, onExpire }: TurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
+  const mountedRef = useRef(true)
 
   const renderWidget = useCallback(() => {
+    if (!mountedRef.current) return
     if (!containerRef.current || !window.turnstile || !SITE_KEY) return
     if (widgetIdRef.current) return
 
@@ -35,18 +37,23 @@ export default function Turnstile({ onVerify, onExpire }: TurnstileProps) {
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: SITE_KEY,
         theme: "dark",
-        callback: (token: string) => onVerify(token),
-        "expired-callback": () => onExpire?.(),
+        callback: (token: string) => {
+          if (mountedRef.current) onVerify(token)
+        },
+        "expired-callback": () => {
+          if (mountedRef.current) onExpire?.()
+        },
         "error-callback": () => {
-          console.warn("Turnstile: erreur du widget, login autorisé sans CAPTCHA")
+          console.warn("Turnstile: widget error")
         },
       })
     } catch {
-      console.warn("Turnstile: impossible de rendre le widget")
+      console.warn("Turnstile: render failed")
     }
   }, [onVerify, onExpire])
 
   useEffect(() => {
+    mountedRef.current = true
     if (!SITE_KEY) return
 
     if (window.turnstile) {
@@ -54,24 +61,26 @@ export default function Turnstile({ onVerify, onExpire }: TurnstileProps) {
       return
     }
 
-    const existing = document.querySelector(
-      'script[src*="challenges.cloudflare.com/turnstile"]'
-    )
+    const scriptId = "cf-turnstile-script"
+    const existing = document.getElementById(scriptId)
+
     if (existing) {
       window.onTurnstileLoad = renderWidget
+      if (window.turnstile) renderWidget()
       return
     }
 
     window.onTurnstileLoad = renderWidget
 
     const script = document.createElement("script")
+    script.id = scriptId
     script.src =
       "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit"
     script.async = true
-    script.defer = true
     document.head.appendChild(script)
 
     return () => {
+      mountedRef.current = false
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current)
@@ -83,5 +92,5 @@ export default function Turnstile({ onVerify, onExpire }: TurnstileProps) {
 
   if (!SITE_KEY) return null
 
-  return <div ref={containerRef} className="mt-2" />
+  return <div ref={containerRef} className="my-3" />
 }
