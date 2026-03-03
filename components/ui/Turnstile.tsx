@@ -31,12 +31,19 @@ export default function Turnstile({ onVerify, onExpire }: TurnstileProps) {
     if (!containerRef.current || !window.turnstile || !SITE_KEY) return
     if (widgetIdRef.current) return
 
-    widgetIdRef.current = window.turnstile.render(containerRef.current, {
-      sitekey: SITE_KEY,
-      theme: "dark",
-      callback: (token: string) => onVerify(token),
-      "expired-callback": () => onExpire?.(),
-    })
+    try {
+      widgetIdRef.current = window.turnstile.render(containerRef.current, {
+        sitekey: SITE_KEY,
+        theme: "dark",
+        callback: (token: string) => onVerify(token),
+        "expired-callback": () => onExpire?.(),
+        "error-callback": () => {
+          console.warn("Turnstile: erreur du widget, login autorisé sans CAPTCHA")
+        },
+      })
+    } catch {
+      console.warn("Turnstile: impossible de rendre le widget")
+    }
   }, [onVerify, onExpire])
 
   useEffect(() => {
@@ -47,18 +54,28 @@ export default function Turnstile({ onVerify, onExpire }: TurnstileProps) {
       return
     }
 
+    const existing = document.querySelector(
+      'script[src*="challenges.cloudflare.com/turnstile"]'
+    )
+    if (existing) {
+      window.onTurnstileLoad = renderWidget
+      return
+    }
+
     window.onTurnstileLoad = renderWidget
 
     const script = document.createElement("script")
     script.src =
-      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad"
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit"
     script.async = true
     script.defer = true
     document.head.appendChild(script)
 
     return () => {
       if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current)
+        try {
+          window.turnstile.remove(widgetIdRef.current)
+        } catch { /* ignore */ }
         widgetIdRef.current = null
       }
     }

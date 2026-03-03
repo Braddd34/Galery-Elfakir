@@ -18,7 +18,6 @@ export default function LoginPage() {
   const [serverError, setServerError] = useState("")
   const [loading, setLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState("")
-  const hasTurnstile = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
   const onTurnstileVerify = useCallback((token: string) => {
     setTurnstileToken(token)
@@ -62,15 +61,10 @@ export default function LoginPage() {
       return
     }
 
-    if (hasTurnstile && !turnstileToken) {
-      setServerError("Veuillez compléter la vérification de sécurité.")
-      return
-    }
-
     setLoading(true)
 
     try {
-      if (hasTurnstile && turnstileToken) {
+      if (turnstileToken) {
         const verifyRes = await fetch("/api/auth/verify-turnstile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -180,7 +174,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading || (hasTurnstile && !turnstileToken)}
+              disabled={loading}
               className="w-full bg-white text-black py-4 font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t("login.logging") : t("login.submit")}
