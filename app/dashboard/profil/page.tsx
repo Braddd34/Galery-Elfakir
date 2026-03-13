@@ -251,6 +251,21 @@ export default function ProfilPage() {
           <h2 className="text-xl font-light mb-6">{t("profile.notifications")}</h2>
           <NotificationPreferences />
         </div>
+
+        {/* Section RGPD */}
+        <div className="mt-12 pt-12 border-t border-neutral-800">
+          <h2 className="text-xl font-light mb-6">{t("profile.myData")}</h2>
+          <p className="text-neutral-400 text-sm mb-4">
+            {t("profile.dataExportDesc")}
+          </p>
+          <a
+            href="/api/user/export"
+            download
+            className="inline-block px-6 py-3 border border-neutral-700 text-sm hover:border-white transition-colors"
+          >
+            {t("profile.exportData")}
+          </a>
+        </div>
       </div>
     </main>
   )

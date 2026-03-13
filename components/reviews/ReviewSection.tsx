@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useLanguage } from "@/components/providers/LanguageProvider"
+import { useToast } from "@/lib/toast-context"
 
 interface Review {
   id: string
@@ -11,6 +12,7 @@ interface Review {
   title: string | null
   comment: string | null
   verified: boolean
+  isOwner: boolean
   createdAt: string
   user: {
     name: string | null
@@ -81,11 +83,13 @@ function StarRating({
 export default function ReviewSection({ artworkId }: ReviewSectionProps) {
   const { data: session } = useSession()
   const { t } = useLanguage()
+  const { showToast } = useToast()
   const [reviews, setReviews] = useState<Review[]>([])
   const [stats, setStats] = useState<ReviewStats>({ count: 0, avgRating: 0 })
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [editingReview, setEditingReview] = useState<Review | null>(null)
   const [error, setError] = useState("")
   
   // Formulaire
@@ -94,9 +98,7 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
   const [comment, setComment] = useState("")
   
   // Vérifier si l'utilisateur a déjà laissé un avis
-  const userHasReviewed = reviews.some(r => 
-    session?.user?.id && r.user.name === session.user.name
-  )
+  const userHasReviewed = reviews.some(r => r.isOwner)
   
   useEffect(() => {
     fetchReviews()
@@ -115,6 +117,48 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
     }
   }
   
+  const startEditing = (review: Review) => {
+    setEditingReview(review)
+    setRating(review.rating)
+    setTitle(review.title || "")
+    setComment(review.comment || "")
+    setShowForm(true)
+    setError("")
+  }
+
+  const cancelForm = () => {
+    setShowForm(false)
+    setEditingReview(null)
+    setRating(0)
+    setTitle("")
+    setComment("")
+    setError("")
+  }
+
+  const handleDelete = async (reviewId: string) => {
+    if (!confirm(t("reviews.confirmDelete"))) return
+
+    try {
+      const res = await fetch(`/api/reviews/${reviewId}`, { method: "DELETE" })
+      if (res.ok) {
+        const deleted = reviews.find(r => r.id === reviewId)
+        const newReviews = reviews.filter(r => r.id !== reviewId)
+        setReviews(newReviews)
+        const newCount = stats.count - 1
+        const newAvg = newCount > 0
+          ? Math.round(((stats.avgRating * stats.count) - (deleted?.rating || 0)) / newCount * 10) / 10
+          : 0
+        setStats({ count: newCount, avgRating: newAvg })
+        showToast("Avis supprimé", "success")
+      } else {
+        const data = await res.json()
+        showToast(data.error || "Erreur", "error")
+      }
+    } catch {
+      showToast("Erreur", "error")
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -127,11 +171,15 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
     setError("")
     
     try {
-      const res = await fetch("/api/reviews", {
-        method: "POST",
+      const isEditing = !!editingReview
+      const url = isEditing ? `/api/reviews/${editingReview.id}` : "/api/reviews"
+      const method = isEditing ? "PUT" : "POST"
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          artworkId,
+          ...(isEditing ? {} : { artworkId }),
           rating,
           title: title || null,
           comment: comment || null
@@ -139,16 +187,18 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
       })
       
       if (res.ok) {
-        const newReview = await res.json()
-        setReviews([newReview, ...reviews])
-        setStats({
-          count: stats.count + 1,
-          avgRating: Math.round(((stats.avgRating * stats.count) + rating) / (stats.count + 1) * 10) / 10
-        })
-        setShowForm(false)
-        setRating(0)
-        setTitle("")
-        setComment("")
+        const updatedReview = await res.json()
+        if (isEditing) {
+          setReviews(reviews.map(r => r.id === editingReview.id ? { ...updatedReview, isOwner: true } : r))
+          showToast("Avis modifié", "success")
+        } else {
+          setReviews([{ ...updatedReview, isOwner: true }, ...reviews])
+          setStats({
+            count: stats.count + 1,
+            avgRating: Math.round(((stats.avgRating * stats.count) + rating) / (stats.count + 1) * 10) / 10
+          })
+        }
+        cancelForm()
       } else {
         const data = await res.json()
         setError(data.error || t("common.error"))
@@ -242,11 +292,11 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
               disabled={submitting}
               className="px-6 py-2 bg-white text-black font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50"
             >
-              {submitting ? t("reviews.sending") : t("reviews.submit")}
+              {submitting ? t("reviews.sending") : (editingReview ? t("common.save") : t("reviews.submit"))}
             </button>
             <button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={cancelForm}
               className="px-6 py-2 border border-neutral-700 hover:border-white transition-colors"
             >
               {t("common.cancel")}
@@ -306,6 +356,23 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
               
               {review.comment && (
                 <p className="text-neutral-300 text-sm">{review.comment}</p>
+              )}
+
+              {review.isOwner && (
+                <div className="flex gap-2 mt-3 pt-3 border-t border-neutral-800">
+                  <button
+                    onClick={() => startEditing(review)}
+                    className="text-xs text-neutral-400 hover:text-white transition-colors"
+                  >
+                    {t("common.edit")}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(review.id)}
+                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    {t("common.delete")}
+                  </button>
+                </div>
               )}
             </div>
           ))}

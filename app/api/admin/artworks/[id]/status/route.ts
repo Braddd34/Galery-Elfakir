@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { sendArtworkApprovedEmail } from "@/lib/emails"
 import { notifyArtworkApproved, notifyArtworkRejected } from "@/lib/notifications"
+import { logAudit } from "@/lib/audit"
 
 // PATCH: Changer le statut d'une œuvre rapidement
 export async function PATCH(
@@ -65,6 +66,13 @@ export async function PATCH(
       notifyArtworkRejected(artwork.artist.user.id, artwork.title, comment || undefined)
         .catch(err => console.error("Erreur notification rejet:", err))
     }
+
+    await logAudit({
+      userId: session.user.id,
+      action: "change_artwork_status",
+      target: params.id,
+      details: { newStatus: status, comment }
+    })
 
     return NextResponse.json({ 
       success: true, 

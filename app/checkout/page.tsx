@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { useCart } from "@/lib/cart-context"
 import { useLanguage } from "@/components/providers/LanguageProvider"
 import { trackCartEvent } from "@/lib/cart-tracking"
@@ -312,7 +313,7 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   {cartItems.map(item => (
                     <div key={item.id} className="bg-neutral-900 border border-neutral-800 p-4 flex gap-4">
-                      <img src={item.image} alt={item.title} className="w-20 h-20 object-cover bg-neutral-800" />
+                      <Image src={item.image} alt={item.title} width={80} height={80} className="w-20 h-20 object-cover bg-neutral-800" />
                       <div className="flex-1">
                         <h4 className="font-light">{item.title}</h4>
                         <p className="text-neutral-500 text-sm">{item.artistName}</p>

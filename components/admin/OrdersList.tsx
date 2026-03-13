@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { OrderStatus } from "@prisma/client"
+import { useToast } from "@/lib/toast-context"
 
 interface Order {
   id: string
@@ -46,6 +47,7 @@ const carriers = [
 ]
 
 export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
+  const { showToast } = useToast()
   const [orders, setOrders] = useState(initialOrders)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showShipModal, setShowShipModal] = useState(false)
@@ -91,13 +93,13 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
         setShowShipModal(false)
         setTrackingNumber("")
         setShippingCarrier("")
-        alert("Commande marquée comme expédiée !")
+        showToast("Commande marquée comme expédiée !", "success")
       } else {
         const data = await res.json()
-        alert(data.error || "Erreur lors de l'expédition")
+        showToast(data.error || "Erreur lors de l'expédition", "error")
       }
     } catch (error) {
-      alert("Erreur lors de l'expédition")
+      showToast("Erreur lors de l'expédition", "error")
     } finally {
       setLoading(false)
     }
@@ -117,13 +119,13 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
             ? { ...o, status: "DELIVERED" as OrderStatus, deliveredAt: new Date() }
             : o
         ))
-        alert("Commande marquée comme livrée !")
+        showToast("Commande marquée comme livrée !", "success")
       } else {
         const data = await res.json()
-        alert(data.error || "Erreur")
+        showToast(data.error || "Erreur", "error")
       }
     } catch (error) {
-      alert("Erreur")
+      showToast("Erreur", "error")
     }
   }
 

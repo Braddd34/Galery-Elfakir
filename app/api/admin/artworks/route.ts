@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { logAudit } from "@/lib/audit"
 
 // Générer un slug unique
 function generateSlug(title: string): string {
@@ -103,6 +104,13 @@ export async function POST(request: NextRequest) {
         tags: [],
         publishedAt: status === "AVAILABLE" ? new Date() : null,
       }
+    })
+
+    await logAudit({
+      userId: session.user.id,
+      action: "create_artwork",
+      target: artwork.id,
+      details: { title: artwork.title, artistId }
     })
 
     return NextResponse.json({

@@ -56,5 +56,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Erreur sitemap artistes:", error)
   }
 
-  return [...staticPages, ...artworkPages, ...artistPages]
+  // Pages blog dynamiques
+  let blogPages: MetadataRoute.Sitemap = []
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true }
+    })
+    blogPages = [
+      { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.7 },
+      ...posts.map((p) => ({
+        url: `${baseUrl}/blog/${p.slug}`,
+        lastModified: p.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.6
+      }))
+    ]
+  } catch (error) {
+    console.error("Erreur sitemap blog:", error)
+  }
+
+  // Pages expositions virtuelles dynamiques
+  let exhibitionPages: MetadataRoute.Sitemap = []
+  try {
+    const exhibitions = await prisma.virtualExhibition.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, updatedAt: true }
+    })
+    exhibitionPages = [
+      { url: `${baseUrl}/expositions-virtuelles`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.7 },
+      ...exhibitions.map((e) => ({
+        url: `${baseUrl}/expositions-virtuelles/${e.slug}`,
+        lastModified: e.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.6
+      }))
+    ]
+  } catch (error) {
+    console.error("Erreur sitemap expositions:", error)
+  }
+
+  return [...staticPages, ...artworkPages, ...artistPages, ...blogPages, ...exhibitionPages]
 }

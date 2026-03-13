@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { cleanupProfilePhoto } from "@/lib/s3"
+import { logAudit } from "@/lib/audit"
 
 /**
  * PUT /api/admin/artists/[id]/profile-photo
@@ -45,9 +47,24 @@ export async function PUT(
       )
     }
 
+    // Supprimer l'ancienne photo S3 si elle existe
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { image: true }
+    })
+    if (currentUser?.image) {
+      await cleanupProfilePhoto(currentUser.image)
+    }
+
     await prisma.user.update({
       where: { id: userId },
       data: { image: imageUrl },
+    })
+
+    await logAudit({
+      userId: session.user.id,
+      action: "update_artist_photo",
+      target: userId
     })
 
     return NextResponse.json({ success: true, image: imageUrl })

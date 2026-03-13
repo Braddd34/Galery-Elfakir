@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { cleanupProfilePhoto } from "@/lib/s3"
 
 /**
  * PUT /api/user/profile-photo
@@ -25,6 +26,15 @@ export async function PUT(req: Request) {
         { error: "URL de l'image manquante" },
         { status: 400 }
       )
+    }
+
+    // Supprimer l'ancienne photo S3 si elle existe
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { image: true }
+    })
+    if (currentUser?.image) {
+      await cleanupProfilePhoto(currentUser.image)
     }
 
     // Mettre à jour l'image dans la table User
@@ -63,6 +73,15 @@ export async function DELETE() {
         { error: "Non autorisé" },
         { status: 401 }
       )
+    }
+
+    // Supprimer l'ancienne photo S3 si elle existe
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { image: true }
+    })
+    if (currentUser?.image) {
+      await cleanupProfilePhoto(currentUser.image)
     }
 
     // Supprimer l'image (mettre à null)

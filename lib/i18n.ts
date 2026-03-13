@@ -108,6 +108,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "reviews.noReviews": "Aucun avis pour le moment. Soyez le premier à donner votre avis !",
     "reviews.verifiedPurchase": "Achat vérifié",
     "reviews.ratingRequired": "Veuillez donner une note",
+    "reviews.confirmDelete": "Voulez-vous vraiment supprimer cet avis ?",
     "reviews.review": "avis",
     "reviews.reviews": "avis",
 
@@ -705,6 +706,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.error": "Erreur lors de la mise à jour",
     "profile.security": "Sécurité",
     "profile.notifications": "Notifications",
+    "profile.myData": "Mes données personnelles",
+    "profile.dataExportDesc": "Conformément au RGPD, vous pouvez télécharger l'ensemble de vos données personnelles au format JSON.",
+    "profile.exportData": "Exporter mes données",
 
     // Forgot password
     "forgotPwd.title": "Mot de passe oublié ?",
@@ -830,6 +834,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "reviews.noReviews": "No reviews yet. Be the first to share your opinion!",
     "reviews.verifiedPurchase": "Verified purchase",
     "reviews.ratingRequired": "Please give a rating",
+    "reviews.confirmDelete": "Are you sure you want to delete this review?",
     "reviews.review": "review",
     "reviews.reviews": "reviews",
 
@@ -1427,6 +1432,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.error": "Error updating profile",
     "profile.security": "Security",
     "profile.notifications": "Notifications",
+    "profile.myData": "My personal data",
+    "profile.dataExportDesc": "In accordance with GDPR, you can download all your personal data in JSON format.",
+    "profile.exportData": "Export my data",
 
     // Forgot password
     "forgotPwd.title": "Forgot password?",

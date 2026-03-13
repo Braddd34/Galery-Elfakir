@@ -1,5 +1,6 @@
 import { resend, FROM_EMAIL, FROM_NAME } from './resend'
 import { CONTACT_EMAIL } from './constants'
+import crypto from 'crypto'
 
 // Types pour les données d'email
 interface OrderData {
@@ -22,7 +23,15 @@ interface ArtworkData {
 // TEMPLATES HTML
 // =====================================================
 
-const baseTemplate = (content: string) => `
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://galeryelfakir.vercel.app"
+
+function generateUnsubscribeUrl(email: string): string {
+  const secret = process.env.NEXTAUTH_SECRET || ""
+  const token = crypto.createHmac("sha256", secret).update(email.toLowerCase()).digest("hex")
+  return `${BASE_URL}/newsletter/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`
+}
+
+const baseTemplate = (content: string, recipientEmail?: string) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -57,11 +66,12 @@ const baseTemplate = (content: string) => `
               <p style="margin: 0 0 10px 0; color: #666; font-size: 12px;">
                 Galerie ELFAKIR — Art Contemporain
               </p>
-              <p style="margin: 0; color: #666; font-size: 12px;">
-                <a href="https://galeryelfakir.vercel.app" style="color: #b8860b; text-decoration: none;">
+              <p style="margin: 0 0 10px 0; color: #666; font-size: 12px;">
+                <a href="${BASE_URL}" style="color: #b8860b; text-decoration: none;">
                   galeryelfakir.vercel.app
                 </a>
               </p>
+              ${recipientEmail ? `<p style="margin: 0; color: #555; font-size: 11px;"><a href="${generateUnsubscribeUrl(recipientEmail)}" style="color: #555; text-decoration: underline;">Se désinscrire</a></p>` : ''}
             </td>
           </tr>
         </table>

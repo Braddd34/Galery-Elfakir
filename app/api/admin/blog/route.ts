@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { logAudit } from "@/lib/audit"
 
 function generateSlug(title: string): string {
   return title
@@ -83,6 +84,13 @@ export async function POST(request: NextRequest) {
         publishedAt: published ? new Date() : null,
         authorId: session.user.id,
       },
+    })
+
+    await logAudit({
+      userId: session.user.id,
+      action: "create_blog_post",
+      target: post.id,
+      details: { title: post.title, published }
     })
 
     return NextResponse.json({ post }, { status: 201 })

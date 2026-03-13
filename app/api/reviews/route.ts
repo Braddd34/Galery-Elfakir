@@ -31,6 +31,12 @@ export async function GET(req: NextRequest) {
       },
       orderBy: { createdAt: "desc" }
     })
+
+    const session = await getServerSession(authOptions)
+    const reviewsWithOwnership = reviews.map(r => ({
+      ...r,
+      isOwner: session?.user?.id === r.userId
+    }))
     
     // Calculer la moyenne des notes
     const avgRating = reviews.length > 0
@@ -38,7 +44,7 @@ export async function GET(req: NextRequest) {
       : 0
     
     return NextResponse.json({
-      reviews,
+      reviews: reviewsWithOwnership,
       stats: {
         count: reviews.length,
         avgRating: Math.round(avgRating * 10) / 10

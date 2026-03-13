@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { logAudit } from "@/lib/audit"
 
 export async function POST(
   request: NextRequest,
@@ -24,6 +25,13 @@ export async function POST(
       where: { id: params.id },
       data: { isVIP },
       select: { id: true, name: true, email: true, isVIP: true }
+    })
+
+    await logAudit({
+      userId: session.user.id,
+      action: "update_user_vip",
+      target: params.id,
+      details: { isVIP }
     })
 
     return NextResponse.json({

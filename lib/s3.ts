@@ -86,7 +86,40 @@ export function isOurS3Url(url: string): boolean {
   }
 }
 
-// Récupérer un objet S3 en stream (pour proxy d’images)
+/**
+ * Supprime les images S3 d'une oeuvre depuis le champ JSON images.
+ * Ignore les erreurs pour ne pas bloquer l'operation principale.
+ */
+export async function cleanupArtworkImages(images: unknown) {
+  try {
+    const parsed = typeof images === "string" ? JSON.parse(images) : images
+    if (!Array.isArray(parsed)) return
+
+    await Promise.allSettled(
+      parsed.map(async (img: { url?: string; key?: string }) => {
+        const key = img.key || getKeyFromUrl(img.url || "")
+        if (key) await deleteImage(key)
+      })
+    )
+  } catch {
+    // ne pas bloquer l'operation principale
+  }
+}
+
+/**
+ * Supprime une photo de profil S3 depuis son URL.
+ */
+export async function cleanupProfilePhoto(imageUrl: string | null | undefined) {
+  if (!imageUrl || !isOurS3Url(imageUrl)) return
+  try {
+    const key = getKeyFromUrl(imageUrl)
+    if (key) await deleteImage(key)
+  } catch {
+    // ne pas bloquer l'operation principale
+  }
+}
+
+// Récupérer un objet S3 en stream (pour proxy d'images)
 export async function getObjectStream(key: string) {
   const safeKey = validateS3Key(key)
   if (!safeKey) {

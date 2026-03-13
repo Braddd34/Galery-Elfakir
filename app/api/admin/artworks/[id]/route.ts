@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { cleanupArtworkImages } from "@/lib/s3"
+import { logAudit } from "@/lib/audit"
 
 // GET: Récupérer une œuvre par ID
 export async function GET(
@@ -67,9 +69,17 @@ export async function PUT(
       return NextResponse.json({ error: "Œuvre non trouvée" }, { status: 404 })
     }
 
-    // Préparer les données des images
+    // Préparer les données des images et nettoyer les anciennes sur S3
     let imagesData = existing.images
     if (images) {
+      const oldImages = typeof existing.images === "string" ? JSON.parse(existing.images) : existing.images
+      const newUrls = new Set(images.map((img: any) => img.url))
+      if (Array.isArray(oldImages)) {
+        const removedImages = oldImages.filter((img: any) => !newUrls.has(img.url))
+        if (removedImages.length > 0) {
+          await cleanupArtworkImages(removedImages)
+        }
+      }
       imagesData = JSON.stringify(images.map((img: any, index: number) => ({
         url: img.url,
         key: img.key,
@@ -101,6 +111,13 @@ export async function PUT(
       data: updateData
     })
 
+    await logAudit({
+      userId: session.user.id,
+      action: "update_artwork",
+      target: params.id,
+      details: { title }
+    })
+
     return NextResponse.json({ 
       success: true, 
       artwork,
@@ -125,8 +142,23 @@ export async function DELETE(
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
+    const artwork = await prisma.artwork.findUnique({
+      where: { id: params.id },
+      select: { images: true }
+    })
+
     await prisma.artwork.delete({
       where: { id: params.id }
+    })
+
+    if (artwork?.images) {
+      await cleanupArtworkImages(artwork.images)
+    }
+
+    await logAudit({
+      userId: session.user.id,
+      action: "delete_artwork",
+      target: params.id
     })
 
     return NextResponse.json({ 

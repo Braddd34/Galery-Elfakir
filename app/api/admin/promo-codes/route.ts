@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { logAudit } from "@/lib/audit"
 
 export const dynamic = "force-dynamic"
 
@@ -60,6 +61,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    await logAudit({
+      userId: session.user.id,
+      action: "create_promo_code",
+      target: promoCode.id,
+      details: { code: promoCode.code }
+    })
+
     return NextResponse.json({ success: true, promoCode })
   } catch (error) {
     console.error("Erreur création code promo:", error)
@@ -85,6 +93,13 @@ export async function PATCH(request: NextRequest) {
     const promoCode = await prisma.promoCode.update({
       where: { id },
       data: { active }
+    })
+
+    await logAudit({
+      userId: session.user.id,
+      action: "update_promo_code",
+      target: id,
+      details: { active }
     })
 
     return NextResponse.json({ success: true, promoCode })

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { logAudit } from "@/lib/audit"
 
 /**
  * PUT /api/admin/blog/[id] — Modifier un article (admin uniquement).
@@ -46,6 +47,13 @@ export async function PUT(
       data,
     })
 
+    await logAudit({
+      userId: session.user.id,
+      action: "update_blog_post",
+      target: id,
+      details: { title }
+    })
+
     return NextResponse.json({ post })
   } catch (error) {
     console.error("Erreur PUT /api/admin/blog/[id]:", error)
@@ -77,6 +85,13 @@ export async function DELETE(
     }
 
     await prisma.blogPost.delete({ where: { id } })
+
+    await logAudit({
+      userId: session.user.id,
+      action: "delete_blog_post",
+      target: id,
+      details: { title: existing.title }
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

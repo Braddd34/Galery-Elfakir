@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { cleanupArtworkImages } from "@/lib/s3"
 
 // GET: Récupérer une œuvre spécifique de l'artiste
 export async function GET(
@@ -103,6 +104,16 @@ export async function PUT(
 
     if (!images || images.length === 0) {
       return NextResponse.json({ error: "Au moins une image est requise" }, { status: 400 })
+    }
+
+    // Nettoyer les anciennes images supprimees sur S3
+    const oldImages = typeof existingArtwork.images === "string" ? JSON.parse(existingArtwork.images) : existingArtwork.images
+    const newUrls = new Set(images.map((img: any) => img.url))
+    if (Array.isArray(oldImages)) {
+      const removedImages = oldImages.filter((img: any) => !newUrls.has(img.url))
+      if (removedImages.length > 0) {
+        await cleanupArtworkImages(removedImages)
+      }
     }
 
     // Formater les images

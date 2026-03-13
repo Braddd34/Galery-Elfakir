@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { logAudit } from "@/lib/audit"
 
 /**
  * API pour gérer les paramètres globaux de la galerie.
@@ -51,6 +52,13 @@ export async function PUT(req: NextRequest) {
         create: { key, value: data[key] }
       })
     }
+
+    await logAudit({
+      userId: session.user.id,
+      action: "update_settings",
+      target: "global_settings",
+      details: { keys }
+    })
 
     return NextResponse.json({ success: true, message: "Paramètres enregistrés" })
   } catch (error) {

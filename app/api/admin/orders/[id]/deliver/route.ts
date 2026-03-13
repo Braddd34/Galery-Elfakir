@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { notifyOrderDelivered } from "@/lib/notifications"
+import { logAudit } from "@/lib/audit"
 
 // POST: Marquer une commande comme livrée
 export async function POST(
@@ -45,6 +46,13 @@ export async function POST(
     // Notification in-app pour l'acheteur
     notifyOrderDelivered(order.userId, order.orderNumber)
       .catch(err => console.error("Erreur notification livraison:", err))
+
+    await logAudit({
+      userId: session.user.id,
+      action: "order_delivered",
+      target: params.id,
+      details: { orderNumber: order.orderNumber }
+    })
 
     return NextResponse.json({ 
       success: true,

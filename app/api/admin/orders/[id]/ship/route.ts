@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { sendShippingNotificationEmail } from "@/lib/emails"
 import { notifyOrderShipped } from "@/lib/notifications"
+import { logAudit } from "@/lib/audit"
 
 // POST: Marquer une commande comme expédiée
 export async function POST(
@@ -66,6 +67,13 @@ export async function POST(
     // Créer une notification in-app
     notifyOrderShipped(order.userId, order.orderNumber, trackingNumber || undefined)
       .catch(err => console.error("Erreur notification expédition:", err))
+
+    await logAudit({
+      userId: session.user.id,
+      action: "order_shipped",
+      target: params.id,
+      details: { orderNumber: order.orderNumber, trackingNumber, shippingCarrier }
+    })
 
     return NextResponse.json({ 
       success: true,
