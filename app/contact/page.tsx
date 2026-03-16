@@ -257,20 +257,6 @@ export default function ContactPage() {
                     </p>
                   </div>
 
-                  <div>
-                    <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                      {t("contact.social")}
-                    </h3>
-                    <div className="flex gap-4">
-                      <a href="#" className="text-neutral-400 hover:text-white transition-colors">
-                        Instagram
-                      </a>
-                      <a href="#" className="text-neutral-400 hover:text-white transition-colors">
-                        LinkedIn
-                      </a>
-                    </div>
-                  </div>
-
                   <div className="pt-8 border-t border-neutral-800">
                     <p className="text-neutral-500 text-sm">
                       {t("contact.responseTime")}

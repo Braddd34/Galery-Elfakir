@@ -145,7 +145,7 @@ export const buyerProfileSchema = z.object({
 export const artistProfileSchema = z.object({
   bio: z
     .string()
-    .min(50, "La biographie doit contenir au moins 50 caractères")
+    .min(20, "La biographie doit contenir au moins 20 caractères")
     .max(2000, "La biographie ne peut pas dépasser 2000 caractères")
     .optional()
     .or(z.literal("")),
@@ -213,7 +213,7 @@ export const artworkSchema = z.object({
     .max(100, "Le titre ne peut pas dépasser 100 caractères"),
   description: z
     .string()
-    .min(50, "La description doit contenir au moins 50 caractères")
+    .min(10, "La description doit contenir au moins 10 caractères")
     .max(3000, "La description ne peut pas dépasser 3000 caractères"),
   category: z.enum([
     "PAINTING", "SCULPTURE", "PHOTOGRAPHY", "DRAWING", 
@@ -226,11 +226,15 @@ export const artworkSchema = z.object({
   width: z
     .number()
     .min(1, "La largeur doit être supérieure à 0")
-    .max(10000, "Dimension trop grande"),
+    .max(10000, "Dimension trop grande")
+    .optional()
+    .nullable(),
   height: z
     .number()
     .min(1, "La hauteur doit être supérieure à 0")
-    .max(10000, "Dimension trop grande"),
+    .max(10000, "Dimension trop grande")
+    .optional()
+    .nullable(),
   depth: z
     .number()
     .min(0, "La profondeur ne peut pas être négative")
@@ -240,7 +244,9 @@ export const artworkSchema = z.object({
   medium: z
     .string()
     .min(3, "La technique doit contenir au moins 3 caractères")
-    .max(100, "La technique ne peut pas dépasser 100 caractères"),
+    .max(100, "La technique ne peut pas dépasser 100 caractères")
+    .optional()
+    .or(z.literal("")),
   price: z
     .number()
     .min(1, "Le prix doit être supérieur à 0")

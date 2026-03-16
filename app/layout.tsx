@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     description: "Découvrez une collection exclusive d'œuvres originales d'artistes internationaux.",
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/icon",
+    apple: "/apple-icon",
   },
   robots: {
     index: true,
@@ -68,8 +68,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/icon" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/apple-icon" />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="theme-bg theme-text min-h-screen transition-colors duration-300">

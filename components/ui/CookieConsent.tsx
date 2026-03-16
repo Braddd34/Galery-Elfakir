@@ -32,14 +32,14 @@ export default function CookieConsent() {
         <p className="text-sm text-neutral-300 flex-1">
           Ce site utilise des cookies essentiels au fonctionnement (authentification, session).
           Aucun cookie publicitaire n&apos;est utilisé.{" "}
-          <a href="/politique-confidentialite" className="underline text-white hover:text-neutral-400 transition-colors">
+          <a href="/confidentialite" className="underline text-white hover:text-neutral-400 transition-colors">
             En savoir plus
           </a>
         </p>
         <div className="flex gap-3 shrink-0">
           <button
             onClick={refuse}
-            className="px-4 py-2 text-sm border border-neutral-600 text-neutral-400 hover:text-white hover:border-neutral-400 transition-colors"
+            className="px-4 py-2 text-sm bg-neutral-700 text-white font-medium hover:bg-neutral-600 transition-colors"
           >
             Refuser
           </button>

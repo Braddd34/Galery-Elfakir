@@ -22,6 +22,7 @@ const categories = [
 export default function Header() {
   const { data: session } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const { t } = useLanguage()
 
   return (
@@ -89,8 +90,17 @@ export default function Header() {
 
           </div>
 
-          {/* Mobile: Cart + Menu */}
+          {/* Mobile: Search + Cart + Menu */}
           <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+              className="p-2 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
+              aria-label="Rechercher"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
             <CartButton />
             <button 
               className="p-2 focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
@@ -149,6 +159,18 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Search Bar */}
+      {mobileSearchOpen && (
+        <div className="md:hidden border-t border-neutral-800 bg-black/95 backdrop-blur-md px-6 py-3">
+          <SearchAutocomplete
+            className="w-full"
+            inputClassName="w-full bg-transparent border border-neutral-700 px-4 py-3 pr-12 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-white transition-colors"
+            placeholder="Rechercher..."
+            onSearch={() => setMobileSearchOpen(false)}
+          />
+        </div>
+      )}
 
       {/* Mobile Menu */}
       {menuOpen && (

@@ -174,7 +174,7 @@ export default function CatalogueFilters({ artists, currentFilters }: CatalogueF
       </div>
 
       {/* Artiste Dropdown */}
-      <div className="relative hidden sm:block">
+      <div className="relative">
         <button
           onClick={() => {
             setShowMedium(!showMedium)

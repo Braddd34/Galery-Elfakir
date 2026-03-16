@@ -169,7 +169,7 @@ export default function ArtistProfilPage() {
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                Biographie <span className="font-normal text-neutral-600">(min. 50 caractères)</span>
+                Biographie <span className="font-normal text-neutral-600">(min. 20 caractères)</span>
               </label>
               <textarea
                 value={profile.bio}

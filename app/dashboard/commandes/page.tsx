@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import prisma from "@/lib/prisma"
 import { OrderStatus } from "@prisma/client"
 import { getServerTranslation } from "@/lib/i18n-server"
@@ -75,9 +76,11 @@ export default async function MesCommandesPage() {
 
                   <div className="flex gap-6 items-center">
                     {snapshot?.image && (
-                      <img
+                      <Image
                         src={snapshot.image}
-                        alt={snapshot.title}
+                        alt={snapshot.title || ""}
+                        width={96}
+                        height={96}
                         className="w-24 h-24 object-cover bg-neutral-800"
                       />
                     )}

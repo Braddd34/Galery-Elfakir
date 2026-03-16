@@ -54,66 +54,84 @@ export default async function AdminLayout({
       {/* Admin Navigation */}
       <nav className="border-b border-neutral-800 bg-neutral-950">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-8 h-12">
+          <div className="flex items-center gap-6 h-12 overflow-x-auto no-scrollbar">
             <Link 
               href="/admin" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
-              Vue d'ensemble
+              Vue d&apos;ensemble
             </Link>
             <Link 
               href="/admin/oeuvres" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Œuvres
             </Link>
             <Link 
               href="/admin/artistes" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Artistes
             </Link>
             <Link 
               href="/admin/commandes" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Commandes
             </Link>
             <Link 
               href="/admin/users" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Utilisateurs
             </Link>
             <Link 
               href="/admin/assignments" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Assignations
             </Link>
             <Link 
               href="/admin/audit" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
-              Journal d'audit
+              Journal d&apos;audit
             </Link>
             <Link 
               href="/admin/promo-codes" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Codes promo
             </Link>
             <Link 
               href="/admin/blog" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Blog
             </Link>
             <Link 
               href="/admin/virtual-exhibitions" 
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
             >
               Expositions virtuelles
+            </Link>
+            <Link 
+              href="/admin/newsletter" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
+            >
+              Newsletter
+            </Link>
+            <Link 
+              href="/admin/stats/abandons" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
+            >
+              Stats abandons
+            </Link>
+            <Link 
+              href="/admin/settings" 
+              className="text-sm text-neutral-400 hover:text-white transition-colors whitespace-nowrap"
+            >
+              Paramètres
             </Link>
           </div>
         </div>

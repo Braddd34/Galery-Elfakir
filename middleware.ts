@@ -66,15 +66,23 @@ export default withAuth(
           path === "/catalogue" ||
           path.startsWith("/oeuvre/") ||
           path.startsWith("/artiste/") ||
+          path === "/artistes" ||
           path === "/login" ||
           path === "/register" ||
+          path === "/forgot-password" ||
+          path === "/reset-password" ||
+          path === "/verify-email" ||
           path === "/a-propos" ||
           path === "/contact" ||
           path === "/blog" ||
           path.startsWith("/blog/") ||
           path === "/faq" ||
+          path === "/confidentialite" ||
+          path === "/cgv" ||
+          path === "/mentions-legales" ||
           path === "/expositions-virtuelles" ||
           path.startsWith("/expositions-virtuelles/") ||
+          path.startsWith("/newsletter/") ||
           path.startsWith("/api/auth") ||
           path.startsWith("/api/setup") ||
           path.startsWith("/api/virtual-exhibitions")

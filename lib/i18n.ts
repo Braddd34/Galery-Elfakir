@@ -224,6 +224,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "cart.adding": "Ajout en cours...",
     "cart.inCart": "Dans le panier — Retirer",
     "cart.add": "Ajouter au panier",
+    "cart.buyNow": "Acheter maintenant",
     "cart.removedToast": "Œuvre retirée du panier",
     "cart.addedToast": "Œuvre ajoutée au panier",
     "cart.emptyDesc": "Découvrez nos œuvres d'art uniques",
@@ -354,7 +355,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.heroTitle1": "L'Art",
     "home.heroTitle2": "Réinventé",
     "home.heroDesc": "Une collection exclusive d'œuvres originales, sélectionnées avec passion auprès d'artistes du monde entier.",
-    "home.discover": "Découvrir",
+    "home.discover": "Voir la collection",
     "home.selectionLabel": "Sélection",
     "home.featuredTitle": "Œuvres à la une",
     "home.viewCollection": "Voir la collection",
@@ -563,6 +564,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.total": "Total",
     "checkout.vatIncluded": "TVA incluse",
     "checkout.paymentSoon": "Le paiement en ligne sera bientôt disponible. En attendant, contactez-nous pour finaliser votre commande.",
+    "checkout.contactEmail": "Envoyez-nous un email ou utilisez le formulaire de contact, nous vous répondrons sous 24h.",
 
     // FAQ page
     "faq.title": "Questions fréquentes",
@@ -950,6 +952,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "cart.adding": "Adding...",
     "cart.inCart": "In cart — Remove",
     "cart.add": "Add to cart",
+    "cart.buyNow": "Buy now",
     "cart.removedToast": "Artwork removed from cart",
     "cart.addedToast": "Artwork added to cart",
     "cart.emptyDesc": "Discover our unique artworks",
@@ -1080,7 +1083,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.heroTitle1": "Art",
     "home.heroTitle2": "Reinvented",
     "home.heroDesc": "An exclusive collection of original artworks, passionately selected from artists around the world.",
-    "home.discover": "Discover",
+    "home.discover": "View collection",
     "home.selectionLabel": "Selection",
     "home.featuredTitle": "Featured artworks",
     "home.viewCollection": "View the collection",
@@ -1289,6 +1292,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.total": "Total",
     "checkout.vatIncluded": "VAT included",
     "checkout.paymentSoon": "Online payment will be available soon. In the meantime, contact us to finalize your order.",
+    "checkout.contactEmail": "Send us an email or use the contact form, we will reply within 24 hours.",
 
     // FAQ page
     "faq.title": "Frequently asked questions",

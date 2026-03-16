@@ -347,14 +347,28 @@ export default function CheckoutPage() {
 
                 {/* Message affiché quand le paiement n'est pas encore disponible */}
                 {orderMessage && (
-                  <div className="bg-gold/10 border border-gold/30 p-6 text-center space-y-3">
-                    <p className="text-gold text-sm">{orderMessage}</p>
-                    <Link
-                      href="/contact"
-                      className="inline-block px-6 py-3 bg-white text-black text-sm uppercase tracking-wider hover:bg-gold transition-colors"
-                    >
-                      {t("about.contactUs")}
-                    </Link>
+                  <div className="bg-gold/10 border border-gold/30 p-6 text-center space-y-4">
+                    <svg className="w-10 h-10 text-gold mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-white text-sm font-medium">{orderMessage}</p>
+                    <p className="text-neutral-400 text-xs">
+                      {t("checkout.contactEmail")}
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link
+                        href="/contact"
+                        className="inline-block px-6 py-3 bg-white text-black text-sm uppercase tracking-wider hover:bg-gold transition-colors"
+                      >
+                        {t("about.contactUs")}
+                      </Link>
+                      <a
+                        href="mailto:contact@elfakir.art"
+                        className="inline-block px-6 py-3 border border-neutral-600 text-white text-sm uppercase tracking-wider hover:border-white transition-colors"
+                      >
+                        contact@elfakir.art
+                      </a>
+                    </div>
                   </div>
                 )}
 

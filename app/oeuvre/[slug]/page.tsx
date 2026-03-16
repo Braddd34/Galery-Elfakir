@@ -7,6 +7,7 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs"
 import prisma from "@/lib/prisma"
 import { ArtworkCategory } from "@prisma/client"
 import AddToCartButton from "@/components/cart/AddToCartButton"
+import BuyNowButton from "@/components/cart/BuyNowButton"
 import ViewTracker from "@/components/artwork/ViewTracker"
 import ReviewSection from "@/components/reviews/ReviewSection"
 import ContactArtistButton from "@/components/artist/ContactArtistButton"
@@ -375,6 +376,15 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
                   </div>
                   
                   <AddToCartButton artwork={{
+                    id: artwork.id,
+                    slug: artwork.slug,
+                    title: artwork.title,
+                    price: Number(artwork.price),
+                    image: images[0]?.url,
+                    artistName: artwork.artist.user.name || "Artiste"
+                  }} />
+                  
+                  <BuyNowButton artwork={{
                     id: artwork.id,
                     slug: artwork.slug,
                     title: artwork.title,

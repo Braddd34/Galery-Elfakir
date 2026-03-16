@@ -51,12 +51,11 @@ export async function POST(request: NextRequest) {
         message: "Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais."
       })
     } else {
-      // En cas d'erreur d'envoi, on log mais on ne bloque pas l'utilisateur
       console.error("Erreur envoi email contact:", result.error)
-      return NextResponse.json({
-        success: true,
-        message: "Message reçu ! Nous vous répondrons bientôt."
-      })
+      return NextResponse.json(
+        { error: "Une erreur est survenue lors de l'envoi. Veuillez réessayer ou nous contacter par email." },
+        { status: 500 }
+      )
     }
 
   } catch (error) {

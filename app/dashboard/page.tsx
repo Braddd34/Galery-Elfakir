@@ -3,32 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
-import AdminDashboard from "@/components/admin/AdminDashboard"
 import { getServerTranslation } from "@/lib/i18n-server"
-
-// Statistiques pour l'admin
-async function getAdminStats() {
-  try {
-    const [artworksCount, artistsCount, ordersCount, revenueData] = await Promise.all([
-      prisma.artwork.count(),
-      prisma.artistProfile.count(),
-      prisma.order.count(),
-      prisma.order.aggregate({
-        where: { status: { in: ["PAID", "SHIPPED", "DELIVERED"] } },
-        _sum: { total: true }
-      })
-    ])
-    
-    return {
-      artworks: artworksCount,
-      artists: artistsCount,
-      orders: ordersCount,
-      revenue: revenueData._sum.total || 0
-    }
-  } catch {
-    return { artworks: 0, artists: 0, orders: 0, revenue: 0 }
-  }
-}
 
 // Statistiques pour l'artiste
 async function getArtistStats(userId: string) {
@@ -130,9 +105,13 @@ export default async function DashboardPage() {
   }
 
   const { user } = session
+
+  if (user.role === "ADMIN") {
+    redirect("/admin")
+  }
   
   // Récupérer les statistiques selon le rôle
-  const adminStats = user.role === "ADMIN" ? await getAdminStats() : null
+  const adminStats = null
   const artistStats = user.role === "ARTIST" ? await getArtistStats(user.id) : null
   const managerStats = user.role === "MANAGER" ? await getManagerStats(user.id) : null
   const buyerStats = user.role === "BUYER" ? await getBuyerStats(user.id) : null
@@ -166,75 +145,6 @@ export default async function DashboardPage() {
 
         {/* Role-based content */}
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Admin Links */}
-          {user.role === "ADMIN" && (
-            <>
-              <Link
-                href="/admin/oeuvres"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">{t("dashboard.manageArtworks")}</h3>
-                <p className="text-neutral-500 text-sm">
-                  {t("dashboard.manageArtworksDesc")}
-                </p>
-              </Link>
-              <Link
-                href="/admin/artistes"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">{t("dashboard.manageArtists")}</h3>
-                <p className="text-neutral-500 text-sm">
-                  {t("dashboard.manageArtistsDesc")}
-                </p>
-              </Link>
-              <Link
-                href="/admin/commandes"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">{t("dashboard.orders")}</h3>
-                <p className="text-neutral-500 text-sm">
-                  {t("dashboard.ordersDesc")}
-                </p>
-              </Link>
-              <Link
-                href="/admin/users"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">{t("dashboard.users")}</h3>
-                <p className="text-neutral-500 text-sm">
-                  {t("dashboard.usersDesc")}
-                </p>
-              </Link>
-              <Link
-                href="/admin/settings"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">{t("dashboard.settings")}</h3>
-                <p className="text-neutral-500 text-sm">
-                  {t("dashboard.settingsDesc")}
-                </p>
-              </Link>
-              <Link
-                href="/dashboard/favoris"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">{t("dashboard.favorites")}</h3>
-                <p className="text-neutral-500 text-sm">
-                  {t("dashboard.favoritesDesc")}
-                </p>
-              </Link>
-              <Link
-                href="/dashboard/manager"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">Gestion manager</h3>
-                <p className="text-neutral-500 text-sm">
-                  Accéder au tableau de bord gestionnaire
-                </p>
-              </Link>
-            </>
-          )}
-
           {/* Artist Links */}
           {user.role === "ARTIST" && (
             <>
@@ -325,15 +235,6 @@ export default async function DashboardPage() {
                   Exporter les données de vos artistes
                 </p>
               </Link>
-              <Link
-                href="/dashboard/favoris"
-                className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
-              >
-                <h3 className="text-lg font-light mb-2">{t("dashboard.favorites")}</h3>
-                <p className="text-neutral-500 text-sm">
-                  {t("dashboard.favoritesDesc")}
-                </p>
-              </Link>
             </>
           )}
 
@@ -370,8 +271,8 @@ export default async function DashboardPage() {
             </>
           )}
           
-          {/* Messages - Pour tous les utilisateurs */}
-          <Link
+          {/* Messages - Pour artistes et acheteurs */}
+          {(user.role === "ARTIST" || user.role === "BUYER") && <Link
             href="/dashboard/messages"
             className="bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors"
           >
@@ -384,17 +285,9 @@ export default async function DashboardPage() {
             <p className="text-neutral-500 text-sm">
               {t("dashboard.myMessagesDesc")}
             </p>
-          </Link>
+          </Link>}
         </div>
 
-        {/* Admin Dashboard avec graphiques et alertes */}
-        {user.role === "ADMIN" && (
-          <div className="mt-12">
-            <h2 className="text-xl font-light mb-6">{t("dashboard.statsAlerts")}</h2>
-            <AdminDashboard />
-          </div>
-        )}
-        
         {/* Quick Stats for Artist */}
         {user.role === "ARTIST" && artistStats && (
           <div className="mt-12">

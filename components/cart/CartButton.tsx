@@ -1,12 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useCart } from "@/lib/cart-context"
 import CartDrawer from "./CartDrawer"
 
 export default function CartButton() {
   const [isOpen, setIsOpen] = useState(false)
   const { itemCount } = useCart()
+
+  const openDrawer = useCallback(() => setIsOpen(true), [])
+
+  useEffect(() => {
+    window.addEventListener("open-cart-drawer", openDrawer)
+    return () => window.removeEventListener("open-cart-drawer", openDrawer)
+  }, [openDrawer])
 
   return (
     <>

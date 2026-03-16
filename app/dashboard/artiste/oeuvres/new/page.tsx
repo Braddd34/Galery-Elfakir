@@ -202,10 +202,25 @@ export default function NewArtistArtworkPage() {
             </div>
           </div>
 
+          {/* Medium */}
+          <div>
+            <label className="block text-sm uppercase tracking-wider text-neutral-400 mb-2">
+              Technique / Medium
+            </label>
+            <input
+              type="text"
+              name="medium"
+              value={formData.medium}
+              onChange={handleChange}
+              className="w-full bg-neutral-900 border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
+              placeholder="Ex: Huile sur toile, Bronze, Photographie argentique..."
+            />
+          </div>
+
           {/* Dimensions */}
           <div>
             <label className="block text-sm uppercase tracking-wider text-neutral-400 mb-2">
-              Dimensions (cm) *
+              Dimensions (cm) <span className="font-normal text-neutral-600">optionnel</span>
             </label>
             <div className="grid grid-cols-3 gap-4">
               <input
@@ -213,7 +228,6 @@ export default function NewArtistArtworkPage() {
                 name="width"
                 value={formData.width}
                 onChange={handleChange}
-                required
                 placeholder="Largeur"
                 className="w-full bg-neutral-900 border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
               />
@@ -222,7 +236,6 @@ export default function NewArtistArtworkPage() {
                 name="height"
                 value={formData.height}
                 onChange={handleChange}
-                required
                 placeholder="Hauteur"
                 className="w-full bg-neutral-900 border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
               />
@@ -231,26 +244,10 @@ export default function NewArtistArtworkPage() {
                 name="depth"
                 value={formData.depth}
                 onChange={handleChange}
-                placeholder="Profondeur (optionnel)"
+                placeholder="Profondeur"
                 className="w-full bg-neutral-900 border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
               />
             </div>
-          </div>
-
-          {/* Medium */}
-          <div>
-            <label className="block text-sm uppercase tracking-wider text-neutral-400 mb-2">
-              Technique / Medium *
-            </label>
-            <input
-              type="text"
-              name="medium"
-              value={formData.medium}
-              onChange={handleChange}
-              required
-              className="w-full bg-neutral-900 border border-neutral-700 px-4 py-3 text-white focus:border-white focus:outline-none"
-              placeholder="Ex: Huile sur toile, Bronze, Photographie argentique..."
-            />
           </div>
 
           {/* Price */}

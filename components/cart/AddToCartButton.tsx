@@ -31,6 +31,7 @@ export default function AddToCartButton({ artwork }: AddToCartButtonProps) {
       showToast(t("cart.addedToast"), "success")
       trackAddToCart({ id: artwork.id, title: artwork.title, price: artwork.price })
       trackCartEvent(artwork.id, "add")
+      window.dispatchEvent(new CustomEvent("open-cart-drawer"))
       setTimeout(() => setIsAdding(false), 500)
     }
   }
