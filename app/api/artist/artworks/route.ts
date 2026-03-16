@@ -119,10 +119,10 @@ export async function POST(request: Request) {
         description: sanitize(valid.description),
         category: valid.category,
         year: valid.year,
-        width: valid.width,
-        height: valid.height,
+        width: valid.width ?? 0,
+        height: valid.height ?? 0,
         depth: valid.depth ?? null,
-        medium: sanitize(valid.medium),
+        medium: valid.medium ? sanitize(valid.medium) : "",
         price: valid.price,
         images: JSON.stringify(imagesData),
         status: "PENDING", // L'œuvre doit être validée par un admin
