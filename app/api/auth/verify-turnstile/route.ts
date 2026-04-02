@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-
-const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || ""
-const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+import { isTurnstileEnforced, verifyTurnstileToken } from "@/lib/turnstile"
 
 export async function POST(request: NextRequest) {
   try {
-    if (!TURNSTILE_SECRET) {
+    if (!isTurnstileEnforced()) {
       return NextResponse.json({ success: true })
     }
 
@@ -19,21 +17,8 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-real-ip") ||
       undefined
 
-    const body = new URLSearchParams({
-      secret: TURNSTILE_SECRET,
-      response: token,
-      ...(ip ? { remoteip: ip } : {}),
-    })
-
-    const res = await fetch(VERIFY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
-    })
-
-    const data = await res.json()
-
-    if (!data.success) {
+    const ok = await verifyTurnstileToken(token, ip)
+    if (!ok) {
       return NextResponse.json({ error: "Vérification échouée" }, { status: 403 })
     }
 

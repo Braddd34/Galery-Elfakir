@@ -80,6 +80,7 @@ export default function LoginPage() {
       const signInResult = await signIn("credentials", {
         email,
         password,
+        turnstileToken,
         redirect: false,
       })
 

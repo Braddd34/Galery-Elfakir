@@ -5,6 +5,8 @@
  * - Variables RECOMMANDÉES : certaines fonctionnalités seront désactivées sans elles → warning.
  */
 
+const NEXTAUTH_SECRET_MIN_LEN = 32
+
 const requiredEnvVars = [
   "DATABASE_URL",
   "NEXTAUTH_SECRET",
@@ -37,6 +39,28 @@ export function validateEnv() {
     console.error(`❌ ${message}`)
     if (process.env.NODE_ENV === "production") {
       throw new Error(message)
+    }
+  }
+
+  if (process.env.NODE_ENV === "production" && process.env.NEXTAUTH_SECRET) {
+    if (process.env.NEXTAUTH_SECRET.length < NEXTAUTH_SECRET_MIN_LEN) {
+      console.warn(
+        `⚠️ NEXTAUTH_SECRET est trop court (minimum ${NEXTAUTH_SECRET_MIN_LEN} caractères recommandé pour la production). Générez-en un avec: openssl rand -base64 32`
+      )
+    }
+  }
+
+  if (process.env.NODE_ENV === "production" && !process.env.CRON_SECRET?.trim()) {
+    console.warn(
+      "⚠️ CRON_SECRET manquant : le nettoyage planifié (/api/cron/cleanup) refusera les appels jusqu'à ce que vous définissiez CRON_SECRET sur Vercel (voir vercel.json)."
+    )
+  }
+
+  if (process.env.NODE_ENV === "production" && process.env.TURNSTILE_SECRET_KEY?.trim()) {
+    if (!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim()) {
+      console.warn(
+        "⚠️ TURNSTILE_SECRET_KEY est défini sans NEXT_PUBLIC_TURNSTILE_SITE_KEY : le widget ne s'affichera pas et la connexion sera refusée. Ajoutez la clé site Turnstile (publique)."
+      )
     }
   }
 

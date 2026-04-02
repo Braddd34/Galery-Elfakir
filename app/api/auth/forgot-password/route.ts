@@ -59,12 +59,24 @@ export async function POST(req: Request) {
     const baseUrl = process.env.NEXTAUTH_URL || "https://galeryelfakir.vercel.app"
     const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
-    // Envoyer l'email
-    await sendPasswordResetEmail(email, resetUrl)
+    const emailResult = await sendPasswordResetEmail(user.email, resetUrl)
+    if (!emailResult.success) {
+      await prisma.passwordResetToken.deleteMany({
+        where: { email: user.email.toLowerCase() },
+      })
+      return NextResponse.json(
+        {
+          error:
+            "Impossible d'envoyer l'email pour le moment. Réessayez plus tard ou contactez le support.",
+        },
+        { status: 503 }
+      )
+    }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation." 
+      message:
+        "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.",
     })
   } catch (error) {
     console.error("Erreur forgot-password:", error)

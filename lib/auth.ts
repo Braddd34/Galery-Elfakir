@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import bcrypt from "bcrypt"
 import prisma from "./prisma"
+import { isTurnstileEnforced, verifyTurnstileToken } from "./turnstile"
 
 const MAX_ATTEMPTS = 5
 const LOCK_WINDOW_MS = 15 * 60 * 1000 // 15 minutes
@@ -48,6 +49,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Mot de passe", type: "password" },
+        turnstileToken: { label: "Turnstile", type: "text" },
       },
       async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
@@ -60,6 +62,17 @@ export const authOptions: NextAuthOptions = {
           (req?.headers?.["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
           (req?.headers?.["x-real-ip"] as string) ||
           "unknown"
+
+        if (isTurnstileEnforced()) {
+          const tsToken =
+            typeof credentials.turnstileToken === "string"
+              ? credentials.turnstileToken
+              : undefined
+          const tsOk = await verifyTurnstileToken(tsToken, ip)
+          if (!tsOk) {
+            throw new Error("Vérification de sécurité échouée. Rechargez la page.")
+          }
+        }
 
         const failures = await countRecentFailures(ip, email)
         if (failures >= MAX_ATTEMPTS) {

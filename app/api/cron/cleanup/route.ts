@@ -12,9 +12,19 @@ import prisma from "@/lib/prisma"
  */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization")
-  const cronSecret = process.env.CRON_SECRET
+  const cronSecret = process.env.CRON_SECRET?.trim()
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (process.env.NODE_ENV === "production") {
+    if (!cronSecret) {
+      return NextResponse.json(
+        { error: "Cron non configuré (CRON_SECRET manquant)" },
+        { status: 503 }
+      )
+    }
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+  } else if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
   }
 

@@ -2,13 +2,25 @@ import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcrypt"
 import prisma from "@/lib/prisma"
 
+const SETUP_SECRET_MIN_LEN = 24
+
 // Cette route permet d'initialiser la base de données une seule fois
 // Accès : GET /api/setup?secret=VOTRE_SECRET
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get("secret")
+  const expected = process.env.SETUP_SECRET
+
+  if (process.env.NODE_ENV === "production") {
+    if (!expected || expected.length < SETUP_SECRET_MIN_LEN) {
+      return NextResponse.json(
+        { error: "Configuration serveur incomplète (SETUP_SECRET)" },
+        { status: 503 }
+      )
+    }
+  }
 
   // Vérification de sécurité
-  if (secret !== process.env.SETUP_SECRET) {
+  if (!expected || secret !== expected) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
   }
 
