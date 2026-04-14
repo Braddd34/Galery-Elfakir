@@ -32,8 +32,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" }
     })
 
-    // Filtrer les favoris dont l'œuvre a été supprimée
-    const validFavorites = favorites.filter(f => f.artwork !== null)
+    const validFavorites = favorites.filter(f => f.artwork !== null && f.artwork?.artist?.user)
 
     return NextResponse.json({ 
       favorites: validFavorites.map(f => ({
@@ -47,7 +46,7 @@ export async function GET() {
           images: f.artwork.images,
           artist: {
             user: {
-              name: f.artwork.artist.user.name
+              name: f.artwork.artist?.user?.name || "Artiste"
             }
           }
         }

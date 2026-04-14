@@ -72,6 +72,7 @@ export default function MessageCenter({ onUnreadCountChange }: MessageCenterProp
   const fetchMessages = async () => {
     try {
       const res = await fetch(`/api/messages?type=${activeTab}`)
+      if (!res.ok) return
       const data = await res.json()
       setMessages(data.messages || [])
       setUnreadCount(data.unreadCount || 0)

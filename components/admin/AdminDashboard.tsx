@@ -36,8 +36,13 @@ export default function AdminDashboard() {
   
   useEffect(() => {
     fetch("/api/admin/stats")
-      .then(res => res.json())
-      .then(setData)
+      .then((res) => {
+        if (!res.ok) return
+        return res.json()
+      })
+      .then((data) => {
+        if (data) setData(data)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

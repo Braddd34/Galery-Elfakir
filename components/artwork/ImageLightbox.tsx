@@ -36,18 +36,21 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
     setPosition({ x: 0, y: 0 })
   }
 
-  // Navigation entre les images
   const goNext = useCallback(() => {
+    if (images.length === 0) return
     setActiveIndex(prev => (prev + 1) % images.length)
     setZoom(1)
     setPosition({ x: 0, y: 0 })
   }, [images.length])
 
   const goPrev = useCallback(() => {
+    if (images.length === 0) return
     setActiveIndex(prev => (prev - 1 + images.length) % images.length)
     setZoom(1)
     setPosition({ x: 0, y: 0 })
   }, [images.length])
+
+  if (!images || images.length === 0) return null
 
   // Zoom avec la molette
   const handleWheel = useCallback((e: React.WheelEvent) => {

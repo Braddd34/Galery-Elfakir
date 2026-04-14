@@ -69,10 +69,11 @@ export async function POST(request: NextRequest) {
     // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Déterminer le rôle et le statut
-    const validRoles = ["ARTIST", "MANAGER", "BUYER"]
-    const userRole = validRoles.includes(role) ? role : "BUYER"
-    const userStatus = (userRole === "ARTIST" || userRole === "MANAGER") ? "PENDING" : "ACTIVE"
+    // Déterminer le rôle — seuls ARTIST et BUYER sont autorisés depuis l'inscription publique.
+    // MANAGER ne peut être attribué que par un ADMIN via le back-office.
+    const publicRoles = ["ARTIST", "BUYER"]
+    const userRole = publicRoles.includes(role) ? role : "BUYER"
+    const userStatus = userRole === "ARTIST" ? "PENDING" : "ACTIVE"
 
     // Créer l'utilisateur (email non vérifié)
     const user = await prisma.user.create({
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Construire l'URL de vérification
-    const baseUrl = process.env.NEXTAUTH_URL || "https://galeryelfakir.vercel.app"
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://galeryelfakir.vercel.app"
     const verifyUrl = `${baseUrl}/verify-email?token=${verificationToken}`
 
     // Envoyer email de vérification (en arrière-plan, sans bloquer)

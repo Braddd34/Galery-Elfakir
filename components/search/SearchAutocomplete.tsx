@@ -66,6 +66,7 @@ export default function SearchAutocomplete({
     setLoading(true)
     try {
       const res = await fetch(`/api/search/suggestions?q=${encodeURIComponent(searchQuery)}`)
+      if (!res.ok) return
       const data = await res.json()
       setSuggestions(data.suggestions)
       setIsOpen(true)

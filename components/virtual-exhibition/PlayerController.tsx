@@ -26,6 +26,7 @@ interface PlayerControllerProps {
   partitions?: PartitionWall[]
   enabled?: boolean
   onLockChange?: (locked: boolean) => void
+  onPositionChange?: (pos: { x: number; z: number }, rotY: number) => void
   mobileInputRef?: { current: MobileInputRef | null }
 }
 
@@ -59,6 +60,7 @@ export default function PlayerController({
   partitions = [],
   enabled = true,
   onLockChange,
+  onPositionChange,
   mobileInputRef,
 }: PlayerControllerProps) {
   const { camera, gl } = useThree()
@@ -245,6 +247,11 @@ export default function PlayerController({
     }
 
     camera.position.y = EYE_HEIGHT
+
+    onPositionChange?.(
+      { x: camera.position.x, z: camera.position.z },
+      yawRef.current
+    )
   })
 
   return null

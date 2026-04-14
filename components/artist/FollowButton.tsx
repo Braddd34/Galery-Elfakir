@@ -24,6 +24,7 @@ export default function FollowButton({ artistId, className = "" }: FollowButtonP
   const fetchFollowStatus = async () => {
     try {
       const res = await fetch(`/api/follow?artistId=${artistId}`)
+      if (!res.ok) return
       const data = await res.json()
       setIsFollowing(data.isFollowing)
       setFollowersCount(data.followersCount)

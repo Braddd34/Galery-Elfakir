@@ -12,7 +12,8 @@ interface ShareButtonsProps {
 export default function ShareButtons({ title, url, description, imageUrl }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
   
-  const fullUrl = url.startsWith("http") ? url : `https://galeryelfakir.vercel.app${url}`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://galeryelfakir.vercel.app"
+  const fullUrl = url.startsWith("http") ? url : `${siteUrl}${url}`
   const encodedUrl = encodeURIComponent(fullUrl)
   const encodedTitle = encodeURIComponent(title)
   const encodedDesc = encodeURIComponent(description || "")

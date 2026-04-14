@@ -104,6 +104,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ suggestions })
   } catch (error) {
     console.error("Erreur suggestions:", error)
-    return NextResponse.json({ suggestions: { artworks: [], artists: [] } })
+    return NextResponse.json({ suggestions: { artworks: [], artists: [] } }, { status: 500 })
   }
 }

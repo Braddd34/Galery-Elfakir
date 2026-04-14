@@ -3,6 +3,15 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
+
 /**
  * API pour générer un certificat d'authenticité en HTML imprimable.
  * Le certificat contient les informations de l'œuvre, l'artiste, et un numéro unique.
@@ -424,19 +433,19 @@ function generateCertificateHTML(data: CertificateData): string {
       </div>
       
       <div class="artwork-section">
-        ${data.imageUrl ? `<img src="${data.imageUrl}" alt="${data.title}" class="artwork-image" />` : ""}
+        ${data.imageUrl ? `<img src="${escapeHtml(data.imageUrl)}" alt="${escapeHtml(data.title)}" class="artwork-image" />` : ""}
         <div class="artwork-details">
-          <div class="artwork-title">${data.title}</div>
-          <div class="artwork-artist">par ${data.artistName}</div>
+          <div class="artwork-title">${escapeHtml(data.title)}</div>
+          <div class="artwork-artist">par ${escapeHtml(data.artistName)}</div>
           
           <div class="detail-grid">
             <div class="detail-item">
               <div class="detail-label">Catégorie</div>
-              <div class="detail-value">${categoryLabels[data.category] || data.category}</div>
+              <div class="detail-value">${escapeHtml(categoryLabels[data.category] || data.category)}</div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Technique</div>
-              <div class="detail-value">${data.medium}</div>
+              <div class="detail-value">${escapeHtml(data.medium)}</div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Dimensions</div>
@@ -453,9 +462,9 @@ function generateCertificateHTML(data: CertificateData): string {
       <div class="declaration">
         <p>
           La galerie <strong>ELFAKIR</strong> certifie que l'œuvre ci-dessus décrite est une création 
-          originale et authentique de l'artiste <strong>${data.artistName}</strong>. Cette œuvre est 
+          originale et authentique de l'artiste <strong>${escapeHtml(data.artistName)}</strong>. Cette œuvre est 
           une pièce unique, non reproduite, et a été acquise en date du <strong>${dateFormatted}</strong> 
-          par <strong>${data.buyerName}</strong>.
+          par <strong>${escapeHtml(data.buyerName)}</strong>.
         </p>
         <br>
         <p>
@@ -468,7 +477,7 @@ function generateCertificateHTML(data: CertificateData): string {
         <div class="signature-block">
           <div class="signature-line"></div>
           <div class="signature-label">L'artiste</div>
-          <div class="signature-name">${data.artistName}</div>
+          <div class="signature-name">${escapeHtml(data.artistName)}</div>
         </div>
         <div class="signature-block">
           <div class="signature-line"></div>

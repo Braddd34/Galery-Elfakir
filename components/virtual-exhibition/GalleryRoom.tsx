@@ -1,6 +1,5 @@
 import * as THREE from "three"
-import type { ThemeId } from "@/lib/virtual-exhibition/types"
-import type { GeneratedLayout } from "@/lib/virtual-exhibition/types"
+import type { ThemeId, GeneratedLayout } from "@/lib/virtual-exhibition/types"
 
 const WALL_THICKNESS = 0.2
 const BASEBOARD_HEIGHT = 0.12

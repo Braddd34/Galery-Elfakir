@@ -52,6 +52,7 @@ export default function InfiniteScrollLoader({
       })
       
       const res = await fetch(`/api/catalogue?${params.toString()}`)
+      if (!res.ok) return
       const data = await res.json()
       
       if (data.artworks?.length > 0) {

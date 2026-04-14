@@ -99,7 +99,14 @@ export default function Minimap({
     }
 
     for (const art of artworks) {
-      const p = toCanvas(0, 0)
+      const wallMap: Record<string, { x: number; z: number }> = {
+        north: { x: art.positionX * roomWidth * 0.4, z: -roomLength / 2 + 0.3 },
+        south: { x: art.positionX * roomWidth * 0.4, z: roomLength / 2 - 0.3 },
+        east:  { x: roomWidth / 2 - 0.3, z: art.positionX * roomLength * 0.4 },
+        west:  { x: -roomWidth / 2 + 0.3, z: art.positionX * roomLength * 0.4 },
+      }
+      const pos = wallMap[art.wall] || { x: 0, z: 0 }
+      const p = toCanvas(pos.x, pos.z)
       ctx.fillStyle = "#d4af37"
       ctx.beginPath()
       ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2)

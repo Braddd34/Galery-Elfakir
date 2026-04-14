@@ -21,8 +21,12 @@ export default function FavoriteButton({ artworkId, className = "" }: FavoriteBu
   useEffect(() => {
     if (session) {
       fetch("/api/favorites")
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => {
+          if (!res.ok) return
+          return res.json()
+        })
+        .then((data) => {
+          if (!data) return
           if (data.favoriteIds?.includes(artworkId)) {
             setIsFavorite(true)
           }

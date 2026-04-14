@@ -107,6 +107,7 @@ export default function ReviewSection({ artworkId }: ReviewSectionProps) {
   const fetchReviews = async () => {
     try {
       const res = await fetch(`/api/reviews?artworkId=${artworkId}`)
+      if (!res.ok) return
       const data = await res.json()
       setReviews(data.reviews || [])
       setStats(data.stats || { count: 0, avgRating: 0 })

@@ -177,6 +177,10 @@ export default function Gallery3D({
             roomHeight={height}
             partitions={layout.partitions}
             onLockChange={handleLockChange}
+            onPositionChange={(pos, rotY) => {
+              setPlayerPos(pos)
+              setPlayerRot(rotY)
+            }}
             mobileInputRef={mobileInputRef}
           />
         </Canvas>

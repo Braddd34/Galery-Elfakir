@@ -11,8 +11,11 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
     }
 
     const promoCodes = await prisma.promoCode.findMany({
@@ -31,8 +34,11 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
     }
 
     const body = await request.json()
@@ -80,8 +86,11 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
     }
 
     const { id, active } = await request.json()

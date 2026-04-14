@@ -56,8 +56,12 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
   useEffect(() => {
     if (session) {
       fetch("/api/favorites")
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => {
+          if (!res.ok) return
+          return res.json()
+        })
+        .then((data) => {
+          if (!data) return
           if (data.favoriteIds?.includes(artwork.id)) {
             setIsFavorite(true)
           }
@@ -84,18 +88,25 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
         body: JSON.stringify({ artworkId: artwork.id })
       })
 
-      const data = await res.json()
-      
-      if (res.ok) {
-        setIsFavorite(data.isFavorite)
-        showToast(
-          data.isFavorite ? "Ajouté aux favoris" : "Retiré des favoris",
-          data.isFavorite ? "success" : "info"
-        )
-      } else {
-        console.error("Erreur favoris:", data.error)
-        showToast(data.error || "Une erreur est survenue", "error")
+      if (!res.ok) {
+        let message = "Une erreur est survenue"
+        try {
+          const err = await res.json()
+          if (err?.error) message = err.error
+        } catch {
+          /* corps non JSON */
+        }
+        console.error("Erreur favoris:", message)
+        showToast(message, "error")
+        return
       }
+
+      const data = await res.json()
+      setIsFavorite(data.isFavorite)
+      showToast(
+        data.isFavorite ? "Ajouté aux favoris" : "Retiré des favoris",
+        data.isFavorite ? "success" : "info"
+      )
     } catch (error) {
       console.error("Erreur favoris:", error)
       showToast("Une erreur est survenue", "error")

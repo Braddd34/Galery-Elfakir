@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, createContext, useContext } from "react"
+import { useState, createContext, useContext } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useLanguage } from "@/components/providers/LanguageProvider"

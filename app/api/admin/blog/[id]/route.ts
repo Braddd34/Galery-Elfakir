@@ -13,8 +13,11 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
     }
 
     const { id } = await params
@@ -73,8 +76,11 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
     }
 
     const { id } = await params

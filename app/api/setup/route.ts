@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcrypt"
+import crypto from "crypto"
 import prisma from "@/lib/prisma"
 
 const SETUP_SECRET_MIN_LEN = 24
@@ -56,8 +57,8 @@ export async function GET(request: NextRequest) {
 
     console.log("🌱 Début de l'initialisation...")
 
-    // Créer l'admin par défaut
-    const adminPassword = await bcrypt.hash("Admin123!", 12)
+    const adminPwd = process.env.SETUP_ADMIN_PASSWORD || crypto.randomBytes(16).toString("hex")
+    const adminPassword = await bcrypt.hash(adminPwd, 12)
 
     const admin = await prisma.user.create({
       data: {
@@ -72,8 +73,8 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Admin créé:", admin.email)
 
-    // Créer un artiste de test
-    const artistPassword = await bcrypt.hash("Artiste123!", 12)
+    const artistPwd = crypto.randomBytes(16).toString("hex")
+    const artistPassword = await bcrypt.hash(artistPwd, 12)
 
     const artist = await prisma.user.create({
       data: {
@@ -95,8 +96,8 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Artiste créé:", artist.email)
 
-    // Créer un acheteur de test
-    const buyerPassword = await bcrypt.hash("Acheteur123!", 12)
+    const buyerPwd = crypto.randomBytes(16).toString("hex")
+    const buyerPassword = await bcrypt.hash(buyerPwd, 12)
 
     const buyer = await prisma.user.create({
       data: {
@@ -223,7 +224,12 @@ export async function GET(request: NextRequest) {
         artist: artist.email,
         buyer: buyer.email,
       },
-      note: "Les mots de passe par défaut ont été créés. Changez-les immédiatement depuis l'interface.",
+      passwords: {
+        admin: adminPwd,
+        artist: artistPwd,
+        buyer: buyerPwd,
+      },
+      note: "COPIEZ ces mots de passe maintenant. Ils ne seront plus jamais affichés. Changez-les après connexion.",
       artworks: 3,
     })
 

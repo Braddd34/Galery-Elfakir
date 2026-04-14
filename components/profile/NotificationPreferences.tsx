@@ -52,9 +52,12 @@ export default function NotificationPreferences() {
   // Charger les préférences
   useEffect(() => {
     fetch("/api/user/notifications")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) return
+        return res.json()
+      })
       .then((data) => {
-        if (data.preferences) {
+        if (data?.preferences) {
           setSettings(data.preferences)
         }
         setLoading(false)

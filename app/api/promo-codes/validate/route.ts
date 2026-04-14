@@ -3,7 +3,9 @@ import prisma from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
   try {
-    const { code, subtotal } = await request.json()
+    const body = await request.json()
+    const code = body.code
+    const subtotal = typeof body.subtotal === "number" && !isNaN(body.subtotal) ? body.subtotal : 0
 
     if (!code) {
       return NextResponse.json({ error: "Code requis" }, { status: 400 })

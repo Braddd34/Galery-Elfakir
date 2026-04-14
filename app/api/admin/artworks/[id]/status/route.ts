@@ -14,8 +14,11 @@ export async function PATCH(
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
     }
 
     const { status, comment, earlyAccessUntil } = await request.json()

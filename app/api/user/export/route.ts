@@ -114,19 +114,19 @@ export async function GET() {
         total: Number(o.total),
       })),
       reviews: reviews.map(r => ({
-        artwork: r.artwork.title,
+        artwork: r.artwork?.title || "Œuvre supprimée",
         rating: r.rating,
         title: r.title,
         comment: r.comment,
         date: r.createdAt,
       })),
       favorites: favorites.map(f => ({
-        artwork: f.artwork.title,
-        slug: f.artwork.slug,
+        artwork: f.artwork?.title || "Œuvre supprimée",
+        slug: f.artwork?.slug || "",
         date: f.createdAt,
       })),
       followedArtists: follows.map(f => ({
-        artist: f.artist.user.name,
+        artist: f.artist?.user?.name || "Artiste",
         date: f.createdAt,
       })),
       messages: messages.map(m => ({
@@ -134,7 +134,7 @@ export async function GET() {
         date: m.createdAt,
       })),
       cartEvents: cartEvents.map(e => ({
-        artwork: e.artwork.title,
+        artwork: e.artwork?.title || "Œuvre supprimée",
         action: e.action,
         date: e.createdAt,
       })),

@@ -1,6 +1,15 @@
 import { resend, FROM_EMAIL, FROM_NAME } from './resend'
-import { CONTACT_EMAIL } from './constants'
+import { CONTACT_EMAIL, SITE_URL } from './constants'
 import crypto from 'crypto'
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
 
 // Types pour les données d'email
 interface OrderData {
@@ -23,7 +32,7 @@ interface ArtworkData {
 // TEMPLATES HTML
 // =====================================================
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://galeryelfakir.vercel.app"
+const BASE_URL = SITE_URL
 
 function generateUnsubscribeUrl(email: string): string {
   const secret = process.env.NEXTAUTH_SECRET || ""
@@ -92,7 +101,7 @@ const baseTemplate = (content: string, recipientEmail?: string) => `
 export async function sendWelcomeEmail(email: string, name: string) {
   const content = `
     <h2 style="margin: 0 0 20px 0; color: #ffffff; font-size: 24px; font-weight: 300;">
-      Bienvenue, ${name || 'cher amateur d\'art'} !
+      Bienvenue, ${escapeHtml(name || 'cher amateur d\'art')} !
     </h2>
     <p style="margin: 0 0 20px 0; color: #999; font-size: 16px; line-height: 1.6;">
       Nous sommes ravis de vous accueillir dans notre galerie d'art contemporain en ligne.
@@ -100,7 +109,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
     <p style="margin: 0 0 30px 0; color: #999; font-size: 16px; line-height: 1.6;">
       Découvrez notre collection exclusive d'œuvres originales, sélectionnées avec passion auprès d'artistes du monde entier.
     </p>
-    <a href="https://galeryelfakir.vercel.app/catalogue" style="display: inline-block; padding: 15px 30px; background-color: #b8860b; color: #000; text-decoration: none; font-size: 14px; letter-spacing: 0.1em;">
+    <a href="${BASE_URL}/catalogue" style="display: inline-block; padding: 15px 30px; background-color: #b8860b; color: #000; text-decoration: none; font-size: 14px; letter-spacing: 0.1em;">
       DÉCOUVRIR LE CATALOGUE
     </a>
   `
@@ -129,7 +138,7 @@ export async function sendOrderConfirmationEmail(email: string, order: OrderData
       Commande confirmée
     </h2>
     <p style="margin: 0 0 10px 0; color: #999; font-size: 16px;">
-      Merci pour votre achat, ${order.customerName} !
+      Merci pour votre achat, ${escapeHtml(order.customerName)} !
     </p>
     <p style="margin: 0 0 30px 0; color: #999; font-size: 14px;">
       Commande #${order.orderNumber}
@@ -137,10 +146,10 @@ export async function sendOrderConfirmationEmail(email: string, order: OrderData
     
     <div style="background-color: #111; padding: 20px; margin-bottom: 30px;">
       <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 18px;">
-        ${order.artworkTitle}
+        ${escapeHtml(order.artworkTitle)}
       </p>
       <p style="margin: 0 0 15px 0; color: #666; font-size: 14px;">
-        par ${order.artworkArtist}
+        par ${escapeHtml(order.artworkArtist)}
       </p>
       <p style="margin: 0; color: #b8860b; font-size: 24px;">
         €${order.total.toLocaleString()}
@@ -192,7 +201,7 @@ export async function sendShippingNotificationEmail(email: string, order: OrderD
       Votre commande est en route !
     </h2>
     <p style="margin: 0 0 10px 0; color: #999; font-size: 16px;">
-      Bonne nouvelle, ${order.customerName} !
+      Bonne nouvelle, ${escapeHtml(order.customerName)} !
     </p>
     <p style="margin: 0 0 20px 0; color: #999; font-size: 14px;">
       Votre commande #${order.orderNumber} a été expédiée.
@@ -200,10 +209,10 @@ export async function sendShippingNotificationEmail(email: string, order: OrderD
     
     <div style="background-color: #111; padding: 20px; margin-bottom: 20px;">
       <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px;">
-        ${order.artworkTitle}
+        ${escapeHtml(order.artworkTitle)}
       </p>
       <p style="margin: 0; color: #666; font-size: 14px;">
-        par ${order.artworkArtist}
+        par ${escapeHtml(order.artworkArtist)}
       </p>
     </div>
     
@@ -239,7 +248,7 @@ export async function sendSaleNotificationEmail(artistEmail: string, artwork: Ar
       Félicitations, vous avez vendu une œuvre !
     </h2>
     <p style="margin: 0 0 30px 0; color: #999; font-size: 16px;">
-      Cher ${artwork.artistName},
+      Cher ${escapeHtml(artwork.artistName)},
     </p>
     
     <div style="background-color: #111; padding: 20px; margin-bottom: 30px;">
@@ -247,7 +256,7 @@ export async function sendSaleNotificationEmail(artistEmail: string, artwork: Ar
         Œuvre vendue
       </p>
       <p style="margin: 0 0 15px 0; color: #ffffff; font-size: 20px;">
-        ${artwork.title}
+        ${escapeHtml(artwork.title)}
       </p>
       <p style="margin: 0; color: #ffffff; font-size: 24px;">
         Votre part : €${saleAmount.toLocaleString()}
@@ -284,7 +293,7 @@ export async function sendArtworkApprovedEmail(artistEmail: string, artwork: Art
       Votre œuvre est en ligne !
     </h2>
     <p style="margin: 0 0 30px 0; color: #999; font-size: 16px;">
-      Cher ${artwork.artistName},
+      Cher ${escapeHtml(artwork.artistName)},
     </p>
     
     <div style="background-color: #111; padding: 20px; margin-bottom: 30px;">
@@ -292,7 +301,7 @@ export async function sendArtworkApprovedEmail(artistEmail: string, artwork: Art
         ✓ Approuvée
       </p>
       <p style="margin: 0; color: #ffffff; font-size: 20px;">
-        ${artwork.title}
+        ${escapeHtml(artwork.title)}
       </p>
     </div>
     
@@ -301,7 +310,7 @@ export async function sendArtworkApprovedEmail(artistEmail: string, artwork: Art
       Elle est désormais disponible à la vente pour nos collectionneurs.
     </p>
     
-    <a href="https://galeryelfakir.vercel.app/catalogue" style="display: inline-block; padding: 15px 30px; background-color: #b8860b; color: #000; text-decoration: none; font-size: 14px; letter-spacing: 0.1em;">
+    <a href="${BASE_URL}/catalogue" style="display: inline-block; padding: 15px 30px; background-color: #b8860b; color: #000; text-decoration: none; font-size: 14px; letter-spacing: 0.1em;">
       VOIR LE CATALOGUE
     </a>
   `
@@ -372,7 +381,7 @@ export async function sendEmailVerificationEmail(email: string, name: string, ve
       Vérifiez votre adresse email
     </h2>
     <p style="margin: 0 0 20px 0; color: #999; font-size: 16px; line-height: 1.6;">
-      Bonjour ${name || 'cher amateur d\'art'},
+      Bonjour ${escapeHtml(name || 'cher amateur d\'art')},
     </p>
     <p style="margin: 0 0 20px 0; color: #999; font-size: 16px; line-height: 1.6;">
       Pour finaliser votre inscription et accéder à toutes les fonctionnalités de la galerie, 
@@ -417,18 +426,18 @@ export async function sendContactEmail(
     
     <div style="background-color: #111; padding: 20px; margin-bottom: 20px;">
       <p style="margin: 0 0 10px 0; color: #666; font-size: 12px;">De</p>
-      <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px;">${name}</p>
-      <p style="margin: 0; color: #b8860b; font-size: 14px;">${email}</p>
+      <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px;">${escapeHtml(name)}</p>
+      <p style="margin: 0; color: #b8860b; font-size: 14px;">${escapeHtml(email)}</p>
     </div>
     
     <div style="background-color: #111; padding: 20px; margin-bottom: 20px;">
       <p style="margin: 0 0 10px 0; color: #666; font-size: 12px;">Sujet</p>
-      <p style="margin: 0; color: #ffffff; font-size: 16px;">${subject}</p>
+      <p style="margin: 0; color: #ffffff; font-size: 16px;">${escapeHtml(subject)}</p>
     </div>
     
     <div style="background-color: #111; padding: 20px;">
       <p style="margin: 0 0 10px 0; color: #666; font-size: 12px;">Message</p>
-      <p style="margin: 0; color: #999; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+      <p style="margin: 0; color: #999; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${escapeHtml(message)}</p>
     </div>
   `
 

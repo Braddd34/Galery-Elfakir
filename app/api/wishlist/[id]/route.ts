@@ -53,7 +53,7 @@ export async function GET(
     }
 
     const wishlist = user.favorites
-      .filter(fav => fav.artwork.status === "AVAILABLE")
+      .filter(fav => fav.artwork && fav.artwork.status === "AVAILABLE")
       .map(fav => ({
         id: fav.artwork.id,
         title: fav.artwork.title,
@@ -62,7 +62,7 @@ export async function GET(
         images: fav.artwork.images,
         category: fav.artwork.category,
         year: fav.artwork.year,
-        artistName: fav.artwork.artist.user.name || "Artiste",
+        artistName: fav.artwork.artist?.user?.name || "Artiste",
         addedAt: fav.createdAt
       }))
 

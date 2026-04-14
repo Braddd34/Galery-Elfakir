@@ -37,6 +37,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "id requis" }, { status: 400 })
     }
 
+    const subscriber = await prisma.newsletterSubscriber.findUnique({ where: { id } })
+    if (!subscriber) {
+      return NextResponse.json({ error: "Abonné non trouvé" }, { status: 404 })
+    }
+
     await prisma.newsletterSubscriber.delete({ where: { id } })
 
     return NextResponse.json({ success: true })

@@ -79,7 +79,17 @@ export default function ChangePasswordForm() {
         body: JSON.stringify(formData),
       })
 
-      const data = await res.json()
+      const contentType = res.headers.get("content-type") ?? ""
+      let data: { error?: string } = {}
+      if (contentType.includes("application/json")) {
+        try {
+          data = await res.json()
+        } catch {
+          setStatus("error")
+          setServerError("Une erreur est survenue")
+          return
+        }
+      }
 
       if (res.ok) {
         setStatus("success")
