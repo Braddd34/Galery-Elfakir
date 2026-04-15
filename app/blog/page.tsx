@@ -4,6 +4,7 @@ import { Metadata } from "next"
 import prisma from "@/lib/prisma"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import { getServerTranslation } from "@/lib/i18n-server"
 
 export const metadata: Metadata = {
   title: "Journal",
@@ -44,6 +45,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   const totalPages = Math.ceil(total / limit)
 
+  const t = getServerTranslation()
+
   return (
     <>
       <Header />
@@ -51,11 +54,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         {/* Hero */}
         <section className="max-w-7xl mx-auto px-6 md:px-12 mb-16">
           <h1 className="text-4xl md:text-5xl font-light tracking-wide mb-4">
-            Journal
+            {t("blog.title")}
           </h1>
           <p className="text-neutral-400 text-lg max-w-2xl">
-            Actualités, coulisses de la galerie, interviews d&apos;artistes et
-            réflexions sur l&apos;art contemporain.
+            {t("blog.desc")}
           </p>
           <div className="mt-6 h-px bg-neutral-800" />
         </section>
@@ -64,7 +66,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         {posts.length === 0 ? (
           <section className="max-w-7xl mx-auto px-6 md:px-12">
             <p className="text-neutral-500 text-center py-20">
-              Aucun article publié pour le moment.
+              {t("blog.noPosts")}
             </p>
           </section>
         ) : (
@@ -145,7 +147,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                     )}
 
                     <span className="inline-block mt-4 text-xs text-neutral-400 group-hover:text-white transition-colors tracking-wider uppercase">
-                      Lire l&apos;article
+                      {t("blog.readArticle")}
                     </span>
                   </div>
                 </Link>
@@ -160,7 +162,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                     href={`/blog?page=${page - 1}`}
                     className="px-4 py-2 text-sm border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-600 transition-colors"
                   >
-                    Précédent
+                    {t("blog.prev")}
                   </Link>
                 )}
 
@@ -185,7 +187,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                     href={`/blog?page=${page + 1}`}
                     className="px-4 py-2 text-sm border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-600 transition-colors"
                   >
-                    Suivant
+                    {t("blog.next")}
                   </Link>
                 )}
               </nav>

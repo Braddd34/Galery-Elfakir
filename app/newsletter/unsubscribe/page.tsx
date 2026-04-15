@@ -3,18 +3,20 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 export default function UnsubscribePage() {
   const searchParams = useSearchParams()
   const email = searchParams.get("email") || ""
   const token = searchParams.get("token") || ""
+  const { t } = useLanguage()
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [message, setMessage] = useState("")
 
   useEffect(() => {
     if (!email || !token) {
       setStatus("error")
-      setMessage("Lien de désinscription invalide.")
+      setMessage(t("unsub.invalidLink"))
       return
     }
 
@@ -27,17 +29,17 @@ export default function UnsubscribePage() {
         const data = await res.json()
         if (res.ok) {
           setStatus("success")
-          setMessage("Vous avez été désinscrit de notre newsletter.")
+          setMessage(t("unsub.success"))
         } else {
           setStatus("error")
-          setMessage(data.error || "Une erreur est survenue.")
+          setMessage(data.error || t("verifyEmail.genericError"))
         }
       })
       .catch(() => {
         setStatus("error")
-        setMessage("Erreur de connexion.")
+        setMessage(t("unsub.networkError"))
       })
-  }, [email, token])
+  }, [email, token, t])
 
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -45,7 +47,7 @@ export default function UnsubscribePage() {
         <h1 className="text-2xl font-light mb-6 tracking-[0.3em]">ELFAKIR</h1>
 
         {status === "loading" && (
-          <p className="text-neutral-400">Désinscription en cours...</p>
+          <p className="text-neutral-400">{t("unsub.loading")}</p>
         )}
 
         {status === "success" && (
@@ -74,7 +76,7 @@ export default function UnsubscribePage() {
           href="/"
           className="inline-block mt-8 px-6 py-3 border border-neutral-700 text-sm hover:border-white transition-colors"
         >
-          Retour à l'accueil
+          {t("unsub.backHome")}
         </Link>
       </div>
     </main>

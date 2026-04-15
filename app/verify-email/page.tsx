@@ -3,10 +3,12 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
+  const { t } = useLanguage()
 
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [message, setMessage] = useState("")
@@ -15,7 +17,7 @@ function VerifyEmailContent() {
     async function verifyEmail() {
       if (!token) {
         setStatus("error")
-        setMessage("Lien de vérification invalide")
+        setMessage(t("verifyEmail.invalidLink"))
         return
       }
 
@@ -28,16 +30,16 @@ function VerifyEmailContent() {
           setMessage(data.message)
         } else {
           setStatus("error")
-          setMessage(data.error || "Une erreur est survenue")
+          setMessage(data.error || t("verifyEmail.genericError"))
         }
       } catch {
         setStatus("error")
-        setMessage("Une erreur est survenue lors de la vérification")
+        setMessage(t("verifyEmail.networkError"))
       }
     }
 
     verifyEmail()
-  }, [token])
+  }, [token, t])
 
   return (
     <>
@@ -49,8 +51,8 @@ function VerifyEmailContent() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-light mb-4">Vérification en cours...</h2>
-          <p className="text-neutral-400">Veuillez patienter</p>
+          <h2 className="text-2xl font-light mb-4">{t("verifyEmail.loading")}</h2>
+          <p className="text-neutral-400">{t("verifyEmail.wait")}</p>
         </div>
       )}
 
@@ -61,13 +63,13 @@ function VerifyEmailContent() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-light mb-4">Email vérifié !</h2>
+          <h2 className="text-2xl font-light mb-4">{t("verifyEmail.success")}</h2>
           <p className="text-neutral-400 mb-8">{message}</p>
           <Link
             href="/login"
             className="inline-block bg-white text-black px-8 py-3 text-sm tracking-wider uppercase hover:bg-neutral-200 transition-colors"
           >
-            Se connecter
+            {t("verifyEmail.login")}
           </Link>
         </div>
       )}
@@ -79,19 +81,19 @@ function VerifyEmailContent() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h2 className="text-2xl font-light mb-4">Erreur de vérification</h2>
+          <h2 className="text-2xl font-light mb-4">{t("verifyEmail.error")}</h2>
           <p className="text-neutral-400 mb-8">{message}</p>
           <div className="space-y-4">
             <Link
               href="/login"
               className="inline-block bg-white text-black px-8 py-3 text-sm tracking-wider uppercase hover:bg-neutral-200 transition-colors"
             >
-              Se connecter
+              {t("verifyEmail.login")}
             </Link>
             <p className="text-neutral-500 text-sm">
-              Besoin d'aide ?{" "}
+              {t("verifyEmail.needHelp")}{" "}
               <Link href="/contact" className="text-white hover:underline">
-                Contactez-nous
+                {t("verifyEmail.contactUs")}
               </Link>
             </p>
           </div>

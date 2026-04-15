@@ -105,7 +105,7 @@ export default function CheckoutPage() {
       })
       setPromoError("")
     } catch {
-      setPromoError("Erreur réseau")
+      setPromoError(t("checkout.networkError"))
     } finally {
       setPromoLoading(false)
     }
@@ -306,7 +306,7 @@ export default function CheckoutPage() {
                   <p className="text-neutral-400">{address.address}</p>
                   <p className="text-neutral-400">{address.postalCode} {address.city}</p>
                   <p className="text-neutral-400">{shippingRate.label}</p>
-                  {address.phone && <p className="text-neutral-500 text-sm mt-2">Tél: {address.phone}</p>}
+                  {address.phone && <p className="text-neutral-500 text-sm mt-2">{address.phone}</p>}
                 </div>
 
                 {/* Œuvres */}
@@ -405,7 +405,7 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 px-4 py-3">
                     <div>
                       <p className="text-green-400 text-sm font-medium">
-                        Code {promoDiscount.code} appliqué
+                        {t("checkout.promoCodeApplied").replace("{code}", promoDiscount.code)}
                       </p>
                       <p className="text-green-400/70 text-xs">
                         {promoDiscount.type === "percent"
@@ -429,7 +429,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                        placeholder="Code promo"
+                        placeholder={t("checkout.promoPlaceholder")}
                         className="flex-1 bg-black border border-neutral-700 px-4 py-2 text-white text-sm focus:border-white focus:outline-none"
                       />
                       <button
@@ -437,7 +437,7 @@ export default function CheckoutPage() {
                         disabled={promoLoading || !promoCode.trim()}
                         className="px-4 py-2 bg-neutral-800 text-white text-sm hover:bg-neutral-700 transition-colors disabled:opacity-50"
                       >
-                        {promoLoading ? "..." : "Appliquer"}
+                        {promoLoading ? "..." : t("checkout.apply")}
                       </button>
                     </div>
                     {promoError && (
@@ -454,7 +454,7 @@ export default function CheckoutPage() {
                 </div>
                 {promoDiscount && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-green-400">Réduction</span>
+                    <span className="text-green-400">{t("checkout.discount")}</span>
                     <span className="text-green-400">−€{discount.toLocaleString()}</span>
                   </div>
                 )}

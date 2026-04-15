@@ -8,121 +8,46 @@ export const metadata: Metadata = {
   description: "Trouvez les réponses à vos questions sur l'achat d'œuvres d'art, la livraison, les retours et la galerie ELFAKIR.",
 }
 
-const faqs = [
-  {
-    category: "Achat",
-    questions: [
-      {
-        q: "Comment acheter une œuvre ?",
-        a: "Parcourez notre catalogue, cliquez sur l'œuvre qui vous plaît, puis ajoutez-la à votre panier. Vous serez guidé à travers le processus de commande avec le choix de l'adresse de livraison et le paiement sécurisé."
-      },
-      {
-        q: "Les prix sont-ils négociables ?",
-        a: "Les prix affichés sont fixes. Cependant, vous pouvez contacter directement l'artiste via notre messagerie interne pour discuter d'éventuelles commandes personnalisées."
-      },
-      {
-        q: "Puis-je payer en plusieurs fois ?",
-        a: "Pour le moment, nous ne proposons pas le paiement en plusieurs fois. Le paiement se fait en une seule fois par carte bancaire via notre plateforme sécurisée."
-      },
-      {
-        q: "Les prix incluent-ils la TVA ?",
-        a: "Oui, tous les prix affichés incluent la TVA. Les frais de livraison sont calculés séparément lors du processus de commande."
-      }
-    ]
-  },
-  {
-    category: "Authenticité",
-    questions: [
-      {
-        q: "Les œuvres sont-elles authentiques ?",
-        a: "Absolument. Chaque œuvre vendue sur ELFAKIR est une création originale accompagnée d'un certificat d'authenticité signé, garantissant son origine et son unicité."
-      },
-      {
-        q: "Qu'est-ce que le certificat d'authenticité ?",
-        a: "C'est un document officiel qui accompagne chaque œuvre vendue. Il contient les informations sur l'œuvre (titre, dimensions, technique), l'artiste, et un numéro unique. Vous pouvez le télécharger depuis votre espace client."
-      },
-      {
-        q: "Comment vérifier l'authenticité d'une œuvre ?",
-        a: "Chaque certificat possède un numéro unique vérifiable. Si vous avez des doutes, contactez-nous avec le numéro de votre certificat et nous confirmerons son authenticité."
-      }
-    ]
-  },
-  {
-    category: "Livraison",
-    questions: [
-      {
-        q: "Quels sont les délais de livraison ?",
-        a: "Les œuvres sont expédiées sous 3 à 5 jours ouvrés après confirmation du paiement. La livraison prend ensuite 2 à 5 jours en France, et 5 à 15 jours à l'international."
-      },
-      {
-        q: "Comment sont emballées les œuvres ?",
-        a: "Chaque œuvre est soigneusement emballée avec des matériaux professionnels : papier de soie, mousse de protection, carton renforcé et caisse en bois pour les sculptures. L'assurance transport est incluse."
-      },
-      {
-        q: "Livrez-vous à l'international ?",
-        a: "Oui, nous livrons dans le monde entier. Les frais de port varient selon la destination : France (25€), Europe (45€), International (80€). La livraison est offerte à partir de 5 000€ d'achat."
-      },
-      {
-        q: "Puis-je suivre ma commande ?",
-        a: "Oui, dès que votre commande est expédiée, vous recevez un email avec le numéro de suivi et le nom du transporteur. Vous pouvez également suivre votre commande depuis votre espace client."
-      }
-    ]
-  },
-  {
-    category: "Retours",
-    questions: [
-      {
-        q: "Puis-je retourner une œuvre ?",
-        a: "Vous disposez d'un droit de rétractation de 14 jours après réception. L'œuvre doit être retournée dans son emballage d'origine, en parfait état. Les frais de retour sont à la charge de l'acheteur."
-      },
-      {
-        q: "Comment effectuer un retour ?",
-        a: "Contactez-nous via le formulaire de contact ou la messagerie interne en indiquant votre numéro de commande. Nous vous enverrons les instructions de retour et l'adresse d'expédition."
-      },
-      {
-        q: "Quand serai-je remboursé ?",
-        a: "Le remboursement est effectué sous 14 jours après réception et vérification de l'œuvre retournée, sur le moyen de paiement utilisé lors de l'achat."
-      }
-    ]
-  },
-  {
-    category: "Artistes",
-    questions: [
-      {
-        q: "Comment devenir artiste partenaire ?",
-        a: "Inscrivez-vous en tant qu'artiste sur notre site. Votre profil sera examiné par notre équipe curatoriale. Si votre travail correspond à notre ligne artistique, nous activerons votre compte et vous pourrez commencer à publier vos œuvres."
-      },
-      {
-        q: "Quelle est la commission de la galerie ?",
-        a: "La commission standard est de 30% sur le prix de vente. Cela couvre les frais de plateforme, de promotion, et le support client. L'artiste reçoit 70% du prix de vente."
-      },
-      {
-        q: "Comment suis-je payé en tant qu'artiste ?",
-        a: "Les paiements sont transférés directement sur votre compte bancaire après chaque vente. Vous pouvez suivre vos ventes et revenus depuis votre tableau de bord artiste."
-      }
-    ]
-  },
-  {
-    category: "Compte",
-    questions: [
-      {
-        q: "Comment créer un compte ?",
-        a: "Cliquez sur 'Connexion' puis 'Créer un compte'. Remplissez le formulaire avec votre nom, email et mot de passe. Vous recevrez un email de vérification pour activer votre compte."
-      },
-      {
-        q: "J'ai oublié mon mot de passe",
-        a: "Sur la page de connexion, cliquez sur 'Mot de passe oublié ?'. Entrez votre email et nous vous enverrons un lien de réinitialisation valable 1 heure."
-      },
-      {
-        q: "Comment modifier mes informations ?",
-        a: "Connectez-vous à votre compte, allez dans 'Mon profil' depuis le tableau de bord. Vous pourrez y modifier vos informations personnelles, votre adresse et vos préférences."
-      }
-    ]
-  }
-]
+function buildFaqs(t: (key: string) => string) {
+  return [
+    { category: t("faq.catPurchase"), questions: [
+      { q: t("faq.q1"), a: t("faq.a1") },
+      { q: t("faq.q2"), a: t("faq.a2") },
+      { q: t("faq.q3"), a: t("faq.a3") },
+      { q: t("faq.q4"), a: t("faq.a4") },
+    ]},
+    { category: t("faq.catAuthenticity"), questions: [
+      { q: t("faq.q5"), a: t("faq.a5") },
+      { q: t("faq.q6"), a: t("faq.a6") },
+      { q: t("faq.q7"), a: t("faq.a7") },
+    ]},
+    { category: t("faq.catShipping"), questions: [
+      { q: t("faq.q8"), a: t("faq.a8") },
+      { q: t("faq.q9"), a: t("faq.a9") },
+      { q: t("faq.q10"), a: t("faq.a10") },
+      { q: t("faq.q11"), a: t("faq.a11") },
+    ]},
+    { category: t("faq.catReturns"), questions: [
+      { q: t("faq.q12"), a: t("faq.a12") },
+      { q: t("faq.q13"), a: t("faq.a13") },
+      { q: t("faq.q14"), a: t("faq.a14") },
+    ]},
+    { category: t("faq.catArtists"), questions: [
+      { q: t("faq.q15"), a: t("faq.a15") },
+      { q: t("faq.q16"), a: t("faq.a16") },
+      { q: t("faq.q17"), a: t("faq.a17") },
+    ]},
+    { category: t("faq.catAccount"), questions: [
+      { q: t("faq.q18"), a: t("faq.a18") },
+      { q: t("faq.q19"), a: t("faq.a19") },
+      { q: t("faq.q20"), a: t("faq.a20") },
+    ]},
+  ]
+}
 
 export default function FAQPage() {
   const t = getServerTranslation()
+  const faqs = buildFaqs(t)
   // Données structurées FAQPage pour Google (rich snippets dans les résultats de recherche)
   const faqJsonLd = {
     "@context": "https://schema.org",
