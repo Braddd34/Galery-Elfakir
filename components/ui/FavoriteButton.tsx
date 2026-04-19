@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/lib/toast-context"
+import { useFavorites } from "@/lib/favorites-context"
 
 interface FavoriteButtonProps {
   artworkId: string
@@ -14,26 +15,9 @@ export default function FavoriteButton({ artworkId, className = "" }: FavoriteBu
   const { data: session } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
-  const [isFavorite, setIsFavorite] = useState(false)
+  const { favoriteIds, toggle } = useFavorites()
+  const isFavorite = favoriteIds.has(artworkId)
   const [loading, setLoading] = useState(false)
-
-  // Vérifier si l'œuvre est dans les favoris au chargement
-  useEffect(() => {
-    if (session) {
-      fetch("/api/favorites")
-        .then((res) => {
-          if (!res.ok) return
-          return res.json()
-        })
-        .then((data) => {
-          if (!data) return
-          if (data.favoriteIds?.includes(artworkId)) {
-            setIsFavorite(true)
-          }
-        })
-        .catch(() => {})
-    }
-  }, [session, artworkId])
 
   const handleClick = async () => {
     if (!session) {
@@ -44,21 +28,12 @@ export default function FavoriteButton({ artworkId, className = "" }: FavoriteBu
 
     setLoading(true)
     try {
-      const res = await fetch("/api/favorites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artworkId })
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        setIsFavorite(data.isFavorite)
-        showToast(
-          data.isFavorite ? "Ajouté aux favoris" : "Retiré des favoris",
-          data.isFavorite ? "success" : "info"
-        )
-      }
-    } catch (error) {
+      const nowFav = await toggle(artworkId)
+      showToast(
+        nowFav ? "Ajouté aux favoris" : "Retiré des favoris",
+        nowFav ? "success" : "info"
+      )
+    } catch {
       showToast("Une erreur est survenue", "error")
     } finally {
       setLoading(false)

@@ -4,18 +4,35 @@ import { useState } from "react"
 import { OrderStatus } from "@prisma/client"
 import { useToast } from "@/lib/toast-context"
 
+interface ArtworkSnapshot {
+  title?: string
+  artistName?: string
+  image?: string
+  price?: number
+}
+
+interface ShippingAddress {
+  firstName?: string
+  lastName?: string
+  address?: string
+  city?: string
+  postalCode?: string
+  country?: string
+  phone?: string
+}
+
 interface Order {
   id: string
   orderNumber: string
   status: OrderStatus
-  total: any
+  total: number | string
   trackingNumber: string | null
   shippingCarrier: string | null
   shippedAt: Date | null
   deliveredAt: Date | null
   createdAt: Date
-  artworkSnapshot: any
-  shippingAddress: any
+  artworkSnapshot: ArtworkSnapshot | null
+  shippingAddress: ShippingAddress | null
   user: {
     name: string | null
     email: string
@@ -61,7 +78,7 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
   // Filtrer les commandes par statut et recherche
   const filteredOrders = orders.filter(order => {
     const matchesStatus = filterStatus === "all" || order.status === filterStatus
-    const snapshot = order.artworkSnapshot as any
+    const snapshot = order.artworkSnapshot
     const searchLower = searchQuery.toLowerCase()
     const matchesSearch = !searchQuery || 
       order.orderNumber.toLowerCase().includes(searchLower) ||
@@ -191,8 +208,8 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
       {filteredOrders.length > 0 ? (
         <div className="space-y-4">
           {filteredOrders.map((order) => {
-            const snapshot = order.artworkSnapshot as any
-            const address = order.shippingAddress as any
+            const snapshot = order.artworkSnapshot
+            const address = order.shippingAddress
             
             return (
               <div
@@ -380,8 +397,8 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
               {/* Œuvre */}
               <div className="pt-4 border-t border-neutral-800">
                 <p className="text-sm text-neutral-500 mb-2">Œuvre</p>
-                <p className="text-lg">{(selectedOrder.artworkSnapshot as any)?.title}</p>
-                <p className="text-neutral-400">par {(selectedOrder.artworkSnapshot as any)?.artistName}</p>
+                <p className="text-lg">{selectedOrder.artworkSnapshot?.title}</p>
+                <p className="text-neutral-400">par {selectedOrder.artworkSnapshot?.artistName}</p>
                 <p className="text-xl mt-2">€{Number(selectedOrder.total).toLocaleString()}</p>
               </div>
 
@@ -390,10 +407,10 @@ export default function OrdersList({ orders: initialOrders }: OrdersListProps) {
                 <div className="pt-4 border-t border-neutral-800">
                   <p className="text-sm text-neutral-500 mb-2">Adresse de livraison</p>
                   <div className="text-neutral-300">
-                    <p>{(selectedOrder.shippingAddress as any)?.firstName} {(selectedOrder.shippingAddress as any)?.lastName}</p>
-                    <p>{(selectedOrder.shippingAddress as any)?.address}</p>
-                    <p>{(selectedOrder.shippingAddress as any)?.postalCode} {(selectedOrder.shippingAddress as any)?.city}</p>
-                    <p>{(selectedOrder.shippingAddress as any)?.country}</p>
+                    <p>{selectedOrder.shippingAddress?.firstName} {selectedOrder.shippingAddress?.lastName}</p>
+                    <p>{selectedOrder.shippingAddress?.address}</p>
+                    <p>{selectedOrder.shippingAddress?.postalCode} {selectedOrder.shippingAddress?.city}</p>
+                    <p>{selectedOrder.shippingAddress?.country}</p>
                   </div>
                 </div>
               )}

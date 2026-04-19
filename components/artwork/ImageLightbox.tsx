@@ -133,7 +133,10 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
         {/* Image principale */}
         <div
           className="aspect-[4/5] bg-neutral-900 cursor-zoom-in relative group"
-          onClick={() => openLightbox(0)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(activeIndex) } }}
+          onClick={() => openLightbox(activeIndex)}
         >
           <img
             src={images[activeIndex]?.url || images[0]?.url}
@@ -154,17 +157,17 @@ export default function ImageLightbox({ images, alt }: ImageLightboxProps) {
         {images.length > 1 && (
           <div className="grid grid-cols-3 gap-4">
             {images.map((img, i) => (
-              <div
+              <button
                 key={i}
+                type="button"
                 className={`aspect-square bg-neutral-900 cursor-pointer transition-opacity ${
                   i === activeIndex ? "ring-1 ring-white" : "opacity-60 hover:opacity-100"
                 }`}
-                onClick={() => {
-                  setActiveIndex(i)
-                }}
+                onClick={() => setActiveIndex(i)}
+                aria-label={`Vue ${i + 1}`}
               >
                 <img src={img.url} alt={`${alt} — vue ${i + 1}`} className="w-full h-full object-cover" />
-              </div>
+              </button>
             ))}
           </div>
         )}

@@ -31,9 +31,7 @@ export const useLanguage = () => useContext(LanguageContext)
  */
 export default function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("fr")
-  const [mounted, setMounted] = useState(false)
 
-  // Charger la langue sauvegardée + synchroniser le cookie
   useEffect(() => {
     const saved = localStorage.getItem("locale") as Locale | null
     if (saved && (saved === "fr" || saved === "en")) {
@@ -42,7 +40,6 @@ export default function LanguageProvider({ children }: { children: ReactNode }) 
     } else {
       document.cookie = `locale=fr;path=/;max-age=31536000;SameSite=Lax`
     }
-    setMounted(true)
   }, [])
 
   // Changer la langue et sauvegarder

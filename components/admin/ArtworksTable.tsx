@@ -9,9 +9,9 @@ interface Artwork {
   title: string
   category: string
   status: string
-  price: any
+  price: number | string
   slug: string
-  images: any
+  images: unknown
   artist: {
     user: {
       name: string | null

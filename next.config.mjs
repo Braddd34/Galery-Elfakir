@@ -35,7 +35,6 @@ const nextConfig = {
   },
   // Optimizations
   reactStrictMode: true,
-  swcMinify: true,
   // Masquer le header X-Powered-By pour la sécurité
   poweredByHeader: false,
   // Supprimer les console.log en production (garde console.error et console.warn)

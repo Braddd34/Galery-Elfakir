@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface FilterState {
   category: string
@@ -21,29 +22,30 @@ interface AdvancedFiltersProps {
   currentView?: "grid" | "list"
 }
 
-const categories = [
-  { value: "all", label: "Toutes catégories" },
-  { value: "painting", label: "Peinture" },
-  { value: "sculpture", label: "Sculpture" },
-  { value: "photography", label: "Photographie" },
-  { value: "drawing", label: "Dessin" },
-  { value: "print", label: "Estampe" },
-  { value: "digital", label: "Art numérique" },
-  { value: "mixed_media", label: "Technique mixte" },
+const categoryKeys = [
+  { value: "all", key: "filters.allCategories" },
+  { value: "painting", key: "filters.painting" },
+  { value: "sculpture", key: "filters.sculpture" },
+  { value: "photography", key: "filters.photography" },
+  { value: "drawing", key: "filters.drawing" },
+  { value: "print", key: "filters.print" },
+  { value: "digital", key: "filters.digital" },
+  { value: "mixed_media", key: "filters.mixedMedia" },
 ]
 
-const sortOptions = [
-  { value: "recent", label: "Plus récentes" },
-  { value: "price_asc", label: "Prix croissant" },
-  { value: "price_desc", label: "Prix décroissant" },
-  { value: "popular", label: "Plus populaires" },
-  { value: "year_desc", label: "Année (récent)" },
-  { value: "year_asc", label: "Année (ancien)" },
+const sortKeys = [
+  { value: "recent", key: "filters.sortRecent" },
+  { value: "price_asc", key: "filters.sortPriceAsc" },
+  { value: "price_desc", key: "filters.sortPriceDesc" },
+  { value: "popular", key: "filters.sortPopular" },
+  { value: "year_desc", key: "filters.sortYearDesc" },
+  { value: "year_asc", key: "filters.sortYearAsc" },
 ]
 
 export default function AdvancedFilters({ onViewChange, currentView = "grid" }: AdvancedFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useLanguage()
   const [showAdvanced, setShowAdvanced] = useState(false)
   
   const [filters, setFilters] = useState<FilterState>({
@@ -138,9 +140,9 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
           }}
           className="px-4 py-2 bg-neutral-900 border border-neutral-700 rounded-lg focus:border-white focus:outline-none"
         >
-          {categories.map((cat) => (
+          {categoryKeys.map((cat) => (
             <option key={cat.value} value={cat.value}>
-              {cat.label}
+              {t(cat.key)}
             </option>
           ))}
         </select>
@@ -160,9 +162,9 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
           }}
           className="px-4 py-2 bg-neutral-900 border border-neutral-700 rounded-lg focus:border-white focus:outline-none"
         >
-          {sortOptions.map((opt) => (
+          {sortKeys.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.key)}
             </option>
           ))}
         </select>
@@ -179,7 +181,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
-          Filtres avancés
+          {t("filters.advanced")}
           {hasActiveFilters() && (
             <span className="bg-white text-black text-xs px-1.5 py-0.5 rounded-full ml-1">
               !
@@ -193,7 +195,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             onClick={resetFilters}
             className="px-3 py-2 text-sm text-neutral-400 hover:text-white transition-colors"
           >
-            Réinitialiser
+            {t("filters.reset")}
           </button>
         )}
         
@@ -207,7 +209,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             className={`p-2 transition-colors ${
               currentView === "grid" ? "bg-white text-black" : "hover:bg-neutral-800"
             }`}
-            title="Vue grille"
+            title={t("filters.gridView")}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -218,7 +220,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             className={`p-2 transition-colors ${
               currentView === "list" ? "bg-white text-black" : "hover:bg-neutral-800"
             }`}
-            title="Vue liste"
+            title={t("filters.listView")}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -233,7 +235,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
           <div className="grid md:grid-cols-3 gap-6">
             {/* Prix */}
             <div>
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">Prix (€)</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.price")}</h4>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -255,7 +257,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             
             {/* Dimensions - Largeur */}
             <div>
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">Largeur (cm)</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.width")}</h4>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -277,7 +279,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             
             {/* Dimensions - Hauteur */}
             <div>
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">Hauteur (cm)</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.height")}</h4>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -299,14 +301,14 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             
             {/* Année */}
             <div className="md:col-span-2">
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">Année de création</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.year")}</h4>
               <div className="flex gap-2">
                 <select
                   value={filters.yearFrom}
                   onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
                   className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
                 >
-                  <option value="">De</option>
+                  <option value="">{t("filters.from")}</option>
                   {years.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
@@ -317,7 +319,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
                   onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
                   className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
                 >
-                  <option value="">À</option>
+                  <option value="">{t("filters.to")}</option>
                   {years.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
@@ -331,7 +333,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
                 onClick={applyFilters}
                 className="w-full px-6 py-2 bg-white text-black font-medium hover:bg-neutral-200 transition-colors"
               >
-                Appliquer les filtres
+                {t("filters.apply")}
               </button>
             </div>
           </div>

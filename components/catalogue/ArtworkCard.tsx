@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/lib/toast-context"
 import { CompareButton } from "@/components/artwork/CompareDrawer"
 import { getArtworkImageUrl } from "@/lib/image-utils"
+import { useFavorites } from "@/lib/favorites-context"
 
 interface ArtworkCardProps {
   artwork: {
@@ -16,10 +17,10 @@ interface ArtworkCardProps {
     slug: string
     category: string
     year: number
-    price: any
-    width: any
-    height: any
-    images: any
+    price: number | string
+    width: number | string
+    height: number | string
+    images: unknown
     artist: {
       user: {
         name: string | null
@@ -28,47 +29,16 @@ interface ArtworkCardProps {
   }
 }
 
-const categoryLabels: Record<string, string> = {
-  PAINTING: "Peinture",
-  SCULPTURE: "Sculpture",
-  PHOTOGRAPHY: "Photographie",
-  DRAWING: "Dessin",
-  PRINT: "Estampe",
-  DIGITAL: "Art numérique",
-  MIXED_MEDIA: "Technique mixte",
-  OTHER: "Autre"
-}
-
-const getImageUrl = getArtworkImageUrl
-
-// Placeholder blur générique (gris neutre)
 const blurDataURL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjYyNjI2Ii8+PC9zdmc+"
 
 export default function ArtworkCard({ artwork }: ArtworkCardProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
-  const [isFavorite, setIsFavorite] = useState(false)
+  const { favoriteIds, toggle } = useFavorites()
+  const isFavorite = favoriteIds.has(artwork.id)
   const [loading, setLoading] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
-
-  // Vérifier si l'œuvre est dans les favoris
-  useEffect(() => {
-    if (session) {
-      fetch("/api/favorites")
-        .then((res) => {
-          if (!res.ok) return
-          return res.json()
-        })
-        .then((data) => {
-          if (!data) return
-          if (data.favoriteIds?.includes(artwork.id)) {
-            setIsFavorite(true)
-          }
-        })
-        .catch(() => {})
-    }
-  }, [session, artwork.id])
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -82,33 +52,12 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
 
     setLoading(true)
     try {
-      const res = await fetch("/api/favorites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artworkId: artwork.id })
-      })
-
-      if (!res.ok) {
-        let message = "Une erreur est survenue"
-        try {
-          const err = await res.json()
-          if (err?.error) message = err.error
-        } catch {
-          /* corps non JSON */
-        }
-        console.error("Erreur favoris:", message)
-        showToast(message, "error")
-        return
-      }
-
-      const data = await res.json()
-      setIsFavorite(data.isFavorite)
+      const nowFav = await toggle(artwork.id)
       showToast(
-        data.isFavorite ? "Ajouté aux favoris" : "Retiré des favoris",
-        data.isFavorite ? "success" : "info"
+        nowFav ? "Ajouté aux favoris" : "Retiré des favoris",
+        nowFav ? "success" : "info"
       )
-    } catch (error) {
-      console.error("Erreur favoris:", error)
+    } catch {
       showToast("Une erreur est survenue", "error")
     } finally {
       setLoading(false)
@@ -129,7 +78,7 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
           height: Number(artwork.height),
           medium: "",
           category: artwork.category,
-          image: getImageUrl(artwork.images),
+          image: getArtworkImageUrl(artwork.images),
           artistName: artwork.artist.user.name || "Artiste",
         }} />
       </div>
@@ -163,7 +112,7 @@ export default function ArtworkCard({ artwork }: ArtworkCardProps) {
         {/* Image */}
         <div className="relative aspect-[3/4] bg-neutral-900 mb-4 overflow-hidden rounded-sm">
           <Image
-            src={getImageUrl(artwork.images)}
+            src={getArtworkImageUrl(artwork.images)}
             alt={artwork.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

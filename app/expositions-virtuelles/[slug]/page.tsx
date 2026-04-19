@@ -54,14 +54,6 @@ export default function ExpositionVirtuelleViewerPage() {
   const enteredAtRef = useRef<Date | null>(null)
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      document.title = exhibition
-        ? `${exhibition.title} | Expositions Virtuelles — ELFAKIR`
-        : "Exposition Virtuelle — ELFAKIR"
-    }
-  }, [exhibition?.title])
-
-  useEffect(() => {
     let cancelled = false
 
     async function fetchExhibition() {

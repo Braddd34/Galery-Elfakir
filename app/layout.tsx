@@ -3,6 +3,7 @@ import { headers } from "next/headers"
 import "./globals.css"
 import SessionProvider from "@/components/providers/SessionProvider"
 import { CompareProvider } from "@/components/artwork/CompareDrawer"
+import { FavoritesProvider } from "@/lib/favorites-context"
 import ThemeProvider from "@/components/providers/ThemeProvider"
 import LanguageProvider from "@/components/providers/LanguageProvider"
 import { Analytics } from "@vercel/analytics/react"
@@ -78,9 +79,11 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider>
             <LanguageProvider>
-              <CompareProvider>
-                {children}
-              </CompareProvider>
+              <FavoritesProvider>
+                <CompareProvider>
+                  {children}
+                </CompareProvider>
+              </FavoritesProvider>
             </LanguageProvider>
           </ThemeProvider>
         </SessionProvider>

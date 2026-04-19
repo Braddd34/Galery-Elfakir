@@ -78,7 +78,16 @@ export default async function AdminOeuvresPage() {
       </div>
 
       {/* Table */}
-      <ArtworksTable artworks={artworks as any} />
+      <ArtworksTable artworks={artworks.map(a => ({
+        id: a.id,
+        title: a.title,
+        category: a.category,
+        status: a.status,
+        price: Number(a.price),
+        slug: a.slug,
+        images: a.images,
+        artist: a.artist,
+      }))} />
     </div>
   )
 }

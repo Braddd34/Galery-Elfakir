@@ -90,7 +90,12 @@ export default async function AdminCommandesPage() {
         </div>
 
         {/* Orders List */}
-        <OrdersList orders={orders as any} />
+        <OrdersList orders={orders.map(o => ({
+          ...o,
+          total: Number(o.total),
+          artworkSnapshot: o.artworkSnapshot as Record<string, unknown> | null,
+          shippingAddress: o.shippingAddress as Record<string, unknown> | null,
+        }))} />
       </div>
     </main>
   )
