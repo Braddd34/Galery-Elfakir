@@ -23,23 +23,23 @@ interface AdvancedFiltersProps {
 }
 
 const categoryKeys = [
-  { value: "all", key: "filters.allCategories" },
-  { value: "painting", key: "filters.painting" },
-  { value: "sculpture", key: "filters.sculpture" },
-  { value: "photography", key: "filters.photography" },
-  { value: "drawing", key: "filters.drawing" },
-  { value: "print", key: "filters.print" },
-  { value: "digital", key: "filters.digital" },
-  { value: "mixed_media", key: "filters.mixedMedia" },
+  { value: "all", key: "advFilters.allCategories" },
+  { value: "painting", key: "advFilters.painting" },
+  { value: "sculpture", key: "advFilters.sculpture" },
+  { value: "photography", key: "advFilters.photography" },
+  { value: "drawing", key: "advFilters.drawing" },
+  { value: "print", key: "advFilters.print" },
+  { value: "digital", key: "advFilters.digital" },
+  { value: "mixed_media", key: "advFilters.mixedMedia" },
 ]
 
 const sortKeys = [
-  { value: "recent", key: "filters.sortRecent" },
-  { value: "price_asc", key: "filters.sortPriceAsc" },
-  { value: "price_desc", key: "filters.sortPriceDesc" },
-  { value: "popular", key: "filters.sortPopular" },
-  { value: "year_desc", key: "filters.sortYearDesc" },
-  { value: "year_asc", key: "filters.sortYearAsc" },
+  { value: "recent", key: "advFilters.sortRecent" },
+  { value: "price_asc", key: "advFilters.sortPriceAsc" },
+  { value: "price_desc", key: "advFilters.sortPriceDesc" },
+  { value: "popular", key: "advFilters.sortPopular" },
+  { value: "year_desc", key: "advFilters.sortYearDesc" },
+  { value: "year_asc", key: "advFilters.sortYearAsc" },
 ]
 
 export default function AdvancedFilters({ onViewChange, currentView = "grid" }: AdvancedFiltersProps) {
@@ -181,7 +181,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
-          {t("filters.advanced")}
+          {t("advFilters.advanced")}
           {hasActiveFilters() && (
             <span className="bg-white text-black text-xs px-1.5 py-0.5 rounded-full ml-1">
               !
@@ -195,7 +195,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             onClick={resetFilters}
             className="px-3 py-2 text-sm text-neutral-400 hover:text-white transition-colors"
           >
-            {t("filters.reset")}
+            {t("advFilters.reset")}
           </button>
         )}
         
@@ -209,7 +209,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             className={`p-2 transition-colors ${
               currentView === "grid" ? "bg-white text-black" : "hover:bg-neutral-800"
             }`}
-            title={t("filters.gridView")}
+            title={t("advFilters.gridView")}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -220,7 +220,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             className={`p-2 transition-colors ${
               currentView === "list" ? "bg-white text-black" : "hover:bg-neutral-800"
             }`}
-            title={t("filters.listView")}
+            title={t("advFilters.listView")}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -235,7 +235,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
           <div className="grid md:grid-cols-3 gap-6">
             {/* Prix */}
             <div>
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.price")}</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("advFilters.price")}</h4>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -257,7 +257,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             
             {/* Dimensions - Largeur */}
             <div>
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.width")}</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("advFilters.width")}</h4>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -279,7 +279,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             
             {/* Dimensions - Hauteur */}
             <div>
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.height")}</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("advFilters.height")}</h4>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -301,14 +301,14 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
             
             {/* Année */}
             <div className="md:col-span-2">
-              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("filters.year")}</h4>
+              <h4 className="text-sm font-medium text-neutral-400 mb-3">{t("advFilters.year")}</h4>
               <div className="flex gap-2">
                 <select
                   value={filters.yearFrom}
                   onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
                   className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
                 >
-                  <option value="">{t("filters.from")}</option>
+                  <option value="">{t("advFilters.from")}</option>
                   {years.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
@@ -319,7 +319,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
                   onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
                   className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded focus:border-white focus:outline-none"
                 >
-                  <option value="">{t("filters.to")}</option>
+                  <option value="">{t("advFilters.to")}</option>
                   {years.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
@@ -333,7 +333,7 @@ export default function AdvancedFilters({ onViewChange, currentView = "grid" }: 
                 onClick={applyFilters}
                 className="w-full px-6 py-2 bg-white text-black font-medium hover:bg-neutral-200 transition-colors"
               >
-                {t("filters.apply")}
+                {t("advFilters.apply")}
               </button>
             </div>
           </div>
