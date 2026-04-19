@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next"
 import prisma from "@/lib/prisma"
+import { SITE_URL } from "@/lib/constants"
 
 /**
  * Génère automatiquement le sitemap.xml du site.
@@ -11,7 +12,7 @@ import prisma from "@/lib/prisma"
  * - Tous les artistes actifs (dynamique depuis la DB)
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://galeryelfakir.vercel.app"
+  const baseUrl = SITE_URL
 
   // Pages statiques
   const staticPages: MetadataRoute.Sitemap = [

@@ -12,6 +12,7 @@ import SkipLink from "@/components/ui/SkipLink"
 import NetworkStatus from "@/components/ui/NetworkStatus"
 import ServiceWorkerRegister from "@/components/ui/ServiceWorkerRegister"
 import CookieConsent from "@/components/ui/CookieConsent"
+import { SITE_URL } from "@/lib/constants"
 
 export const metadata: Metadata = {
   title: {
@@ -23,18 +24,27 @@ export const metadata: Metadata = {
   authors: [{ name: "ELFAKIR" }],
   creator: "ELFAKIR Gallery",
   publisher: "ELFAKIR",
-  metadataBase: new URL("https://galeryelfakir.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
     locale: "fr_FR",
     siteName: "ELFAKIR",
     title: "ELFAKIR — Galerie d'Art Contemporain",
     description: "Découvrez une collection exclusive d'œuvres originales d'artistes internationaux.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "ELFAKIR — Galerie d'Art Contemporain",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "ELFAKIR — Galerie d'Art Contemporain",
     description: "Découvrez une collection exclusive d'œuvres originales d'artistes internationaux.",
+    images: ["/opengraph-image"],
   },
   icons: {
     icon: "/icon",

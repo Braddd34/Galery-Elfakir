@@ -155,4 +155,23 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+// Wrapper Sentry — actif uniquement si @sentry/nextjs est installé.
+// Permet l'upload des source maps et l'instrumentation auto des routes.
+let exportedConfig = nextConfig
+try {
+  const { withSentryConfig } = await import("@sentry/nextjs")
+  exportedConfig = withSentryConfig(nextConfig, {
+    silent: true,
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    widenClientFileUpload: true,
+    hideSourceMaps: true,
+    disableLogger: true,
+    tunnelRoute: "/monitoring",
+  })
+} catch {
+  // @sentry/nextjs non installé — on continue sans Sentry.
+}
+
+export default exportedConfig

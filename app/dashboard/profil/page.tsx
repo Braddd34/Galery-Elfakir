@@ -7,6 +7,7 @@ import Link from "next/link"
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm"
 import ProfilePhotoUpload from "@/components/profile/ProfilePhotoUpload"
 import NotificationPreferences from "@/components/profile/NotificationPreferences"
+import DeleteAccountSection from "@/components/profile/DeleteAccountSection"
 import { useLanguage } from "@/components/providers/LanguageProvider"
 
 interface BuyerProfile {
@@ -265,6 +266,12 @@ export default function ProfilPage() {
           >
             {t("profile.exportData")}
           </a>
+        </div>
+
+        {/* Section Suppression de compte (RGPD - droit à l'effacement) */}
+        <div className="mt-12 pt-12 border-t border-neutral-800">
+          <h2 className="text-xl font-light mb-6 text-red-400">{t("deleteAccount.sectionTitle")}</h2>
+          <DeleteAccountSection />
         </div>
       </div>
     </main>

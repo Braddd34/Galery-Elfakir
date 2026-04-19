@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next"
+import { SITE_URL } from "@/lib/constants"
 
 /**
  * Génère le fichier robots.txt pour les moteurs de recherche.
@@ -22,6 +23,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://galeryelfakir.vercel.app/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   }
 }

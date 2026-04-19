@@ -17,6 +17,7 @@ import Recommendations from "@/components/artwork/Recommendations"
 import { getArtworkImages } from "@/lib/image-utils"
 import { Metadata } from "next"
 import { getServerTranslation } from "@/lib/i18n-server"
+import { SITE_URL } from "@/lib/constants"
 
 // Générer les meta tags dynamiques pour le SEO
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -148,7 +149,7 @@ export default async function ArtworkPage({ params }: { params: { slug: string }
   
   const images = getImages(artwork.images)
   const artistName = artwork.artist.user.name || "Artiste"
-  const baseUrl = "https://galeryelfakir.vercel.app"
+  const baseUrl = SITE_URL
   
   // Récupérer les stats d'avis pour le JSON-LD
   const reviewData = await getReviewStats(artwork.id)

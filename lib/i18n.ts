@@ -821,6 +821,24 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.dataExportDesc": "Conformément au RGPD, vous pouvez télécharger l'ensemble de vos données personnelles au format JSON.",
     "profile.exportData": "Exporter mes données",
 
+    // Suppression de compte (RGPD)
+    "deleteAccount.sectionTitle": "Zone de danger",
+    "deleteAccount.description": "La suppression de votre compte est définitive. Si vous avez des commandes, votre compte sera anonymisé (les commandes sont conservées pour les obligations comptables légales).",
+    "deleteAccount.button": "Supprimer mon compte",
+    "deleteAccount.warning": "Attention, cette action est irréversible.",
+    "deleteAccount.warning1": "Vos favoris, avis, messages et préférences seront supprimés.",
+    "deleteAccount.warning2": "Si vous avez des commandes, votre compte sera anonymisé (obligation légale de conservation 10 ans).",
+    "deleteAccount.warning3": "Vous serez immédiatement déconnecté.",
+    "deleteAccount.passwordLabel": "Mot de passe",
+    "deleteAccount.passwordPlaceholder": "Votre mot de passe actuel",
+    "deleteAccount.passwordHelp": "Laissez vide si vous vous êtes connecté via Google.",
+    "deleteAccount.typeConfirm": "Tapez SUPPRIMER pour confirmer",
+    "deleteAccount.confirmRequired": "Vous devez taper SUPPRIMER pour confirmer.",
+    "deleteAccount.cancel": "Annuler",
+    "deleteAccount.confirm": "Supprimer définitivement",
+    "deleteAccount.deleting": "Suppression…",
+    "deleteAccount.error": "Une erreur est survenue. Réessayez.",
+
     // Forgot password
     "forgotPwd.title": "Mot de passe oublié ?",
     "forgotPwd.desc": "Entrez votre email pour recevoir un lien de réinitialisation",
@@ -1657,6 +1675,24 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.myData": "My personal data",
     "profile.dataExportDesc": "In accordance with GDPR, you can download all your personal data in JSON format.",
     "profile.exportData": "Export my data",
+
+    // Account deletion (GDPR)
+    "deleteAccount.sectionTitle": "Danger zone",
+    "deleteAccount.description": "Account deletion is permanent. If you have orders, your account will be anonymized (orders are kept for legal accounting requirements).",
+    "deleteAccount.button": "Delete my account",
+    "deleteAccount.warning": "Warning, this action is irreversible.",
+    "deleteAccount.warning1": "Your favorites, reviews, messages and preferences will be deleted.",
+    "deleteAccount.warning2": "If you have orders, your account will be anonymized (10-year legal retention).",
+    "deleteAccount.warning3": "You will be logged out immediately.",
+    "deleteAccount.passwordLabel": "Password",
+    "deleteAccount.passwordPlaceholder": "Your current password",
+    "deleteAccount.passwordHelp": "Leave empty if you signed in with Google.",
+    "deleteAccount.typeConfirm": "Type SUPPRIMER to confirm",
+    "deleteAccount.confirmRequired": "You must type SUPPRIMER to confirm.",
+    "deleteAccount.cancel": "Cancel",
+    "deleteAccount.confirm": "Delete permanently",
+    "deleteAccount.deleting": "Deleting…",
+    "deleteAccount.error": "An error occurred. Please try again.",
 
     // Forgot password
     "forgotPwd.title": "Forgot password?",
