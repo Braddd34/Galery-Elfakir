@@ -98,6 +98,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\..*|api).*)",
+    // Exclut : assets _next, favicon, fichiers statiques, /api, et /monitoring (tunnel Sentry)
+    "/((?!_next/static|_next/image|favicon.ico|.*\\..*|api|monitoring).*)",
   ],
 }
