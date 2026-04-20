@@ -1,6 +1,7 @@
 /**
  * Configuration Sentry côté navigateur (client).
- * Capturé : erreurs JavaScript, promesses rejetées, performance des pages.
+ * Pattern v8+ : instrumentation-client.ts est le nouveau nom recommandé
+ * (remplace sentry.client.config.ts).
  */
 import * as Sentry from "@sentry/nextjs"
 
@@ -38,3 +39,10 @@ Sentry.init({
     "Non-Error promise rejection captured",
   ],
 })
+
+// Hook optionnel pour traquer les transitions de routes côté client.
+// Disponible à partir de @sentry/nextjs >= 8.17. Le check évite un crash si plus ancien.
+export const onRouterTransitionStart =
+  typeof (Sentry as unknown as { captureRouterTransitionStart?: unknown }).captureRouterTransitionStart === "function"
+    ? (Sentry as unknown as { captureRouterTransitionStart: () => void }).captureRouterTransitionStart
+    : undefined
