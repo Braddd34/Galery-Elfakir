@@ -160,7 +160,7 @@ const nextConfig = {
 import { withSentryConfig } from "@sentry/nextjs"
 
 export default withSentryConfig(nextConfig, {
-  silent: false, // afficher les logs Sentry pendant le build (debug)
+  silent: true, // silencieux : on ne pollue plus les logs de build
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,

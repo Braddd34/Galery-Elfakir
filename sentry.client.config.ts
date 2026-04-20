@@ -4,12 +4,6 @@
  */
 import * as Sentry from "@sentry/nextjs"
 
-// Diagnostic : utilise console.warn car next.config.mjs supprime les console.log en prod
-if (typeof window !== "undefined") {
-  // eslint-disable-next-line no-console
-  console.warn("[Sentry diagnostic] DSN value:", JSON.stringify(process.env.NEXT_PUBLIC_SENTRY_DSN))
-}
-
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
