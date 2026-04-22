@@ -35,7 +35,7 @@
     "isomorphic-dompurify": "^2.9.0",
     "date-fns": "^3.3.1",
     "lucide-react": "^0.344.0",
-    "next": "14.2.35",
+    "next": "15.5.15",
     "next-auth": "^4.24.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
