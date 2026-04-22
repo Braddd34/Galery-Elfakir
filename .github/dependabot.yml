@@ -1,0 +1,65 @@
+# Configuration Dependabot
+# Doc : https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Dependabot scanne automatiquement les dépendances du projet, détecte
+# les vulnérabilités et crée des Pull Requests pour appliquer les
+# correctifs. C'est gratuit pour les repos publics et privés.
+#
+# Pour activer Dependabot :
+#   GitHub Repo → Settings → Code security and analysis
+#   → Dependabot alerts : Enable
+#   → Dependabot security updates : Enable
+#   → Dependabot version updates : Enable
+
+version: 2
+updates:
+  # Mises à jour npm hebdomadaires (lundis matin)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    # Regrouper les mises à jour par famille pour limiter le nombre de PRs
+    groups:
+      # Toutes les MAJ patch + minor regroupées en 1 seule PR par famille
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+      react-three:
+        patterns:
+          - "@react-three/*"
+          - "three"
+          - "@types/three"
+      sentry:
+        patterns:
+          - "@sentry/*"
+      types:
+        patterns:
+          - "@types/*"
+      # Toutes les autres MAJ patch (corrections de bugs uniquement)
+      patch-updates:
+        update-types:
+          - "patch"
+    # Ignorer les MAJ majeures qui peuvent casser le projet
+    # (Dependabot créera quand même des PRs pour les vulnérabilités)
+    ignore:
+      # Next 14 → 15 = breaking changes (cookies/headers async, etc.)
+      # À débloquer manuellement quand on planifiera la migration
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-config-next"
+        update-types: ["version-update:semver-major"]
+      # React 18 → 19 = breaking changes
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+
+  # Mises à jour des GitHub Actions (si on en ajoute plus tard)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
