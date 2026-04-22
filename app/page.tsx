@@ -64,9 +64,9 @@ export default async function HomePage() {
   const t = getServerTranslation()
   
   // Image de fond : première œuvre ou fallback
-  const heroImage = featuredArtworks[0] 
-    ? getArtworkImageUrl(featuredArtworks[0].images) 
-    : "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1920&h=1080&fit=crop"
+  const heroImage = featuredArtworks[0]
+    ? getArtworkImageUrl(featuredArtworks[0].images)
+    : "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1280&h=720&fit=crop&q=60"
 
   const baseUrl = "https://galeryelfakir.vercel.app"
 
@@ -131,13 +131,14 @@ export default async function HomePage() {
       <section className="h-screen relative flex items-end">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <Image 
+          <Image
             src={heroImage}
             alt="Œuvre mise en avant"
             fill
             className="object-cover opacity-40"
             priority
             sizes="100vw"
+            quality={50}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
@@ -368,12 +369,14 @@ export default async function HomePage() {
       {/* Artists CTA */}
       <section className="py-32 md:py-48 relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image 
-            src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1920&h=800&fit=crop" 
+          <Image
+            src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1280&h=540&fit=crop&q=60"
             alt="Arrière-plan artistique décoratif"
             fill
             className="object-cover opacity-20"
             sizes="100vw"
+            quality={50}
+            loading="lazy"
           />
         </div>
         <div className="relative max-w-[1800px] mx-auto px-8 md:px-16 text-center">
@@ -444,10 +447,10 @@ export default async function HomePage() {
           
           {/* Bottom */}
           <div className="mt-20 pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-neutral-600 text-sm">
+            <p className="text-neutral-400 text-sm">
               © {new Date().getFullYear()} Galerie ELFAKIR. {t("home.footerRights")}
             </p>
-            <div className="flex gap-8 text-sm text-neutral-600">
+            <div className="flex gap-8 text-sm text-neutral-400">
               <Link href="/mentions-legales" className="hover:text-white transition-colors">{t("home.footerLegal")}</Link>
               <Link href="/cgv" className="hover:text-white transition-colors">{t("home.footerTerms")}</Link>
               <Link href="/confidentialite" className="hover:text-white transition-colors">{t("home.footerPrivacy")}</Link>
