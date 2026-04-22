@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import * as Sentry from "@sentry/nextjs"
 import prisma from "@/lib/prisma"
 
 /**
@@ -15,7 +16,10 @@ import prisma from "@/lib/prisma"
  *  - 503 { status: "error", ... } → un sous-système est down
  *
  * Volontairement pas d'auth : doit pouvoir être pingué depuis l'extérieur.
- * Ne renvoie aucune info sensible.
+ *
+ * SÉCURITÉ : ne JAMAIS renvoyer le message brut d'erreur DB en réponse
+ * publique (peut contenir hostname, version, credentials partiels).
+ * Le détail est loggé côté serveur via Sentry pour le debug.
  */
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -29,8 +33,8 @@ export async function GET() {
     await prisma.$queryRaw`SELECT 1`
     checks.database = { ok: true, latencyMs: Date.now() - t0 }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "unknown"
-    checks.database = { ok: false, error: message }
+    Sentry.captureException(error, { tags: { route: "api/health", check: "database" } })
+    checks.database = { ok: false, error: "unavailable" }
   }
 
   const allOk = Object.values(checks).every(c => c.ok)

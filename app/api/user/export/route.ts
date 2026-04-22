@@ -1,14 +1,18 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { formLimiter, getClientIP } from "@/lib/rate-limit"
 
 /**
  * GET /api/user/export
  * Export RGPD : retourne toutes les donnees personnelles de l'utilisateur connecte
  * en JSON telechargeable.
+ *
+ * Rate limit : max 2 exports par minute par utilisateur (fait 8 grosses
+ * requêtes Prisma en parallèle, donc coûteux en DB).
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -16,6 +20,15 @@ export async function GET() {
     }
 
     const userId = session.user.id
+
+    const ip = getClientIP(req)
+    const limited = await formLimiter.check(`export:${userId}:${ip}`, 2)
+    if (!limited.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans une minute." },
+        { status: 429 }
+      )
+    }
 
     const [user, buyerProfile, orders, reviews, favorites, follows, messages, cartEvents] = await Promise.all([
       prisma.user.findUnique({
