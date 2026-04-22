@@ -7,7 +7,6 @@ import { FavoritesProvider } from "@/lib/favorites-context"
 import ThemeProvider from "@/components/providers/ThemeProvider"
 import LanguageProvider from "@/components/providers/LanguageProvider"
 import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import SkipLink from "@/components/ui/SkipLink"
 import NetworkStatus from "@/components/ui/NetworkStatus"
 import ServiceWorkerRegister from "@/components/ui/ServiceWorkerRegister"
@@ -100,7 +99,6 @@ export default function RootLayout({
         <CookieConsent />
         <ServiceWorkerRegister />
         <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   )
