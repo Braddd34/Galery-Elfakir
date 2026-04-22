@@ -130,7 +130,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </svg>
               </div>
               <p className="text-neutral-400 mb-2 text-lg">{t("cart.empty")}</p>
-              <p className="text-neutral-600 text-sm mb-6">{t("cart.emptyDesc")}</p>
+              <p className="text-neutral-400 text-sm mb-6">{t("cart.emptyDesc")}</p>
               <button
                 onClick={onClose}
                 className="px-6 py-3 bg-white text-black text-sm tracking-wider uppercase font-medium hover:bg-neutral-200 transition-all duration-200 hover:-translate-y-0.5"
@@ -170,7 +170,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         >
                           {item.title}
                         </Link>
-                        <p className="text-neutral-500 text-sm">{item.artistName}</p>
+                        <p className="text-neutral-400 text-sm">{item.artistName}</p>
                       </div>
                       <p className="text-lg font-medium">€{item.price.toLocaleString()}</p>
                     </div>
@@ -194,7 +194,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <span className="text-neutral-400 text-sm">Total</span>
                     <p className="text-2xl font-light">€{total.toLocaleString()}</p>
                   </div>
-                  <span className="text-neutral-500 text-xs">
+                  <span className="text-neutral-400 text-xs">
                     Livraison calculée à l'étape suivante
                   </span>
                 </div>
@@ -207,7 +207,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </Link>
                 <button
                   onClick={clearCart}
-                  className="w-full text-center text-neutral-500 text-sm hover:text-red-400 transition-all duration-200 py-2"
+                  className="w-full text-center text-neutral-400 text-sm hover:text-red-400 transition-all duration-200 py-2"
                 >
                   Vider le panier
                 </button>

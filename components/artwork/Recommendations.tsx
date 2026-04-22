@@ -85,14 +85,14 @@ export default function Recommendations({
             {isPersonalized ? t("reco.youWillLike") : t("reco.popular")}
           </h2>
           {isPersonalized && (
-            <p className="text-neutral-500 text-sm mt-2">
+            <p className="text-neutral-400 text-sm mt-2">
               {t("reco.basedOnFavorites")}
             </p>
           )}
         </div>
         <Link
           href="/catalogue"
-          className="text-sm tracking-[0.15em] uppercase text-neutral-500 hover:text-white transition-colors"
+          className="text-sm tracking-[0.15em] uppercase text-neutral-400 hover:text-white transition-colors"
         >
           {t("reco.viewAll")}
         </Link>
@@ -120,7 +120,7 @@ export default function Recommendations({
             <h3 className="font-light group-hover:text-gold transition-colors">
               {artwork.title}
             </h3>
-            <p className="text-neutral-500 text-sm">{artwork.artistName}</p>
+            <p className="text-neutral-400 text-sm">{artwork.artistName}</p>
             <p className="mt-1">€{artwork.price.toLocaleString()}</p>
           </Link>
         ))}

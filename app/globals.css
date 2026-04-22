@@ -148,7 +148,7 @@ a {
 }
 
 .label {
-  @apply text-xs uppercase tracking-widest text-neutral-500;
+  @apply text-xs uppercase tracking-widest text-neutral-400;
 }
 
 /* Animations */

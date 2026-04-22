@@ -170,7 +170,7 @@ export default async function HomePage() {
         
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-fade-in">
-          <span className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">Scroll</span>
+          <span className="text-[10px] tracking-[0.3em] uppercase text-neutral-400">Scroll</span>
           <div className="w-[1px] h-12 bg-gradient-to-b from-neutral-500 to-transparent" />
         </div>
       </section>
@@ -219,7 +219,7 @@ export default async function HomePage() {
                       <h3 className="heading-sm mb-2 group-hover:text-gold transition-colors">
                         {featuredArtworks[0].title}
                       </h3>
-                      <p className="text-neutral-500">{featuredArtworks[0].artist.user.name}</p>
+                      <p className="text-neutral-400">{featuredArtworks[0].artist.user.name}</p>
                     </div>
                     <p className="text-lg">€{Number(featuredArtworks[0].price).toLocaleString()}</p>
                   </div>
@@ -246,7 +246,7 @@ export default async function HomePage() {
                         <h3 className="text-xl font-light group-hover:text-gold transition-colors">
                           {artwork.title}
                         </h3>
-                        <p className="text-neutral-500 text-sm mt-1">{artwork.artist.user.name}</p>
+                        <p className="text-neutral-400 text-sm mt-1">{artwork.artist.user.name}</p>
                       </div>
                       <p>€{Number(artwork.price).toLocaleString()}</p>
                     </div>
@@ -257,10 +257,10 @@ export default async function HomePage() {
           ) : (
             // Message si pas d'œuvres
             <div className="text-center py-24 border border-neutral-800">
-              <p className="text-neutral-500 text-lg mb-4">
+              <p className="text-neutral-400 text-lg mb-4">
                 {t("home.noArtworks")}
               </p>
-              <p className="text-neutral-600">
+              <p className="text-neutral-400">
                 {t("home.noArtworksDesc")}
               </p>
             </div>
@@ -331,7 +331,7 @@ export default async function HomePage() {
             </h2>
             <div className="mt-12 flex items-center gap-6">
               <div className="w-16 h-[1px] bg-gold" />
-              <p className="text-neutral-500">{t("home.philosophyAuthor")}</p>
+              <p className="text-neutral-400">{t("home.philosophyAuthor")}</p>
             </div>
           </div>
         </div>
@@ -361,7 +361,7 @@ export default async function HomePage() {
               <div key={service.number} className="bg-neutral-950 p-12 md:p-16">
                 <span className="text-gold text-sm">{service.number}</span>
                 <h3 className="heading-sm mt-6 mb-4">{service.title}</h3>
-                <p className="text-neutral-500 leading-relaxed">{service.description}</p>
+                <p className="text-neutral-400 leading-relaxed">{service.description}</p>
               </div>
             ))}
           </div>
@@ -406,7 +406,7 @@ export default async function HomePage() {
             {/* Brand */}
             <div className="md:col-span-2">
               <h2 className="text-3xl tracking-[0.3em] font-light mb-6">ELFAKIR</h2>
-              <p className="text-neutral-500 max-w-sm leading-relaxed">
+              <p className="text-neutral-400 max-w-sm leading-relaxed">
                 {t("home.footerDesc")}
               </p>
             </div>
