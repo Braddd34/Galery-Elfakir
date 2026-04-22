@@ -210,6 +210,7 @@ export default async function HomePage() {
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 58vw"
+                      quality={65}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
                   </div>
@@ -236,6 +237,7 @@ export default async function HomePage() {
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 42vw"
+                        quality={65}
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
                     </div>
